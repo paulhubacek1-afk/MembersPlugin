@@ -43,8 +43,7 @@ final class MP_Migration_Backup {
 
 	public static function menu() {
 		if ( current_user_can( 'manage_options' ) ) {
-			add_submenu_page(
-				'ultimatemember',
+			add_options_page(
 				__( 'Sicherung', 'members-plugin' ),
 				__( 'Sicherung', 'members-plugin' ),
 				'manage_options',
@@ -224,7 +223,7 @@ final class MP_Migration_Backup {
 			array( 'filename' => $filename, 'created_at' => current_time( 'mysql', true ), 'file_size' => filesize( $path ), 'checksum' => hash_file( 'sha256', $path ) ),
 			array( '%s', '%s', '%d', '%s' )
 		);
-		wp_safe_redirect( add_query_arg( array( 'page' => self::PAGE, 'mp_backup' => 'created' ), admin_url( 'tools.php' ) ) );
+		wp_safe_redirect( add_query_arg( array( 'page' => self::PAGE, 'mp_backup' => 'created' ), admin_url( 'options-general.php' ) ) );
 		exit;
 	}
 

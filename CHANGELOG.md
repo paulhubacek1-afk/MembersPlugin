@@ -1,6 +1,6 @@
 # Members Plugin – Changelog
 
-## 2.14.1 – 2026-10-23
+## 1.0.7 – 2026-10-23
 
 - Added: administrator-only Sicherung page with ZIP export and import.
 - Added: same-site and database-prefix validation before import, plus ID-based upsert for captured WordPress users, user metadata, options, posts and post metadata.
