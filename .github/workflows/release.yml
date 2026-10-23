@@ -1,0 +1,53 @@
+# Baut members-plugin.zip und hängt sie an das GitHub-Release.
+# Auslöser: ein Tag "v1.2.3" wird gepusht ODER ein Release wird auf GitHub veröffentlicht.
+# Der WordPress-Updater des Plugins lädt genau dieses Asset.
+name: Release-ZIP bauen
+
+on:
+  push:
+    tags:
+      - 'v*'
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Code auschecken
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.release.tag_name || github.ref }}
+
+      - name: Version prüfen (Plugin-Header == Tag)
+        run: |
+          TAG="${{ github.event.release.tag_name || github.ref_name }}"
+          VERSION="${TAG#v}"
+          HEADER=$(grep -m1 -E '^\s*\*\s*Version:' members-plugin.php | sed -E 's/.*Version:\s*//' | tr -d '[:space:]')
+          echo "Tag: $TAG  Header: $HEADER"
+          if [ "$HEADER" != "$VERSION" ]; then
+            echo "::error::Die Version im Plugin-Header ($HEADER) passt nicht zum Tag ($TAG). Bitte 'Version:' in members-plugin.php anpassen."
+            exit 1
+          fi
+          php -l members-plugin.php
+
+      - name: ZIP bauen
+        run: |
+          mkdir -p build/members-plugin
+          git archive HEAD | tar -x -C build/members-plugin
+          cd build/members-plugin
+          rm -rf .github tools composer.json package.json .distignore .gitignore .gitattributes
+          cd ..
+          zip -qr members-plugin.zip members-plugin
+          ls -la members-plugin.zip
+
+      - name: Release anlegen bzw. ZIP anhängen
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="${{ github.event.release.tag_name || github.ref_name }}"
+          gh release view "$TAG" >/dev/null 2>&1 || gh release create "$TAG" --title "$TAG" --generate-notes
+          gh release upload "$TAG" build/members-plugin.zip --clobber

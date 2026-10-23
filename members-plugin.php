@@ -3,7 +3,7 @@
  * Plugin Name: Members Plugin
  * Plugin URI: https://github.com/paulhubacek1-afk/MembersPlugin
  * Description: Mitgliederbereich, Profile, Registrierung und Mitgliederverzeichnis. Fork von Ultimate Member mit automatischer Theme-Farbanpassung, Design-Einstellungen, CSS-Klassen-Referenz und zusätzlicher Sicherheitshärtung.
- * Version: 2.14.1-mp.1.0.0
+ * Version: 1.0.0
  * Author: Members Plugin (basiert auf Ultimate Member)
  * License: GPLv3
  * License URI: http://www.gnu.org/licenses/gpl-3.0.txt
@@ -11,7 +11,7 @@
  * Domain Path: /languages
  * Requires at least: 6.2
  * Requires PHP: 7.0
- * Update URI: false
+ * Update URI: https://github.com/paulhubacek1-afk/MembersPlugin
  *
  * @package UM
  */
@@ -61,8 +61,9 @@ define( 'UM_LICENSE_REQUEST_DEBUG', false ); // Set true, then need to debug the
 define( 'UM_UPDATER_DEBUG', false ); // Set true, then need to debug the upgrade packages.
 // define( 'UM_DEV_MODE', true );
 
-// Members-Plugin-eigene Konstanten.
-define( 'MP_VERSION', '1.0.0' );
+// Members-Plugin-eigene Konstanten. Die Version kommt aus dem Plugin-Header (wird für Updates verglichen).
+define( 'MP_VERSION', $plugin_data['Version'] );
+define( 'MP_FILE', __FILE__ );
 define( 'MP_PATH', UM_PATH . 'includes/members-plugin/' );
 define( 'MP_URL', UM_URL . 'includes/members-plugin/' );
 

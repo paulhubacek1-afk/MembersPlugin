@@ -28,3 +28,4 @@
 /phpdoc.dist.xml
 /README.md
 *.sass
+/tools

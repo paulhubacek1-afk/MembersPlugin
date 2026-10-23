@@ -13,15 +13,15 @@ require_once MP_PATH . 'class-mp-design.php';
 require_once MP_PATH . 'class-mp-class-reference.php';
 require_once MP_PATH . 'class-mp-inspector.php';
 require_once MP_PATH . 'class-mp-security.php';
+require_once MP_PATH . 'class-mp-updater.php';
 
 MP_Design::init();
 MP_Inspector::init();
 MP_Security::init();
+MP_Updater::init();
 
+// MP_Admin::SLUG wird auch im Frontend (Admin-Leiste) benötigt.
+require_once MP_PATH . 'class-mp-admin.php';
 if ( is_admin() ) {
-	require_once MP_PATH . 'class-mp-admin.php';
 	MP_Admin::init();
-} else {
-	// MP_Admin::SLUG wird auch im Frontend (Admin-Leiste) benötigt.
-	require_once MP_PATH . 'class-mp-admin.php';
 }

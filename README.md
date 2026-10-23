@@ -83,6 +83,26 @@ Body-Klassen: `um-mp-design`, `um-theme-dark` (bei dunklem Hintergrund).
 
 Templates überschreiben wie gewohnt: `wp-content/themes/DEIN-THEME/ultimate-member/…`
 
+## Updates aus GitHub
+
+Das Plugin aktualisiert sich wie jedes andere Plugin über *Dashboard › Aktualisierungen* bzw. die Pluginliste –
+die Updates kommen aus den **GitHub-Releases** dieses Repositorys.
+
+**Einrichtung (einmalig, weil das Repository privat ist):**
+1. Auf GitHub einen [Fine-grained Token](https://github.com/settings/personal-access-tokens/new) erstellen:
+   Repository access → *Only select repositories* → `MembersPlugin`, Permissions → *Contents: Read-only*.
+2. In WordPress unter *Members Plugin › Updates* eintragen – oder sicherer in die `wp-config.php`:
+   ```php
+   define( 'MP_GITHUB_TOKEN', 'github_pat_…' );
+   ```
+   (Bei einem öffentlichen Repository ist kein Token nötig.)
+
+**Neue Version veröffentlichen:**
+1. In `members-plugin.php` die Zeile `Version:` erhöhen (z.B. `1.0.1`), committen und pushen.
+2. Release auf GitHub erstellen mit Tag `v1.0.1` (oder `git tag v1.0.1 && git push --tags`).
+3. Die GitHub Action baut `members-plugin.zip` und hängt sie an das Release (sie bricht ab, wenn Tag und `Version:` nicht übereinstimmen).
+4. WordPress zeigt das Update spätestens nach 6 Stunden – sofort über *Members Plugin › Updates › Jetzt nach Updates suchen*.
+
 ## Entwicklung
 
 - `tools/css-vars.py` – wandelt hartkodierte Farben in Stylesheets in Variablen um (idempotent, auch für `.min.css`)
@@ -92,7 +112,7 @@ Templates überschreiben wie gewohnt: `wp-content/themes/DEIN-THEME/ultimate-mem
 ## Hinweise
 
 - Text-Domain bleibt `ultimate-member`, damit vorhandene Übersetzungen weiter funktionieren.
-- `Update URI: false` verhindert, dass WordPress.org den Fork mit dem Original überschreibt.
+- `Update URI` zeigt auf GitHub – WordPress.org kann den Fork daher nie mit dem Original überschreiben.
 - Die im Entwicklungsstand fehlenden Bibliotheken (Action Scheduler 3.9.3, wp-config-transformer 1.4.7) sind enthalten.
 - Behobener Original-Fehler: Mitgliederverzeichnisse ohne Rollenauswahl zeigten keine Mitglieder.
 
