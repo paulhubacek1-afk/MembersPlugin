@@ -1,9 +1,9 @@
 <?php
 /**
- * Members Plugin – built-in Users Online list and activity tracking.
+ * Members Plugin – online/offline presence indicators and activity tracking.
  *
- * A user's last-seen timestamp is updated at most once per minute. The
- * [mp_online_users] and [users_online] shortcodes are restricted to logged-in visitors.
+ * Presence dots are added automatically next to names in member directories
+ * and profile headers. The optional legacy list shortcodes remain supported.
  *
  * @package MembersPlugin
  */
@@ -16,13 +16,18 @@ final class MP_Online_Status {
 	const DEFAULT_WINDOW = 300;
 
 	/**
-	 * Register tracking and the built-in shortcodes.
+	 * Register activity tracking, automatic indicators, assets and AJAX endpoints.
 	 */
 	public static function init() {
 		add_action( 'init', array( __CLASS__, 'mark_current_user_online' ), 50 );
+		add_action( 'um_members_just_after_name', array( __CLASS__, 'directory_name_indicator' ), 20, 2 );
+		add_action( 'um_after_profile_name_inline', array( __CLASS__, 'profile_name_indicator' ), 20, 2 );
 		add_shortcode( 'mp_online_users', array( __CLASS__, 'render_online_users' ) );
 		add_shortcode( 'users_online', array( __CLASS__, 'render_online_users' ) );
 		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'register_styles' ) );
+		add_action( 'wp_ajax_mp_online_presence_poll', array( __CLASS__, 'ajax_poll_presence' ) );
+		add_action( 'wp_ajax_nopriv_mp_online_presence_poll', array( __CLASS__, 'ajax_poll_presence' ) );
+		add_action( 'wp_ajax_mp_online_presence_heartbeat', array( __CLASS__, 'ajax_heartbeat' ) );
 	}
 
 	/**
@@ -45,23 +50,149 @@ final class MP_Online_Status {
 	}
 
 	/**
-	 * Register CSS; the file is enqueued only when the shortcode is rendered.
+	 * Check if a member has activity inside the configured online window.
+	 *
+	 * @param int $user_id WordPress user ID.
+	 * @return bool
 	 */
-	public static function register_styles() {
-		if ( defined( 'MP_URL' ) ) {
-			wp_register_style(
-				'mp-online-members',
-				MP_URL . 'assets/online.css',
-				array(),
-				defined( 'MP_VERSION' ) ? MP_VERSION : null
-			);
+	public static function is_online( $user_id ) {
+		$user_id = absint( $user_id );
+		if ( ! $user_id ) {
+			return false;
 		}
+
+		$window = (int) apply_filters( 'mp_online_status_window', self::DEFAULT_WINDOW );
+		$window = max( MINUTE_IN_SECONDS, $window );
+		$last   = absint( get_user_meta( $user_id, self::META_KEY, true ) );
+
+		return $last > 0 && $last >= ( time() - $window );
 	}
 
 	/**
-	 * Render a member-only list of users seen in the last five minutes.
+	 * Print a presence indicator directly after a member-directory name.
 	 *
-	 * Usage: [mp_online_users], [mp_online_users limit="20"], or [users_online].
+	 * @param int   $user_id        Member ID.
+	 * @param array $directory_data Directory settings.
+	 */
+	public static function directory_name_indicator( $user_id, $directory_data = array() ) {
+		self::output_presence_indicator( $user_id );
+	}
+
+	/**
+	 * Print a presence indicator directly after the profile header name.
+	 *
+	 * @param array $args    Profile arguments.
+	 * @param int   $user_id Profile owner ID.
+	 */
+	public static function profile_name_indicator( $args, $user_id ) {
+		self::output_presence_indicator( $user_id );
+	}
+
+	/**
+	 * Render an accessible green or grey status dot.
+	 *
+	 * @param int $user_id User ID.
+	 */
+	private static function output_presence_indicator( $user_id ) {
+		$user_id = absint( $user_id );
+		if ( ! $user_id || ! get_userdata( $user_id ) ) {
+			return;
+		}
+
+		$online = self::is_online( $user_id );
+		$state  = $online ? 'online' : 'offline';
+		$label  = $online
+			? __( 'Online', 'ultimate-member' )
+			: __( 'Offline', 'ultimate-member' );
+
+		printf(
+			'<span class="mp-presence-dot mp-presence-dot--%1$s" data-user-id="%2$d" data-presence="%1$s" role="img" aria-label="%3$s" title="%3$s"></span>',
+			esc_attr( $state ),
+			$user_id,
+			esc_attr( $label )
+		);
+	}
+
+	/**
+	 * Register and load presence styles and live status updater.
+	 */
+	public static function register_styles() {
+		if ( ! defined( 'MP_URL' ) ) {
+			return;
+		}
+
+		wp_register_style(
+			'mp-online-members',
+			MP_URL . 'assets/online.css',
+			array(),
+			defined( 'MP_VERSION' ) ? MP_VERSION : null
+		);
+		wp_enqueue_style( 'mp-online-members' );
+
+		wp_register_script(
+			'mp-online-presence',
+			MP_URL . 'assets/online-presence.js',
+			array(),
+			defined( 'MP_VERSION' ) ? MP_VERSION : null,
+			true
+		);
+		wp_localize_script(
+			'mp-online-presence',
+			'MPOnlinePresence',
+			array(
+				'ajaxUrl'    => admin_url( 'admin-ajax.php' ),
+				'nonce'      => wp_create_nonce( 'mp_online_presence' ),
+				'loggedIn'   => is_user_logged_in(),
+				'interval'   => 60000,
+				'onlineLabel'  => __( 'Online', 'ultimate-member' ),
+				'offlineLabel' => __( 'Offline', 'ultimate-member' ),
+			)
+		);
+		wp_enqueue_script( 'mp-online-presence' );
+	}
+
+	/**
+	 * AJAX heartbeat from an active, logged-in browser tab.
+	 */
+	public static function ajax_heartbeat() {
+		check_ajax_referer( 'mp_online_presence', 'nonce' );
+
+		if ( ! is_user_logged_in() ) {
+			wp_send_json_error( array( 'message' => 'not_logged_in' ), 401 );
+		}
+
+		update_user_meta( get_current_user_id(), self::META_KEY, time() );
+		wp_send_json_success();
+	}
+
+	/**
+	 * Return current presence states for IDs actually displayed on the page.
+	 * At most 100 IDs are accepted per request.
+	 */
+	public static function ajax_poll_presence() {
+		check_ajax_referer( 'mp_online_presence', 'nonce' );
+
+		$user_ids = isset( $_POST['user_ids'] ) ? wp_unslash( $_POST['user_ids'] ) : array();
+		if ( ! is_array( $user_ids ) ) {
+			$user_ids = array( $user_ids );
+		}
+
+		$user_ids = array_values( array_unique( array_filter( array_map( 'absint', array_slice( $user_ids, 0, 100 ) ) ) ) );
+		$states   = array();
+
+		foreach ( $user_ids as $user_id ) {
+			if ( get_userdata( $user_id ) ) {
+				$states[ (string) $user_id ] = self::is_online( $user_id ) ? 'online' : 'offline';
+			}
+		}
+
+		wp_send_json_success( $states );
+	}
+
+	/**
+	 * Render the optional legacy online-member list shortcode.
+	 *
+	 * Usage: [mp_online_users] or [mp_online_users limit="20"].
 	 *
 	 * @param array|string $atts Shortcode attributes.
 	 * @return string
