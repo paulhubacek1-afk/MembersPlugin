@@ -1,5 +1,9 @@
 # Members Plugin – Profiles & Community
 
+## Updated in 1.0.9.1
+
+- Fixed the WordPress Media Library picker for **Default Profile Photo** and **Default Cover Photo** under the Appearance settings sections. The media scripts are now loaded on the profile-photo and cover-photo subtabs too.
+
 ## Updated in 1.0.9
 
 - Fixed localization bootstrap for both `members-plugin` and the bundled core's `ultimate-member` text domain. Translation loading occurs on WordPress `init`, avoiding early-loading warnings.
