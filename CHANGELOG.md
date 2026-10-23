@@ -1,5 +1,13 @@
 # Members Plugin – Changelog
 
+## 1.0.3 – 2026-10-23
+
+- Added: automatic green online and grey offline indicators beside names in member-directory cards and profile headers; no shortcode needed.
+- Added: browser heartbeat for signed-in users and periodic presence refresh.
+- Added: suppression of outgoing email recipients at the exact domain @buehne-total.eu; other recipients remain eligible to receive the message.
+- Added: **Members Plugin → E-Mail-Protokoll** to show suppressed-recipient events and WordPress/PHPMailer mail failures without storing message bodies.
+- Improved: documentation and product wording focused on Members Plugin.
+
 ## 1.0.2 – 2026-10-23
 
 - Added: administrators can enable and choose a profile-picture ring color for each WordPress role under Members Plugin → Profilbild-Ringfarben.
