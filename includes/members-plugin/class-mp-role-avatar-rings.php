@@ -247,20 +247,20 @@ final class MP_Role_Avatar_Rings {
 		wp_register_style( 'mp-role-avatar-rings', false, array(), defined( 'MP_VERSION' ) ? MP_VERSION : null );
 		wp_enqueue_style( 'mp-role-avatar-rings' );
 
-		$css = '.mp-role-avatar-ring{box-shadow:0 0 0 3px currentColor!important;}';
+		$css = '.mp-role-avatar-ring{border:0!important;outline:none!important;box-shadow:0 0 0 3px currentColor!important;}';
 		foreach ( $colors as $role => $color ) {
 			$role_class = sanitize_html_class( 'um-role-' . $role );
 			$ring_class = sanitize_html_class( 'mp-role-avatar-ring--' . $role );
+			$css .= '.um-profile.' . $role_class . ' .um-profile-photo-img{border:0!important;outline:none!important;box-shadow:none!important;}';
+
 			$selectors  = array(
 				'.' . $ring_class,
 				'.um-profile.' . $role_class . ' .um-profile-photo img',
-				'.um-profile.' . $role_class . ' .um-profile-photo-img',
-				'.um-profile.' . $role_class . ' .um-profile-photo-img img',
 				'.um-member.' . $role_class . ' .um-member-photo img',
 				'.um-member.' . $role_class . ' .um-member-photo .um-avatar',
 			);
 			$selectors = array_unique( $selectors );
-			$css .= implode( ',', $selectors ) . '{box-shadow:0 0 0 3px ' . $color . '!important;}';
+			$css .= implode( ',', $selectors ) . '{border:0!important;outline:none!important;box-shadow:0 0 0 3px ' . $color . '!important;}';
 		}
 
 		wp_add_inline_style( 'mp-role-avatar-rings', $css );

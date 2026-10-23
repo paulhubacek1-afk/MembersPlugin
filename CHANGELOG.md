@@ -1,5 +1,14 @@
 # Members Plugin – Changelog
 
+## 1.0.4 – 2026-10-23
+
+- Changed: removed automatic online/offline dots from member-directory cards. Profile-header indicators remain.
+- Fixed: role-colored avatar rings now override the default ring, with the photo wrapper's shadow reset to prevent stacked rings.
+- Added: a birthday cake, greeting and animated CSS confetti on the profile owner's birthday using the built-in `birth_date` field.
+- Added: automatic GitHub release checks through WordPress Cron every six hours. Updates are advertised to WordPress, not silently installed.
+- Fixed: birthday CSS is enqueued before the page head is rendered.
+- Improved: updater and product documentation.
+
 ## 1.0.3 – 2026-10-23
 
 - Added: automatic green online and grey offline indicators beside names in member-directory cards and profile headers; no shortcode needed.

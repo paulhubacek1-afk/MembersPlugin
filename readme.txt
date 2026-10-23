@@ -4,45 +4,35 @@ Tags: membership, user-profile, community, user-registration, member-directory, 
 Requires at least: 6.2
 Tested up to: 7.1
 Requires PHP: 7.0
-Stable tag: 1.0.3
+Stable tag: 1.0.4
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
-A WordPress membership and profile system with role-based avatar ring colors, automatic online/offline markers and mail delivery diagnostics.
+A WordPress membership and profile system with per-role avatar rings, automatic profile presence dots, birthday celebrations and scheduled update checks.
 
 == Description ==
 
-Members Plugin provides membership pages, login and registration forms, profile pages, member directories and account features, along with theme-aware design tools and configurable profile picture rings for each WordPress role.
+Version 1.0.4 removes online/offline dots from member-directory lists, makes a role-colored ring replace the default avatar ring, adds a cake and confetti celebration on the profile owner's birthday, and schedules automatic GitHub release checks every six hours.
 
-Version 1.0.3 adds green online and grey offline indicators next to names in member directories and profile headers. Indicators refresh automatically and require no shortcode. It also suppresses outbound emails to recipients at @buehne-total.eu and records WordPress mail failures in the dashboard mail log.
-
-Features:
-* Front-end profiles, registration, login and account pages
-* Member directories and configurable profile fields
-* Automatic theme color detection and design variables
-* CSS editor, class reference and front-end CSS inspector
-* ID-based profile-photo resolution
-* Configurable avatar ring colors for each user role
-* Automatic online/offline indicators next to names
-* Email recipient suppression rule and mail failure diagnostics
-* Additional security hardening
-
-== Installation ==
-
-1. Upload the plugin ZIP through Plugins > Add New > Upload Plugin.
-2. Deactivate any separately installed legacy membership core that conflicts with this bundled membership engine.
-3. Activate Members Plugin – Profiles & Community.
-4. Configure settings from the Members Plugin dashboard menu.
+It also retains the recipient suppression rule for @buehne-total.eu and the dashboard email diagnostics log.
 
 == Online and offline indicators ==
 
-A green dot means online and a grey dot means offline. Dots are automatically shown beside names in member directories and profile headers; no shortcode is required. A member is considered online for five minutes after the last activity. An active, signed-in browser tab refreshes activity and visible status indicators about once per minute.
+A green dot means online and a grey dot means offline. Dots appear beside the profile owner name in profile headers only; member-directory lists do not show online status. Status updates use a five-minute online window and a signed-in user's browser heartbeat.
 
-Optional compatibility shortcodes [users_online] and [mp_online_users] remain supported.
+The optional compatibility shortcodes [users_online] and [mp_online_users] remain available, but are not required for the profile indicators.
+
+== Birthday celebration ==
+
+If the built-in birth_date field contains a valid birthday matching the current day and month in the site's timezone, the profile page displays a birthday cake, greeting and animated confetti. It is automatically hidden on other days and while editing the profile.
 
 == Profile picture ring colors ==
 
-Open Members Plugin > Profilbild-Ringfarben. Enable a ring and choose a color for each role. Roles without a ring enabled retain their normal avatar appearance. If a user has multiple roles, the first assigned role with an enabled ring color is used.
+Open Members Plugin > Profilbild-Ringfarben. Enable a ring and choose a color for each role. A selected role color replaces the default ring instead of stacking a second ring. Roles without an enabled ring retain their default appearance.
+
+== Automatic updates ==
+
+Members Plugin checks GitHub Releases every six hours through WordPress Cron and refreshes available-update information so updates can appear in Dashboard > Aktualisierungen. It does not install updates without authorization. WordPress Cron depends on site traffic.
 
 == Email handling ==
 
@@ -52,23 +42,30 @@ Open Members Plugin > E-Mail-Protokoll to see WordPress mail errors and suppress
 
 == Frequently Asked Questions ==
 
-= Can I use status dots without a shortcode? =
+= Do the online status dots appear in member directories? =
 
-Yes. Dots are automatically shown next to member names in member directories and profile headers.
+No. Status dots appear only in profile headers.
 
-= Can guests see the status dots? =
+= Does birthday confetti need a shortcode? =
 
-The indicators show only whether a member has activity inside the online window; they do not expose an exact last-seen time.
+No. The profile checks the built-in birth_date field automatically.
 
-= What happens to emails for @buehne-total.eu? =
+= Does the automatic updater install updates by itself? =
 
-Those recipients are excluded by the plugin's mail rule. Other recipients on the same message can still receive it.
+No. It searches for releases automatically and makes available updates visible in WordPress.
 
 == Changelog ==
 
+= 1.0.4 - 2026-10-23 =
+* Changed: online/offline status dots no longer appear in member-directory lists.
+* Fixed: a role-colored avatar ring replaces the default ring instead of stacking on the photo wrapper.
+* Added: birthday cake and animated confetti on the profile owner's birthday.
+* Added: automatic GitHub release checks every six hours through WordPress Cron.
+* Improved: birthday stylesheet loading and updater documentation.
+
 = 1.0.3 - 2026-10-23 =
-* Added: automatic green online and grey offline indicators next to profile and directory names.
-* Added: browser heartbeat and live presence refresh.
+* Added: automatic green online and grey offline indicators beside names in member-directory cards and profile headers.
+* Added: browser heartbeat for signed-in users and periodic presence refresh.
 * Added: suppression of recipients at @buehne-total.eu.
 * Added: dashboard log for WordPress mail failures and suppressed recipients.
 * Improved: Members Plugin branding and usage documentation.
@@ -77,14 +74,14 @@ Those recipients are excluded by the plugin's mail rule. Other recipients on the
 * Added: configurable profile-picture ring colors per WordPress role.
 * Added: [users_online] shortcode alias for the Users Online list.
 * Improved: role ring styling across profile photos, directory cards and online list.
-* Improved: plugin description, dashboard wording and documentation.
+* Improved: product description and dashboard wording.
 
 = 1.0.1 - 2026-10-23 =
 * Fixed: resolve avatar pictures from the actual WordPress user-ID directory first.
 * Fixed: preserve safe h1–h6 tags in HTML-enabled form text fields.
 * Added: built-in online tracking and the [mp_online_users] shortcode.
 * Added: responsive online-member list styling.
-* Improved: plugin metadata and documentation.
+* Improved: plugin metadata and installation/update documentation.
 
 = 1.0.0 =
 * Initial Members Plugin build with theme-aware styles, CSS tools and additional security checks.
