@@ -4,7 +4,7 @@ Tags: membership, user-profile, community, user-registration, member-directory, 
 Requires at least: 6.2
 Tested up to: 7.1
 Requires PHP: 7.0
-Stable tag: 1.0.9.1
+Stable tag: 1.0.9.2
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -57,6 +57,11 @@ No. The profile checks the built-in birth_date field automatically.
 No. It searches for releases automatically and makes available updates visible in WordPress.
 
 == Changelog ==
+
+= 1.0.9.2 =
+* Fixed: save uploaded cover photos and responsive thumbnails at quality 100 and preserve full resolution of the selected crop.
+* Improved: prime member/user-meta caches to reduce repeated database lookups.
+* Improved: query profile-form IDs once per request and lazy-load off-screen directory cover photos.
 
 = 1.0.9.1 =
 * Fixed: enqueue the WordPress Media Library on all Appearance settings subsections.

@@ -1,5 +1,10 @@
 # Members Plugin – Profiles & Community
 
+## Updated in 1.0.9.2
+
+- Cover-photo uploads are saved at maximum supported encoder quality (100), and the selected crop keeps its full resolution.
+- Member directories are optimized by priming current-page user and user-meta caches, querying profile-form IDs once per request, and lazy-loading off-screen cover photos.
+
 ## Updated in 1.0.9.1
 
 - Fixed the WordPress Media Library picker for **Default Profile Photo** and **Default Cover Photo** under the Appearance settings sections. The media scripts are now loaded on the profile-photo and cover-photo subtabs too.
