@@ -1,5 +1,15 @@
 # Members Plugin – Changelog
 
+## 1.0.7 – 2026-10-23
+
+- Added: standalone migration backup screen under **Tools → MP Migration & Sicherung**, available even when the separately installed Ultimate Member plugin is detected.
+- Added: MP-owned database index table `mp_backup_index` and private ZIP backups containing user data, user metadata, UM-related options/tables, UM form/directory records, and common Ultimate Member upload folders.
+- Changed: WordPress plugin overview version is now **1.0.7**.
+- Safety: backups are stored outside the WordPress web root and can be downloaded only by an administrator through a nonce-protected action.
+- Note: this is a backup foundation, not yet a complete migration to a fully independent membership engine.
+
+
+
 ## 1.0.6 – 2026-10-23
 
 - Changed: the birthday effect is now confetti only, spread across the full profile viewport.
