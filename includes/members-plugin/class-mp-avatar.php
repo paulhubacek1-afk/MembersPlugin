@@ -26,7 +26,7 @@ final class MP_Avatar {
 	 *
 	 * @param string          $avatar      Generated avatar HTML.
 	 * @param mixed           $id_or_email User, ID, email, post or comment.
-	 * @param int|string      $size        Requested size.
+	 * @param int|string|array $size        Requested size.
 	 * @param string          $default     Default avatar.
 	 * @param string          $alt         Alternative text.
 	 * @param array           $args        Additional avatar arguments.
@@ -44,8 +44,8 @@ final class MP_Avatar {
 		}
 
 		if ( is_array( $size ) ) {
-			$width  = isset( $size['width'] ) ? absint( $size['width'] ) : 96;
-			$height = isset( $size['height'] ) ? absint( $size['height'] ) : $width;
+			$width  = isset( $size['width'] ) ? max( 1, absint( $size['width'] ) ) : 96;
+			$height = isset( $size['height'] ) ? max( 1, absint( $size['height'] ) ) : $width;
 		} else {
 			$width  = max( 1, absint( $size ) );
 			$height = $width;
@@ -53,8 +53,13 @@ final class MP_Avatar {
 
 		$classes = array( 'avatar', 'avatar-' . $width, 'photo' );
 		if ( is_array( $args ) && ! empty( $args['class'] ) ) {
-			$extra_classes = preg_split( '/\s+/', sanitize_html_class( str_replace( ' ', '-', (string) $args['class'] ) ) );
-			$classes       = array_merge( $classes, array_filter( $extra_classes ) );
+			$requested_classes = preg_split( '/\s+/', trim( (string) $args['class'] ) );
+			foreach ( $requested_classes as $requested_class ) {
+				$requested_class = sanitize_html_class( $requested_class );
+				if ( '' !== $requested_class ) {
+					$classes[] = $requested_class;
+				}
+			}
 		}
 
 		$attributes = array(
@@ -66,14 +71,6 @@ final class MP_Avatar {
 			'loading="lazy"',
 			'decoding="async"',
 		);
-
-		if ( is_array( $args ) && ! empty( $args['extra_attr'] ) && is_string( $args['extra_attr'] ) ) {
-			// Keep only extra attributes that WordPress itself recognises as safe.
-			$extra = trim( wp_strip_all_tags( $args['extra_attr'] ) );
-			if ( '' !== $extra ) {
-				$attributes[] = $extra;
-			}
-		}
 
 		return '<img ' . implode( ' ', $attributes ) . ' />';
 	}
@@ -137,8 +134,8 @@ final class MP_Avatar {
 			return false;
 		}
 
-		$directory = trailingslashit( $uploads['basedir'] ) . 'ultimatemember/' . $user_id . '/';
-		$url_base  = trailingslashit( $uploads['baseurl'] ) . 'ultimatemember/' . $user_id . '/';
+		$directory  = trailingslashit( $uploads['basedir'] ) . 'ultimatemember/' . $user_id . '/';
+		$url_base   = trailingslashit( $uploads['baseurl'] ) . 'ultimatemember/' . $user_id . '/';
 		$extensions = array( 'jpg', 'jpeg', 'png', 'webp', 'gif', 'avif' );
 
 		foreach ( $extensions as $extension ) {
@@ -160,7 +157,7 @@ final class MP_Avatar {
 				continue;
 			}
 
-			$url = $url_base . rawurlencode( $filename );
+			$url      = $url_base . rawurlencode( $filename );
 			$modified = @filemtime( $path ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
 			if ( false !== $modified ) {
 				$url = add_query_arg( 'mp-avatar-v', (string) $modified, $url );
