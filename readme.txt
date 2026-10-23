@@ -4,7 +4,7 @@ Tags: membership, user-profile, community, user-registration, member-directory, 
 Requires at least: 6.2
 Tested up to: 7.1
 Requires PHP: 7.0
-Stable tag: 1.0.5
+Stable tag: 1.0.6
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -12,7 +12,7 @@ A WordPress membership and profile system with per-role avatar rings, automatic 
 
 == Description ==
 
-Version 1.0.5 fixes profile-page role rings by applying the selected ring to the outer circular photo link and suppressing the clipped inner image shadow. Version 1.0.4 removes online/offline dots from member-directory lists, adds a birthday cake and confetti celebration, and schedules automatic GitHub release checks every six hours.
+Version 1.0.6 displays only colorful confetti across the full visible profile page on a member's birthday, without a cake or text. Version 1.0.5 fixes profile-page role rings by applying the selected ring to the outer circular photo link and suppressing the clipped inner image shadow.
 
 It also retains the recipient suppression rule for @buehne-total.eu and the dashboard email diagnostics log.
 
@@ -24,7 +24,7 @@ The optional compatibility shortcodes [users_online] and [mp_online_users] remai
 
 == Birthday celebration ==
 
-If the built-in birth_date field contains a valid birthday matching the current day and month in the site's timezone, the profile page displays a birthday cake, greeting and animated confetti. It is automatically hidden on other days and while editing the profile.
+If the built-in birth_date field contains a valid birthday matching the current day and month in the site's timezone, colorful confetti falls across the full visible profile page. No cake, greeting or other text is displayed. The effect is hidden on other days and while editing the profile.
 
 == Profile picture ring colors ==
 
@@ -55,6 +55,10 @@ No. The profile checks the built-in birth_date field automatically.
 No. It searches for releases automatically and makes available updates visible in WordPress.
 
 == Changelog ==
+
+= 1.0.6 - 2026-10-23 =
+* Changed: birthday effect now shows only full-page confetti.
+* Removed: birthday cake and all celebration text.
 
 = 1.0.5 - 2026-10-23 =
 * Fixed: role-colored ring is now visible on profile pages.
