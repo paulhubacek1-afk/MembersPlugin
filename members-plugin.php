@@ -3,7 +3,7 @@
  * Plugin Name: Members Plugin – Profiles & Community
  * Plugin URI: https://github.com/paulhubacek1-afk/MembersPlugin
  * Description: Mitgliederprofile, Registrierung, Verzeichnisse, Theme-Farben, Profilbild-Ringfarben je Rolle, Online-Status und sichere HTML-Formatierung.
- * Version: 1.0.2
+ * Version: 1.0.3
  * Author: Paul Hubacek
  * Author URI: https://github.com/paulhubacek1-afk
  * License: GPLv3
@@ -34,7 +34,7 @@ if ( function_exists( 'UM' ) || is_plugin_active( 'ultimate-member/ultimate-memb
 				return;
 			}
 			echo '<div class="notice notice-error"><p>' .
-				esc_html__( 'Members Plugin bringt eine eigene Mitgliederverwaltung mit. Die frühere, separat installierte Mitgliederverwaltung darf aktuell nicht parallel aktiviert sein, da noch interne Funktionsnamen überschneiden. Bitte deaktiviere die separate Installation, bevor du Members Plugin verwendest.', 'ultimate-member' ) .
+				esc_html__( 'Members Plugin bringt eine eigene Mitgliederverwaltung mit. Eine separat installierte ältere Mitgliederverwaltung darf aktuell nicht parallel aktiviert sein, da noch interne Funktionsnamen überschneiden. Bitte deaktiviere die separate Installation, bevor du Members Plugin verwendest.', 'ultimate-member' ) .
 				'</p></div>';
 		}
 	);
