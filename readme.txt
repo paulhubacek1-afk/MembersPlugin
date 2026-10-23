@@ -4,7 +4,7 @@ Tags: membership, user-profile, community, user-registration, member-directory, 
 Requires at least: 6.2
 Tested up to: 7.1
 Requires PHP: 7.0
-Stable tag: 1.0.9
+Stable tag: 1.0.9.1
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -57,6 +57,10 @@ No. The profile checks the built-in birth_date field automatically.
 No. It searches for releases automatically and makes available updates visible in WordPress.
 
 == Changelog ==
+
+= 1.0.9.1 =
+* Fixed: enqueue the WordPress Media Library on all Appearance settings subsections.
+* Fixed: Default Profile Photo and Default Cover Photo media pickers can now open.
 
 = 1.0.9 =
 * Fixed: register both translation domains at WordPress init so the plugin uses the site's language setting.
