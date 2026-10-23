@@ -54,9 +54,9 @@ jobs:
           cd build/members-plugin
           rm -rf .github tools composer.json package.json .distignore .gitignore .gitattributes
           cd ../..
-          zip -qr build/members-plugin.zip build/members-plugin
-          mv build/members-plugin.zip build/members-plugin.zip.tmp
-          mv build/members-plugin.zip.tmp build/members-plugin.zip
+          cd build
+          zip -qr members-plugin.zip members-plugin
+          cd ..
           ls -lh build/members-plugin.zip
 
       - name: Attach ZIP to GitHub Release
