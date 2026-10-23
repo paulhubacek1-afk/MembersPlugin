@@ -1058,14 +1058,13 @@ if ( ! class_exists( 'um\core\Uploader' ) ) {
 		 * @return array
 		 */
 		public function cover_photo( $response, $image_path, $src, $key, $user_id, $coord, $crop ) {
-			$sizes   = UM()->options()->get( 'cover_thumb_sizes' );
-			$quality = UM()->options()->get( 'image_compression' );
+			$sizes = UM()->options()->get( 'cover_thumb_sizes' );
 
 			$image = wp_get_image_editor( $image_path ); // Return an implementation that extends WP_Image_Editor
 
 			$temp_image_path = $image_path;
 
-			// Refresh image_path to make temporary image permanently after upload
+			// Refresh image_path to make temporary image permanently after upload.
 			$photo_ext  = pathinfo( $image_path, PATHINFO_EXTENSION );
 			$image_path = pathinfo( $image_path, PATHINFO_DIRNAME ) . DIRECTORY_SEPARATOR . $key . '.' . $photo_ext;
 
@@ -1077,11 +1076,12 @@ if ( ! class_exists( 'um\core\Uploader' ) ) {
 
 				$image->crop( $src_x, $src_y, $src_w, $src_h );
 
-				$max_w = UM()->options()->get( 'image_max_width' );
-				if ( $src_w > $max_w ) {
-					$image->resize( $max_w, $src_h );
-				}
+				// Cover images use maximum encoder quality. Set this BEFORE save(), otherwise
+				// the main uploaded image would be saved with the editor's default quality.
+				$image->set_quality( 100 );
 
+				// Keep the full resolution of the user's selected crop. The generic
+				// image_max_width limit must not downscale the master cover image.
 				$save_result = $image->save( $image_path );
 
 				if ( is_wp_error( $save_result ) ) {
@@ -1089,25 +1089,36 @@ if ( ! class_exists( 'um\core\Uploader' ) ) {
 					wp_send_json_error( sprintf( __( 'Unable to crop image file: %s', 'ultimate-member' ), $src ) );
 				}
 
-				$image->set_quality( $quality );
-
 				$sizes_array = array();
-
-				foreach ( $sizes as $size ) {
-					$sizes_array[] = array( 'width' => $size );
+				foreach ( (array) $sizes as $size ) {
+					$size = absint( $size );
+					if ( $size > 0 ) {
+						$sizes_array[] = array( 'width' => $size );
+					}
 				}
 
+				// Keep the configured thumbnail sizes, but render them at quality 100 too.
 				$resize = $image->multi_resize( $sizes_array );
 
-				// change filenames of resized images
-				foreach ( $resize as $row ) {
-					$new_filename = str_replace( "x{$row['height']}", '', $row['file'] );
-					$old_filename = $row['file'];
-
-					rename( dirname( $image_path ) . DIRECTORY_SEPARATOR . $old_filename, dirname( $image_path ) . DIRECTORY_SEPARATOR . $new_filename );
+				// Change filenames of resized images.
+				if ( is_array( $resize ) ) {
+					foreach ( $resize as $row ) {
+						if ( empty( $row['file'] ) || empty( $row['height'] ) ) {
+							continue;
+						}
+						$new_filename = str_replace( "x{$row['height']}", '', $row['file'] );
+						$old_filename = $row['file'];
+						$old_path     = dirname( $image_path ) . DIRECTORY_SEPARATOR . $old_filename;
+						$new_path     = dirname( $image_path ) . DIRECTORY_SEPARATOR . $new_filename;
+						if ( $old_path !== $new_path && file_exists( $old_path ) ) {
+							rename( $old_path, $new_path );
+						}
+					}
 				}
 
-				unlink( $temp_image_path );
+				if ( $temp_image_path !== $image_path && file_exists( $temp_image_path ) ) {
+					unlink( $temp_image_path );
+				}
 
 				$basename = $key . '_temp.' . $photo_ext;
 				$src      = str_replace( '/' . $basename, '/' . $save_result['file'], $src );
@@ -1125,7 +1136,6 @@ if ( ! class_exists( 'um\core\Uploader' ) ) {
 
 			return $response;
 		}
-
 
 		/**
 		 * Stream photo image process
