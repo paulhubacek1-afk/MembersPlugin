@@ -25,19 +25,21 @@ if ( ! class_exists( 'MP_GitHub_Updater' ) ) {
 
 		private static function release() {
 			$cached = get_transient( self::CACHE_KEY );
-			if ( is_array( $cached ) && isset( $cached['tag_name'], $cached['assets'] ) ) {
+			if ( is_array( $cached ) && isset( $cached['tag_name'], $cached['package'] ) ) {
 				return $cached;
 			}
 
+			// The repository may contain upstream core tags such as 2.14.1.
+			// Only use the product's own 1.0.x release line for this updater.
 			$response = wp_remote_get(
-				'https://api.github.com/repos/' . self::REPOSITORY . '/releases/latest',
+				'https://api.github.com/repos/' . self::REPOSITORY . '/releases?per_page=30',
 				array(
 					'timeout' => 8,
 					'headers' => array(
 						'Accept'     => 'application/vnd.github+json',
 						'User-Agent' => 'MembersPlugin-WordPress-Updater',
 						'X-GitHub-Api-Version' => '2022-11-28',
-					),
+				),
 			)
 			);
 
@@ -45,33 +47,45 @@ if ( ! class_exists( 'MP_GitHub_Updater' ) ) {
 				return false;
 			}
 
-			$data = json_decode( wp_remote_retrieve_body( $response ), true );
-			if ( ! is_array( $data ) || empty( $data['tag_name'] ) || ! empty( $data['draft'] ) || ! empty( $data['prerelease'] ) || empty( $data['assets'] ) ) {
+			$releases = json_decode( wp_remote_retrieve_body( $response ), true );
+			if ( ! is_array( $releases ) ) {
 				return false;
 			}
 
-			$version = ltrim( sanitize_text_field( $data['tag_name'] ), 'vV' );
-			$package = '';
-			foreach ( $data['assets'] as $asset ) {
-				if ( isset( $asset['name'], $asset['browser_download_url'] ) && 'members-plugin.zip' === $asset['name'] ) {
-					$package = esc_url_raw( $asset['browser_download_url'] );
-					break;
+			$selected = false;
+			foreach ( $releases as $item ) {
+				if ( ! is_array( $item ) || empty( $item['tag_name'] ) || ! empty( $item['draft'] ) || ! empty( $item['prerelease'] ) ) {
+					continue;
+				}
+				$version = ltrim( sanitize_text_field( $item['tag_name'] ), 'vV' );
+				if ( ! preg_match( '/^1\\.0\\.\\d+(?:\\.\\d+)?$/', $version ) || empty( $item['assets'] ) ) {
+					continue;
+				}
+				$package = '';
+				foreach ( $item['assets'] as $asset ) {
+					if ( isset( $asset['name'], $asset['browser_download_url'] ) && 'members-plugin.zip' === $asset['name'] ) {
+						$package = esc_url_raw( $asset['browser_download_url'] );
+						break;
+					}
+				}
+				if ( empty( $package ) ) {
+					continue;
+				}
+				if ( ! $selected || version_compare( $version, $selected['tag_name'], '>' ) ) {
+					$selected = array(
+						'tag_name' => $version,
+						'package'  => $package,
+					'html_url' => isset( $item['html_url'] ) ? esc_url_raw( $item['html_url'] ) : '',
+					'name'     => isset( $item['name'] ) ? sanitize_text_field( $item['name'] ) : 'Members Plugin ' . $version,
+					'body'     => isset( $item['body'] ) ? wp_kses_post( $item['body'] ) : '',
+				);
 				}
 			}
-			if ( ! preg_match( '/^\d+\.\d+\.\d+(?:\.\d+)?$/', $version ) || empty( $package ) ) {
+			if ( ! $selected ) {
 				return false;
 			}
-
-			$release = array(
-				'tag_name'    => $version,
-				'package'     => $package,
-				'html_url'    => isset( $data['html_url'] ) ? esc_url_raw( $data['html_url'] ) : '',
-				'name'        => isset( $data['name'] ) ? sanitize_text_field( $data['name'] ) : 'Members Plugin ' . $version,
-				'body'        => isset( $data['body'] ) ? wp_kses_post( $data['body'] ) : '',
-				'assets'      => $data['assets'],
-			);
-			set_transient( self::CACHE_KEY, $release, self::CACHE_TTL );
-			return $release;
+			set_transient( self::CACHE_KEY, $selected, self::CACHE_TTL );
+			return $selected;
 		}
 
 		public static function inject_update( $transient ) {
