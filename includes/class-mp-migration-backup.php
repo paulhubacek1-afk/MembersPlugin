@@ -16,6 +16,7 @@ final class MP_Migration_Backup {
 		add_action( 'admin_init', array( __CLASS__, 'install_schema' ) );
 		add_action( 'admin_post_mp_migration_create_backup', array( __CLASS__, 'create_backup' ) );
 		add_action( 'admin_post_mp_migration_download_backup', array( __CLASS__, 'download_backup' ) );
+		add_action( 'admin_post_mp_migration_import_backup', array( __CLASS__, 'import_backup' ) );
 	}
 
 	public static function install_schema() {
@@ -42,9 +43,10 @@ final class MP_Migration_Backup {
 
 	public static function menu() {
 		if ( current_user_can( 'manage_options' ) ) {
-			add_management_page(
-				__( 'MP Migration & Sicherung', 'members-plugin' ),
-				__( 'MP Migration & Sicherung', 'members-plugin' ),
+			add_submenu_page(
+				'ultimatemember',
+				__( 'Sicherung', 'members-plugin' ),
+				__( 'Sicherung', 'members-plugin' ),
 				'manage_options',
 				self::PAGE,
 				array( __CLASS__, 'render_page' )
@@ -62,19 +64,32 @@ final class MP_Migration_Backup {
 		if ( $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table ) ) === $table ) {
 			$backups = $wpdb->get_results( "SELECT id, filename, created_at, file_size, checksum FROM {$table} ORDER BY id DESC LIMIT 20", ARRAY_A );
 		}
-		echo '<div class="wrap"><h1>' . esc_html__( 'MP Migration & Sicherung', 'members-plugin' ) . '</h1>';
+		echo '<div class="wrap"><h1>' . esc_html__( 'Sicherung', 'members-plugin' ) . '</h1>';
+		echo '<nav class="nav-tab-wrapper"><a class="nav-tab nav-tab-active" href="' . esc_url( admin_url( 'admin.php?page=' . self::PAGE ) ) . '">' . esc_html__( 'Sicherung', 'members-plugin' ) . '</a></nav>';
 		if ( isset( $_GET['mp_backup'] ) && 'created' === sanitize_key( wp_unslash( $_GET['mp_backup'] ) ) ) {
 			echo '<div class="notice notice-success"><p>' . esc_html__( 'Sicherung wurde erstellt.', 'members-plugin' ) . '</p></div>';
+		}
+		if ( isset( $_GET['mp_import'] ) && 'done' === sanitize_key( wp_unslash( $_GET['mp_import'] ) ) ) {
+			echo '<div class="notice notice-success"><p>' . esc_html__( 'Sicherung erfolgreich importiert. Vorhandene zusätzliche Datensätze wurden nicht gelöscht.', 'members-plugin' ) . '</p></div>';
+		}
+		if ( isset( $_GET['mp_import_error'] ) ) {
+			echo '<div class="notice notice-error"><p>' . esc_html__( 'Import fehlgeschlagen. Prüfe die Sicherungsdatei und die Website, von der sie stammt.', 'members-plugin' ) . ' (' . esc_html( sanitize_key( wp_unslash( $_GET['mp_import_error'] ) ) ) . ')</p></div>';
 		}
 		if ( isset( $_GET['mp_backup_error'] ) ) {
 			echo '<div class="notice notice-error"><p>' . esc_html__( 'Sicherung fehlgeschlagen. Prüfe ZipArchive, Schreibrechte und den privaten Speicherpfad.', 'members-plugin' ) . ' (' . esc_html( sanitize_key( wp_unslash( $_GET['mp_backup_error'] ) ) ) . ')</p></div>';
 		}
-		echo '<p>' . esc_html__( 'Erstelle eine Sicherung, bevor du Ultimate Member entfernst. Die ZIP-Datei wird außerhalb des WordPress-Webverzeichnisses gespeichert.', 'members-plugin' ) . '</p>';
-		echo '<p><strong>' . esc_html__( 'Die Sicherung enthält WordPress-Benutzer und Metadaten, UM-bezogene Optionen und Tabellen, UM-Formulare/Verzeichnisse mit Metadaten sowie vorhandene Ultimate-Member-Uploadordner.', 'members-plugin' ) . '</strong></p>';
+		echo '<p>' . esc_html__( 'Exportiere eine Sicherung und importiere sie bei Bedarf wieder. Die ZIP-Datei wird außerhalb des WordPress-Webverzeichnisses gespeichert.', 'members-plugin' ) . '</p>';
+		echo '<p><strong>' . esc_html__( 'Die Sicherung enthält WordPress-Benutzer und Metadaten, pluginbezogene Optionen und Datensätze sowie vorhandene Profilbild-Dateien.', 'members-plugin' ) . '</strong></p>';
 		echo '<p>' . esc_html__( 'Die Datei enthält private Benutzerdaten einschließlich Passwort-Hashes. Bewahre sie sicher auf.', 'members-plugin' ) . '</p>';
 		echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '"><input type="hidden" name="action" value="mp_migration_create_backup">';
 		wp_nonce_field( 'mp_migration_create_backup' );
 		submit_button( __( 'Jetzt Sicherung erstellen', 'members-plugin' ) );
+		echo '</form><hr><h2>' . esc_html__( 'Sicherung importieren', 'members-plugin' ) . '</h2>';
+		echo '<p>' . esc_html__( 'Importiert eine zuvor exportierte ZIP-Sicherung derselben Website. Datensätze werden anhand ihrer IDs ergänzt oder aktualisiert; nicht enthaltene Datensätze werden nicht gelöscht. Erstelle vor dem Import eine zusätzliche vollständige Website-Sicherung.', 'members-plugin' ) . '</p>';
+		echo '<form method="post" enctype="multipart/form-data" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '"><input type="hidden" name="action" value="mp_migration_import_backup">';
+		wp_nonce_field( 'mp_migration_import_backup' );
+		echo '<input type="file" name="mp_backup_file" accept=".zip,application/zip" required> ';
+		submit_button( __( 'Sicherung importieren', 'members-plugin' ), 'secondary', 'submit', false );
 		echo '</form><h2>' . esc_html__( 'Vorhandene Sicherungen', 'members-plugin' ) . '</h2>';
 		if ( empty( $backups ) ) {
 			echo '<p>' . esc_html__( 'Noch keine Sicherung vorhanden.', 'members-plugin' ) . '</p>';
@@ -86,7 +101,7 @@ final class MP_Migration_Backup {
 			}
 			echo '</tbody></table>';
 		}
-		echo '<hr><p><strong>' . esc_html__( 'Wichtig:', 'members-plugin' ) . '</strong> ' . esc_html__( 'Das ist eine Datensicherung, noch keine vollständige Migration auf den unabhängigen MP-Kern. Lade die ZIP-Datei herunter und prüfe sie, bevor du UM deinstallierst.', 'members-plugin' ) . '</p></div>';
+		echo '<hr><p><strong>' . esc_html__( 'Wichtig:', 'members-plugin' ) . '</strong> ' . esc_html__( 'Die Sicherung enthält vertrauliche Benutzerdaten. Importiere nur Dateien aus einer vertrauenswürdigen Quelle.', 'members-plugin' ) . '</p></div>';
 	}
 
 	private static function private_directory() {
@@ -235,6 +250,116 @@ final class MP_Migration_Backup {
 		header( 'Content-Disposition: attachment; filename="' . $filename . '"' );
 		header( 'Content-Length: ' . (string) filesize( $path ) );
 		readfile( $path );
+		exit;
+	}
+
+
+	public static function import_backup() {
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_die( esc_html__( 'Keine Berechtigung.', 'members-plugin' ), 403 );
+		}
+		check_admin_referer( 'mp_migration_import_backup' );
+		if ( ! class_exists( 'ZipArchive' ) || empty( $_FILES['mp_backup_file']['tmp_name'] ) || ! is_uploaded_file( $_FILES['mp_backup_file']['tmp_name'] ) ) {
+			self::redirect_import_error( 'invalid_upload' );
+		}
+		$file = $_FILES['mp_backup_file'];
+		if ( ! empty( $file['error'] ) || empty( $file['size'] ) || (int) $file['size'] > 250 * MB_IN_BYTES ) {
+			self::redirect_import_error( 'upload_size_or_error' );
+		}
+		$zip = new ZipArchive();
+		if ( true !== $zip->open( $file['tmp_name'] ) ) {
+			self::redirect_import_error( 'invalid_zip' );
+		}
+		$json = $zip->getFromName( 'database-snapshot.json' );
+		if ( false === $json || strlen( $json ) > 200 * MB_IN_BYTES ) {
+			$zip->close();
+			self::redirect_import_error( 'snapshot_missing' );
+		}
+		$data = json_decode( $json, true );
+		if ( ! is_array( $data ) || 'members-plugin-migration-backup' !== ( $data['format'] ?? '' ) || 1 !== (int) ( $data['format_version'] ?? 0 ) ) {
+			$zip->close();
+			self::redirect_import_error( 'unsupported_format' );
+		}
+		global $wpdb;
+		if ( untrailingslashit( (string) ( $data['site_url'] ?? '' ) ) !== untrailingslashit( home_url( '/' ) ) || ( $data['database_prefix'] ?? '' ) !== $wpdb->prefix ) {
+			$zip->close();
+			self::redirect_import_error( 'site_mismatch' );
+		}
+		$map = array(
+			array( $wpdb->users, 'users', 'ID' ),
+			array( $wpdb->usermeta, 'usermeta', 'umeta_id' ),
+			array( $wpdb->options, 'options', 'option_id' ),
+			array( $wpdb->posts, 'posts', 'ID' ),
+			array( $wpdb->postmeta, 'postmeta', 'meta_id' ),
+		);
+		$ok = true;
+		foreach ( $map as $item ) {
+			if ( ! isset( $data[ $item[1] ] ) || ! is_array( $data[ $item[1] ] ) ) {
+				$ok = false;
+				break;
+			}
+			foreach ( $data[ $item[1] ] as $row ) {
+				if ( ! is_array( $row ) || ! array_key_exists( $item[2], $row ) ) {
+					$ok = false;
+					break 2;
+				}
+				$exists = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$item[0]} WHERE {$item[2]} = %s", $row[ $item[2] ] ) );
+				$result = $exists ? $wpdb->update( $item[0], $row, array( $item[2] => $row[ $item[2] ] ) ) : $wpdb->insert( $item[0], $row );
+				if ( false === $result ) {
+					$ok = false;
+					break 2;
+				}
+			}
+		}
+		// Restore archived profile files only into the two expected upload subfolders.
+		$upload = wp_upload_dir();
+		$media_map = array(
+			'media/ultimatemember/' => trailingslashit( $upload['basedir'] ) . 'ultimatemember/',
+			'media/ultimate-member/' => trailingslashit( $upload['basedir'] ) . 'ultimate-member/',
+		);
+		for ( $i = 0; $i < $zip->numFiles; $i++ ) {
+			$entry = $zip->getNameIndex( $i );
+			if ( ! is_string( $entry ) || false !== strpos( $entry, '..' ) || 0 === strpos( $entry, '/' ) ) {
+				continue;
+			}
+			foreach ( $media_map as $prefix => $target_root ) {
+				if ( 0 !== strpos( $entry, $prefix ) ) {
+					continue;
+				}
+				$relative = substr( $entry, strlen( $prefix ) );
+				if ( '' === $relative ) {
+					continue;
+				}
+				$target = $target_root . $relative;
+				if ( ! wp_mkdir_p( dirname( $target ) ) ) {
+					$ok = false;
+					continue;
+				}
+				$stream = $zip->getStream( $entry );
+				$out = fopen( $target, 'wb' );
+				if ( false === $stream || false === $out ) {
+					if ( is_resource( $stream ) ) {
+						fclose( $stream );
+					}
+					$ok = false;
+					continue;
+				}
+				stream_copy_to_stream( $stream, $out );
+				fclose( $stream );
+				fclose( $out );
+			}
+		}
+		$zip->close();
+		if ( ! $ok ) {
+			self::redirect_import_error( 'partial_restore' );
+		}
+		wp_cache_flush();
+		wp_safe_redirect( add_query_arg( array( 'page' => self::PAGE, 'mp_import' => 'done' ), admin_url( 'admin.php' ) ) );
+		exit;
+	}
+
+	private static function redirect_import_error( $code ) {
+		wp_safe_redirect( add_query_arg( array( 'page' => self::PAGE, 'mp_import_error' => sanitize_key( $code ) ), admin_url( 'admin.php' ) ) );
 		exit;
 	}
 
