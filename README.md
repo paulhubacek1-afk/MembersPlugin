@@ -1,5 +1,11 @@
 # Members Plugin – Profiles & Community
 
+## Updated in 1.0.9
+
+- Fixed localization bootstrap for both `members-plugin` and the bundled core's `ultimate-member` text domain. Translation loading occurs on WordPress `init`, avoiding early-loading warnings.
+- Release ZIP includes the official German translation for the bundled core. The active language is controlled by **WordPress → Settings → General → Site Language**.
+- Existing legacy CSS classes and extension-facing compatibility identifiers are unchanged.
+
 ## Updated in 1.0.8.1
 
 - Fixed WordPress update discovery: the plugin now registers a standard update transient filter, fetches published GitHub releases, and supplies the ZIP to the WordPress updater.
@@ -17,7 +23,7 @@ Members Plugin is evolving toward an independent WordPress membership system. It
 
 - **Migration backup:** open **Tools → MP Migration & Sicherung** to create a private ZIP snapshot before removing a separately installed legacy membership engine plugin. The tool is loaded before the legacy-core compatibility guard.
 - **MP-owned database index:** backup records use the WordPress table prefix plus `mp_backup_index`.
-- **Version display:** the WordPress plugin header reports Members Plugin version 1.0.8.1.
+- **Version display:** the WordPress plugin header reports Members Plugin version 1.0.9.
 - **Important limitation:** this snapshot is a safety net, not a one-click restore or a completed conversion to a fully independent membership engine. Keep a separate full-site/database backup too.
 
 ## Updated in 1.0.6
