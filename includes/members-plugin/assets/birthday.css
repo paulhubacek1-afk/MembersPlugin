@@ -27,7 +27,7 @@
 	top: -5vh;
 	left: var(--mp-confetti-left);
 	width: var(--mp-confetti-size);
-	height: calc(var(--mp-confetti-size) * 1.65);
+	height: calc(var(--mp-confetti-size) + 4px);
 	border-radius: 2px;
 	background: #f59e0b;
 	opacity: 0;
