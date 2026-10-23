@@ -810,9 +810,16 @@ if ( ! class_exists( 'UM_Functions' ) ) {
 					 *
 					 * This intentionally does not inherit WordPress global/common attributes
 					 * or the full `post`, `user_description` HTML allowlist.
-					 * Only formatting elements and the explicitly required link attributes are allowed.
+					 * Safe semantic headings and basic formatting elements are allowed, but heading tags
+					 * receive no user-controlled attributes (for example, inline event handlers).
 					 */
 					$allowed_html = array(
+						'h1'         => array(),
+						'h2'         => array(),
+						'h3'         => array(),
+						'h4'         => array(),
+						'h5'         => array(),
+						'h6'         => array(),
 						'p'          => array(),
 						'br'         => array(),
 						'strong'     => array(),

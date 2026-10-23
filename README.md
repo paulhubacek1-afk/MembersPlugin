@@ -7,6 +7,7 @@ Members Plugin is a WordPress membership and profile system with automatic theme
 - **ID-based profile photos:** avatar output checks the actual WordPress user-ID folder first: wp-content/uploads/ultimatemember/{USER_ID}/profile_photo.{jpg|jpeg|png|webp|gif|avif}. A photo from a previously loaded profile should no longer be selected for another user.
 - **Online members included:** online tracking is built into this plugin; no separate online-user extension is required.
 - **Responsive online list:** a compact, theme-aware grid with avatars and an online indicator.
+- **HTML-enabled text fields:** safe `h1`–`h6` heading tags are preserved during form sanitization, without permitting arbitrary heading attributes.
 - **Improved plugin identity and documentation.**
 
 ## Installation
