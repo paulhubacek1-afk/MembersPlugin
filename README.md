@@ -1,6 +1,13 @@
 # Members Plugin – Profiles & Community
 
-Members Plugin is a self-managed WordPress membership and community system with profile tools, theme-aware design controls, role-based avatar rings, automatic update checks, and email diagnostics.
+Members Plugin is evolving toward an independent WordPress membership system. It currently includes profile tools, theme-aware design controls, role-based avatar rings, automatic update checks, email diagnostics, and a standalone migration backup tool.
+
+## Updated in 1.0.7
+
+- **Migration backup:** open **Tools → MP Migration & Sicherung** to create a private ZIP snapshot before removing a separately installed Ultimate Member plugin. The tool is loaded before the legacy-core compatibility guard.
+- **MP-owned database index:** backup records use the WordPress table prefix plus `mp_backup_index`.
+- **Version display:** the WordPress plugin header now reports version 1.0.7.
+- **Important limitation:** this snapshot is a safety net, not a one-click restore or a completed conversion to a fully independent membership engine. Keep a separate full-site/database backup too.
 
 ## Updated in 1.0.6
 
@@ -55,6 +62,12 @@ A selected role color replaces the default ring on that avatar. The ring is draw
 Outgoing email recipients at the exact domain @buehne-total.eu are intentionally removed from the recipient list. If all recipients match that domain, no message is sent. If a message has additional recipients, delivery continues to those remaining recipients.
 
 When WordPress reports a mail failure, Members Plugin records the failure code and error message in **Members Plugin → E-Mail-Protokoll**. The log does not store the message body. This confirms errors reported by WordPress/PHPMailer; it cannot guarantee delivery to the recipient's inbox.
+
+## Migration backup before removing Ultimate Member
+
+The page **Tools → MP Migration & Sicherung** is intentionally independent from the bundled legacy core, so it can be used while a separately installed Ultimate Member plugin is detected. It creates a ZIP containing a JSON database snapshot (WordPress users and usermeta, UM-related options and custom tables, UM form/directory posts and metadata) and copies files from the common `uploads/ultimatemember` and `uploads/ultimate-member` directories when present. Backup files are placed in a directory adjacent to the WordPress web root, with restrictive permissions, and are served only through an administrator-only, nonce-protected download action. The index of backups is stored in an MP-owned table using the site's actual WordPress table prefix.
+
+The archive contains sensitive personal data and password hashes. Store it securely. The snapshot is not an automatic SQL restore and does not yet make the whole bundled membership engine independent of Ultimate Member naming or internals. Do not uninstall UM until you have downloaded and checked the archive and have a separate full-site backup.
 
 ## Automatic updates
 
