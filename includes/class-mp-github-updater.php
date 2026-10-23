@@ -10,7 +10,7 @@ defined( 'ABSPATH' ) || exit;
 if ( ! class_exists( 'MP_GitHub_Updater' ) ) {
 	final class MP_GitHub_Updater {
 		const REPOSITORY = 'paulhubacek1-afk/MembersPlugin';
-		const CACHE_KEY  = 'mp_github_release_update_v1081';
+		const CACHE_KEY  = 'mp_github_release_update_v109';
 		const CACHE_TTL  = 15 * MINUTE_IN_SECONDS;
 
 		public static function init() {

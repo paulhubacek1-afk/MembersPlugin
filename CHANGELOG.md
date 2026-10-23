@@ -1,3 +1,9 @@
+## 1.0.9 – 2026-10-23
+
+- Fixed: register both `members-plugin` and legacy `ultimate-member` text domains on WordPress `init`, so translations follow the site's selected language without loading too early.
+- Fixed: release ZIP includes the official German `ultimate-member-de_DE.mo` translation for the bundled membership core.
+- Kept: legacy `.um` CSS classes and compatibility identifiers unchanged.
+
 ## 1.0.8.1 – 2026-10-23
 
 - Fixed: register a WordPress-compatible update transient filter and plugin information response using the published GitHub release ZIP.

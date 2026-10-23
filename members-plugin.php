@@ -3,7 +3,7 @@
  * Plugin Name: Members Plugin – Profiles & Community
  * Plugin URI: https://github.com/paulhubacek1-afk/MembersPlugin
  * Description: Mitgliederprofile, Community-Funktionen, Profilbild-Ringfarben, automatische Updates sowie Sicherung und Import.
- * Version: 1.0.8.1
+ * Version: 1.0.9
  * Author: Paul Hubacek
  * Author URI: https://github.com/paulhubacek1-afk
  * License: GPLv3
@@ -70,6 +70,18 @@ define( 'MP_VERSION', $plugin_data['Version'] );
 define( 'MP_FILE', __FILE__ );
 define( 'MP_PATH', UM_PATH . 'includes/members-plugin/' );
 define( 'MP_URL', UM_URL . 'includes/members-plugin/' );
+
+// Respect the WordPress site language for both the new product domain and the
+// legacy core domain whose translation files are still named "ultimate-member".
+add_action(
+	'init',
+	static function () {
+		$language_path = dirname( plugin_basename( MP_FILE ) ) . '/languages';
+		load_plugin_textdomain( 'members-plugin', false, $language_path );
+		load_plugin_textdomain( 'ultimate-member', false, $language_path );
+	},
+	0
+);
 
 require_once 'includes/class-functions.php';
 require_once 'includes/class-init.php';

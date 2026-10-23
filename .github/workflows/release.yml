@@ -35,11 +35,32 @@ jobs:
           php -l members-plugin.php
 
       - name: ZIP bauen
+        shell: bash
         run: |
+          set -euo pipefail
           mkdir -p build/members-plugin
           git archive HEAD | tar -x -C build/members-plugin
           cd build/members-plugin
           rm -rf .github tools composer.json package.json .distignore .gitignore .gitattributes
+
+          # Official German catalog for the bundled legacy text domain.
+          TRANSLATION_API="$(curl --fail --silent --show-error --location --retry 3 'https://api.wordpress.org/translations/plugins/1.0/?slug=ultimate-member&version=2.14.1')"
+          TRANSLATION_URL="$(printf '%s' "$TRANSLATION_API" | jq -r '.translations[]? | select(.language == "de_DE") | .package' | sed -n '1p')"
+          if [[ -z "$TRANSLATION_URL" || "$TRANSLATION_URL" == "null" ]]; then
+            echo "::error::WordPress.org returned no de_DE translation package for the bundled ultimate-member core."
+            exit 1
+          fi
+          curl --fail --silent --show-error --location --retry 3 "$TRANSLATION_URL" -o /tmp/ultimate-member-de_DE.zip
+          MO_ENTRY="$(unzip -Z1 /tmp/ultimate-member-de_DE.zip | grep -E '(^|/)ultimate-member-de_DE\.mo$' | sed -n '1p' || true)"
+          if [[ -z "$MO_ENTRY" ]]; then
+            echo "::error::The German translation archive did not contain ultimate-member-de_DE.mo."
+            exit 1
+          fi
+          mkdir -p languages
+          unzip -p /tmp/ultimate-member-de_DE.zip "$MO_ENTRY" > languages/ultimate-member-de_DE.mo
+          test -s languages/ultimate-member-de_DE.mo
+          echo "Included German translation: languages/ultimate-member-de_DE.mo"
+
           cd ..
           zip -qr members-plugin.zip members-plugin
           ls -la members-plugin.zip
