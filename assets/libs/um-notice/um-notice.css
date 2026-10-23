@@ -4,7 +4,7 @@
   color: var(--um-gray-700, #344054);
   text-align: center;
   width: 250px;
-  background-color: #fff;
+  background-color: var(--um-bg, #fff);
   z-index: 99999999;
   right: 30px;
   bottom: -200px;

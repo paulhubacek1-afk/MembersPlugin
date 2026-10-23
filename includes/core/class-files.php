@@ -173,12 +173,36 @@ if ( ! class_exists( 'um\core\Files' ) ) {
 
 
 		/**
+		 * Members Plugin: Liegt die Datei im UM-Upload-Verzeichnis (inkl. Multisite-Altpfad)?
+		 *
+		 * @param string $file_path Pfad.
+		 *
+		 * @return bool
+		 */
+		private function mp_in_upload_dir( $file_path ) {
+			$base = UM()->uploader()->get_upload_base_dir();
+			if ( um_mp_path_is_inside( $file_path, $base ) ) {
+				return true;
+			}
+			if ( is_multisite() ) {
+				$legacy = str_replace( DIRECTORY_SEPARATOR . 'sites' . DIRECTORY_SEPARATOR . get_current_blog_id() . DIRECTORY_SEPARATOR, DIRECTORY_SEPARATOR, $base );
+				return um_mp_path_is_inside( $file_path, $legacy );
+			}
+			return false;
+		}
+
+		/**
 		 * @param $user_id
 		 * @param $field_key
 		 * @param $field_value
 		 */
 		function image_download( $user_id, $field_key, $field_value ) {
-			$file_path = UM()->uploader()->get_upload_base_dir() . $user_id . DIRECTORY_SEPARATOR . $field_value;
+			// Members Plugin: Nur reine Dateinamen im Ordner des Benutzers zulassen.
+			if ( ! is_string( $field_value ) || wp_basename( $field_value ) !== $field_value || false !== strpos( $field_value, '..' ) ) {
+				um_reset_user();
+				return;
+			}
+			$file_path = UM()->uploader()->get_upload_base_dir() . absint( $user_id ) . DIRECTORY_SEPARATOR . $field_value;
 			if ( ! file_exists( $file_path ) ) {
 				if ( is_multisite() ) {
 					//multisite fix for old customers
@@ -192,16 +216,36 @@ if ( ! class_exists( 'um\core\Files' ) ) {
 				return;
 			}
 
+			// Members Plugin: Datei muss existieren und im Upload-Verzeichnis liegen.
+			if ( ! is_file( $file_path ) || ! $this->mp_in_upload_dir( $file_path ) ) {
+				um_reset_user();
+				return;
+			}
+
 			$file_info = get_user_meta( $user_id, $field_key . "_metadata", true );
 
 			$pathinfo = pathinfo( $file_path );
 			$size = filesize( $file_path );
 			$originalname = ! empty( $file_info['original_name'] ) ? $file_info['original_name'] : $pathinfo['basename'];
-			$type = ! empty( $file_info['type'] ) ? $file_info['type'] : $pathinfo['extension'];
+			// Members Plugin: MIME-Typ immer aus der echten Datei ableiten, Dateinamen für den Header bereinigen.
+			$checked = wp_check_filetype( $file_path );
+			$type    = ! empty( $checked['type'] ) ? $checked['type'] : 'application/octet-stream';
+			$disposition = 'inline';
+			if ( 'inline' === $disposition && 0 !== strpos( $type, 'image/' ) ) {
+				$disposition = 'attachment';
+			}
+			if ( 'image/svg+xml' === $type ) {
+				$disposition = 'attachment';
+			}
+			$safe_name = sanitize_file_name( wp_basename( (string) $originalname ) );
+			if ( '' === $safe_name ) {
+				$safe_name = $pathinfo['basename'];
+			}
 
 			header('Content-Description: File Transfer');
 			header('Content-Type: ' . $type );
-			header('Content-Disposition: inline; filename="' . $originalname . '"');
+			header('X-Content-Type-Options: nosniff');
+			header('Content-Disposition: ' . $disposition . '; filename="' . $safe_name . '"; filename*=UTF-8\'\'' . rawurlencode( $safe_name ) );
 			header('Content-Transfer-Encoding: binary');
 			header('Expires: 0');
 			header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
@@ -224,7 +268,12 @@ if ( ! class_exists( 'um\core\Files' ) ) {
 		 * @param $field_value
 		 */
 		function file_download( $user_id, $field_key, $field_value ) {
-			$file_path = UM()->uploader()->get_upload_base_dir() . $user_id . DIRECTORY_SEPARATOR . $field_value;
+			// Members Plugin: Nur reine Dateinamen im Ordner des Benutzers zulassen.
+			if ( ! is_string( $field_value ) || wp_basename( $field_value ) !== $field_value || false !== strpos( $field_value, '..' ) ) {
+				um_reset_user();
+				return;
+			}
+			$file_path = UM()->uploader()->get_upload_base_dir() . absint( $user_id ) . DIRECTORY_SEPARATOR . $field_value;
 			if ( ! file_exists( $file_path ) ) {
 				if ( is_multisite() ) {
 					//multisite fix for old customers
@@ -238,16 +287,36 @@ if ( ! class_exists( 'um\core\Files' ) ) {
 				return;
 			}
 
+			// Members Plugin: Datei muss existieren und im Upload-Verzeichnis liegen.
+			if ( ! is_file( $file_path ) || ! $this->mp_in_upload_dir( $file_path ) ) {
+				um_reset_user();
+				return;
+			}
+
 			$file_info = get_user_meta( $user_id, $field_key . "_metadata", true );
 
 			$pathinfo = pathinfo( $file_path );
 			$size = filesize( $file_path );
 			$originalname = ! empty( $file_info['original_name'] ) ? $file_info['original_name'] : $pathinfo['basename'];
-			$type = ! empty( $file_info['type'] ) ? $file_info['type'] : $pathinfo['extension'];
+			// Members Plugin: MIME-Typ immer aus der echten Datei ableiten, Dateinamen für den Header bereinigen.
+			$checked = wp_check_filetype( $file_path );
+			$type    = ! empty( $checked['type'] ) ? $checked['type'] : 'application/octet-stream';
+			$disposition = 'attachment';
+			if ( 'inline' === $disposition && 0 !== strpos( $type, 'image/' ) ) {
+				$disposition = 'attachment';
+			}
+			if ( 'image/svg+xml' === $type ) {
+				$disposition = 'attachment';
+			}
+			$safe_name = sanitize_file_name( wp_basename( (string) $originalname ) );
+			if ( '' === $safe_name ) {
+				$safe_name = $pathinfo['basename'];
+			}
 
 			header('Content-Description: File Transfer');
 			header('Content-Type: ' . $type );
-			header('Content-Disposition: attachment; filename="' . $originalname . '"');
+			header('X-Content-Type-Options: nosniff');
+			header('Content-Disposition: ' . $disposition . '; filename="' . $safe_name . '"; filename*=UTF-8\'\'' . rawurlencode( $safe_name ) );
 			header('Content-Transfer-Encoding: binary');
 			header('Expires: 0');
 			header('Cache-Control: must-revalidate, post-check=0, pre-check=0');

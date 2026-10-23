@@ -1452,14 +1452,22 @@ if ( ! class_exists( 'um\core\Member_Directory' ) ) {
 		 * @param array $directory_data
 		 */
 		function show_selected_roles( $directory_data ) {
+			// Members Plugin: Erst deserialisieren, dann auf "leer" prüfen. Vorher galt der String "a:0:{}"
+			// (keine Rolle gewählt) als nicht leer und das Verzeichnis zeigte keine Mitglieder.
+			$roles = isset( $directory_data['roles'] ) ? um_maybe_unserialize( $directory_data['roles'] ) : array();
+			if ( ! is_array( $roles ) ) {
+				$roles = '' === $roles ? array() : array( $roles );
+			}
+			$roles = array_filter( $roles );
+
 			// add roles to appear in directory
-			if ( ! empty( $directory_data['roles'] ) ) {
+			if ( ! empty( $roles ) ) {
 				//since WP4.4 use 'role__in' argument
 				if ( ! empty( $this->query_args['role__in'] ) ) {
 					$this->query_args['role__in'] = is_array( $this->query_args['role__in'] ) ? $this->query_args['role__in'] : array( $this->query_args['role__in'] );
-					$this->query_args['role__in'] = array_intersect( $this->query_args['role__in'], maybe_unserialize( $directory_data['roles'] ) );
+					$this->query_args['role__in'] = array_intersect( $this->query_args['role__in'], $roles );
 				} else {
-					$this->query_args['role__in'] = maybe_unserialize( $directory_data['roles'] );
+					$this->query_args['role__in'] = $roles;
 				}
 			}
 		}
@@ -3309,6 +3317,11 @@ if ( ! class_exists( 'um\core\Member_Directory' ) ) {
 		 */
 		public function default_filter_settings() {
 			check_ajax_referer( 'um_md_default_filters_settings' );
+
+			// Members Plugin: Zusätzliche Berechtigungsprüfung (Nonce allein reicht nicht).
+			if ( ! current_user_can( 'manage_options' ) ) {
+				wp_send_json_error( __( 'You do not have permission to do this action.', 'ultimate-member' ), 403 );
+			}
 
 			// we can't use function "sanitize_key" because it changes uppercase to lowercase
 			$filter_key   = sanitize_text_field( $_REQUEST['key'] );

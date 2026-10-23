@@ -111,7 +111,8 @@ if ( ! class_exists( 'um\Dependencies' ) ) {
 				self::init();
 			}
 
-			return in_array( 'ultimate-member/ultimate-member.php', self::$active_plugins ) || array_key_exists( 'ultimate-member/ultimate-member.php', self::$active_plugins );
+			$core = defined( 'UM_PLUGIN' ) ? UM_PLUGIN : 'ultimate-member/ultimate-member.php';
+			return in_array( $core, self::$active_plugins, true ) || array_key_exists( $core, self::$active_plugins ) || in_array( 'ultimate-member/ultimate-member.php', self::$active_plugins, true ) || array_key_exists( 'ultimate-member/ultimate-member.php', self::$active_plugins );
 		}
 
 		/**

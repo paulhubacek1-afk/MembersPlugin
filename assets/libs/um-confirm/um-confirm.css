@@ -26,7 +26,7 @@
 .um_confirm #um_confirm_title {
     background-color: rgba(0, 0, 0, 0.4);
     border-bottom: 1px solid #5c5c5c;
-    color: #cccccc;
+    color: var(--um-text-light, #cccccc);
     font-weight: bold;
     height: 15px;
     padding: 10px;
@@ -48,7 +48,7 @@
 .um_confirm .um_confirm_button {
     /*font-family: verdana, arial;*/
     border-top: 1px solid #5c5c5c;
-    color: #aaa;
+    color: var(--um-text-light, #aaa);
     font-size: 15px;
     font-weight: bold;
     float: left;
@@ -60,6 +60,6 @@
 
 .um_confirm .um_confirm_button:hover {
     background-color: rgba(0, 0, 0, 0.6);
-    border-top: 1px solid #fff;
-    color: #fff;
+    border-top: 1px solid var(--um-bg, #fff);
+    color: var(--um-on-primary, #fff);
 }

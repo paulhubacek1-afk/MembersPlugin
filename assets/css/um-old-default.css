@@ -16,7 +16,7 @@
 i.um-active-color,
 span.um-active-color
 {
-    color: #3ba1da;
+    color: var(--um-primary, #3ba1da);
 }
 
 .um .um-field-group-head,
@@ -35,7 +35,7 @@ span.um-active-color
 div.uimob800 .um-account-side li a.current,
 div.uimob800 .um-account-side li a.current:hover
 {
-    background: #3ba1da;
+    background: var(--um-primary, #3ba1da);
 }
 
 .um .um-field-group-head:hover,
@@ -51,7 +51,7 @@ div.uimob800 .um-account-side li a.current:hover
 .picker__list-item--selected,
 .picker__list-item--selected:hover,
 .picker--focused .picker__list-item--selected {
-    background: #44b0ec;
+    background: var(--um-primary-hover, #44b0ec);
 }
 
 .um {
@@ -59,7 +59,7 @@ div.uimob800 .um-account-side li a.current:hover
     margin-right: auto!important;
 }
 .um input[type=submit]:disabled:hover {
-    background: #3ba1da;
+    background: var(--um-primary, #3ba1da);
 }
 
 .um input[type=submit].um-button,
@@ -68,57 +68,57 @@ div.uimob800 .um-account-side li a.current:hover
 .um a.um-button.um-disabled:hover,
 .um a.um-button.um-disabled:focus,
 .um a.um-button.um-disabled:active {
-    background: #3ba1da;
+    background: var(--um-primary, #3ba1da);
 }
 
 .um a.um-link {
-    color: #3ba1da;
+    color: var(--um-primary, #3ba1da);
 }
 
 .um input[type=submit].um-button:hover,
 .um a.um-button:hover {
-    background-color: #44b0ec;
+    background-color: var(--um-primary-hover, #44b0ec);
 }
 
 .um a.um-link:hover,
 .um a.um-link-hvr:hover {
-    color: #44b0ec;
+    color: var(--um-primary-hover, #44b0ec);
 }
 
 .um .um-button {
-    color: #ffffff;
+    color: var(--um-on-primary, #ffffff);
 }
 
 .um .um-button:before {
-    color: #ffffff;
+    color: var(--um-on-primary, #ffffff);
 }
 
 .um .um-button.um-alt,
 .um input[type=submit].um-button.um-alt {
-    background: #eeeeee;
+    background: var(--um-secondary, #eeeeee);
 }
 
 .um .um-button.um-alt:hover,
 .um input[type=submit].um-button.um-alt:hover{
-    background: #e5e5e5;
+    background: var(--um-secondary-hover, #e5e5e5);
 }
 
 .um .um-button.um-alt,
 .um input[type=submit].um-button.um-alt {
-    color: #666666;
+    color: var(--um-on-secondary, #666666);
 }
 
 .um .um-button.um-alt:before,
 .um input[type=submit].um-button.um-alt:before {
-    color: #666666;
+    color: var(--um-on-secondary, #666666);
 }
 
 .um .um-tip {
-    color: #cccccc;
+    color: var(--um-text-light, #cccccc);
 }
 
 .um .um-field-label {
-    color: #555555;
+    color: var(--um-text, #555555);
 }
 
 .um .um-row.um-customized-row .um-field-label {
@@ -141,7 +141,7 @@ div.uimob800 .um-account-side li a.current:hover
 .select2-drop-active,
 .select2-drop.select2-drop-above
 {
-    border: 1px solid #ddd !important;
+    border: 1px solid var(--um-border, #ddd) !important;
 }
 
 .um .um-form .select2-container-multi .select2-choices .select2-search-field input[type=text] {
@@ -159,7 +159,7 @@ div.uimob800 .um-account-side li a.current:hover
 .um .um-form .um-datepicker.picker__input.picker__input--active,
 .um .um-form .um-datepicker.picker__input.picker__input--target,
 .um .um-form textarea:focus {
-    border: 1px solid #bbb !important;
+    border: 1px solid var(--um-border-strong, #bbb) !important;
 }
 
 .um .um-form input[type=text],
@@ -174,7 +174,7 @@ div.uimob800 .um-account-side li a.current:hover
 .select2-container .select2-choice,
 .select2-container-multi .select2-choices
 {
-    background-color: #ffffff;
+    background-color: var(--um-bg, #ffffff);
 }
 
 .um .um-form input[type=text]:focus,
@@ -186,7 +186,7 @@ div.uimob800 .um-account-side li a.current:hover
 .um .um-form input[type=number]:focus,
 .um .um-form input[type=password]:focus,
 .um .um-form textarea:focus {
-    background-color: #ffffff;
+    background-color: var(--um-bg, #ffffff);
 }
 
 .um .um-form input[type=text],
@@ -198,40 +198,40 @@ div.uimob800 .um-account-side li a.current:hover
 .um .um-form input[type=password],
 .um .um-form textarea
 {
-    color: #666666;
+    color: var(--um-text, #666666);
 }
 
 .um .um-form input:-webkit-autofill {
-    -webkit-box-shadow:0 0 0 50px white inset; /* Change the color to your own background color */
+    -webkit-box-shadow:0 0 0 50px var(--um-bg, #fff) inset; /* Change the color to your own background color */
     -webkit-text-fill-color: #666666;
 }
 
 .um .um-form input:-webkit-autofill:focus {
-    -webkit-box-shadow: none,0 0 0 50px white inset;
-    -webkit-text-fill-color: #666666;
+    -webkit-box-shadow: none,0 0 0 50px var(--um-bg, #fff) inset;
+    -webkit-text-fill-color: var(--um-text, #666666);
 }
 
 .um .um-form ::-webkit-input-placeholder
 {
-    color:  #aaaaaa;
+    color:  var(--um-text-light, #aaaaaa);
     opacity: 1 !important;
 }
 
 .um .um-form ::-moz-placeholder
 {
-    color:  #aaaaaa;
+    color:  var(--um-text-light, #aaaaaa);
     opacity: 1 !important;
 }
 
 .um .um-form ::-moz-placeholder
 {
-    color:  #aaaaaa;
+    color:  var(--um-text-light, #aaaaaa);
     opacity: 1 !important;
 }
 
 .um .um-form ::-ms-input-placeholder
 {
-    color:  #aaaaaa;
+    color:  var(--um-text-light, #aaaaaa);
     opacity: 1 !important;
 }
 
@@ -239,7 +239,7 @@ div.uimob800 .um-account-side li a.current:hover
 .select2-default *,
 .select2-container-multi .select2-choices .select2-search-field input
 {
-    color:  #aaaaaa;
+    color:  var(--um-text-light, #aaaaaa);
 }
 
 .um .um-field-icon i,
@@ -247,12 +247,12 @@ div.uimob800 .um-account-side li a.current:hover
 .select2-search:before,
 .select2-search-choice-close:before
 {
-    color: #aaaaaa;
+    color: var(--um-text-light, #aaaaaa);
 }
 
 .um span.um-req
 {
-    color: #aaaaaa;
+    color: var(--um-text-light, #aaaaaa);
 }
 
 .um .um-profile-photo a.um-profile-photo-img,
@@ -265,22 +265,22 @@ div.uimob800 .um-account-side li a.current:hover
 }
 
 .um-profile.um .um-profile-meta {
-    color: #999999;
+    color: var(--um-text-muted, #999999);
 }
 
 .um-profile.um .um-name a {
-    color: #555555;
+    color: var(--um-text, #555555);
 }
 
 .um-profile.um .um-name a:hover {
-    color: #444444;
+    color: var(--um-text-strong, #444444);
 }
 
 .um-profile.um .um-profile-headericon a {
-    color: #aaaaaa;
+    color: var(--um-text-light, #aaaaaa);
 }
 
 .um-profile.um .um-profile-headericon a:hover,
 .um-profile.um .um-profile-edit-a.active {
-    color: #3ba1da;
+    color: var(--um-primary, #3ba1da);
 }

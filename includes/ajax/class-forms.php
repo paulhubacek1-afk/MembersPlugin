@@ -25,6 +25,11 @@ class Forms {
 	public function get_icons() {
 		check_ajax_referer( 'um_get_icons' );
 
+		// Members Plugin: Zusätzliche Berechtigungsprüfung (Nonce allein reicht nicht).
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_send_json_error( __( 'You do not have permission to do this action.', 'ultimate-member' ), 403 );
+		}
+
 		$search_request = ! empty( $_REQUEST['search'] ) ? sanitize_text_field( $_REQUEST['search'] ) : '';
 		$page           = ! empty( $_REQUEST['page'] ) ? absint( $_REQUEST['page'] ) : 1;
 		$per_page       = 50;

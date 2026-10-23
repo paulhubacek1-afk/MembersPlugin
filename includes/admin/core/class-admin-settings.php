@@ -83,6 +83,11 @@ if ( ! class_exists( 'um\admin\core\Admin_Settings' ) ) {
 
 			check_ajax_referer( 'um_same_page_update' . sanitize_key( $_POST['field_key'] ) );
 
+			// Members Plugin: Zusätzliche Berechtigungsprüfung (Nonce allein reicht nicht).
+			if ( ! current_user_can( 'manage_options' ) ) {
+				wp_send_json_error( __( 'You do not have permission to do this action.', 'ultimate-member' ), 403 );
+			}
+
 			if ( empty( $_POST['cb_func'] ) ) {
 				wp_send_json_error( __( 'Wrong callback', 'ultimate-member' ) );
 			}

@@ -16,7 +16,7 @@
  */
 .um .picker__list-item {
   position: relative;
-  border-radius: 2px;
+  border-radius: var(--um-radius, 2px);
   display: inline-block;
   width: 25%;
   text-align: center;
@@ -76,7 +76,7 @@
   outline: 0 !important;
   background: none !important;
   border-radius: 0 0 2px 2px;
-  color: #fff !important;
+  color: var(--um-on-primary, #fff) !important;
 }
 .um .picker--time .picker__button--clear:hover,
 .um .picker--time .picker__button--clear:focus {
@@ -99,7 +99,7 @@
 .um .picker--time .picker__box {
   font-size: 15px;
   padding: 0;
-  border-radius: 2px !important;
+  border-radius: var(--um-radius, 2px) !important;
 }
 
 .um .picker__box ul li[role="presentation"] {

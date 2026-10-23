@@ -70,18 +70,8 @@ if ( ! class_exists( 'um\core\Permalinks' ) ) {
 			//use WP native function for fill $_SERVER variables by correct values
 			wp_fix_server_vars();
 
-			//check if WP-CLI there isn't set HTTP_HOST, use localhost instead
-			if ( defined( 'WP_CLI' ) && WP_CLI ) {
-				$host = isset( $_SERVER['HTTP_HOST'] ) ? $_SERVER['HTTP_HOST'] : 'localhost';
-			} else {
-				if ( isset( $_SERVER['HTTP_HOST'] ) ) {
-					$host = $_SERVER['HTTP_HOST'];
-				} else {
-					$host = 'localhost';
-				}
-			}
-
-			$page_url = ( is_ssl() ? 'https://' : 'http://' ) . $host . $_SERVER['REQUEST_URI'];
+			// Members Plugin: Host aus home_url() statt aus dem (fälschbaren) Host-Header – verhindert Host-Header-Injection/Cache-Poisoning.
+			$page_url = um_mp_current_url_from_home( isset( $_SERVER['REQUEST_URI'] ) ? wp_unslash( $_SERVER['REQUEST_URI'] ) : '/' );
 
 			if ( false !== $no_query_params ) {
 				$page_url = strtok( $page_url, '?' );

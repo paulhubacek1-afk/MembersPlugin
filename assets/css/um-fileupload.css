@@ -12,9 +12,9 @@
 	display: inline-block;
 	overflow: hidden;
 	margin: auto;
-	-moz-border-radius: 3px;
-	-webkit-border-radius: 3px;
-	border-radius: 3px;
+	-moz-border-radius: var(--um-radius, 3px);
+	-webkit-border-radius: var(--um-radius, 3px);
+	border-radius: var(--um-radius, 3px);
 }
 
 .um-single-image-preview,
@@ -42,7 +42,7 @@
 	-moz-border-radius: 999px;
 	-webkit-border-radius: 999px;
 	border-radius: 999px;
-	background: #ddd;
+	background: var(--um-border, #ddd);
 	cursor: pointer;
 	text-decoration: none !important;
 	z-index: 666;
@@ -52,7 +52,7 @@
 .um-single-image-preview a.cancel i,
 .um-single-file-preview a.cancel i {
 	font-size: 16px;
-	color: #888;
+	color: var(--um-text-muted, #888);
 	position: relative;
 	display: block;
 	width: 100%;
@@ -78,9 +78,9 @@
 	display: inline-block;
 	width: 100px;
 	height: 70px;
-	-moz-border-radius: 3px;
-	-webkit-border-radius: 3px;
-	border-radius: 3px;
+	-moz-border-radius: var(--um-radius, 3px);
+	-webkit-border-radius: var(--um-radius, 3px);
+	border-radius: var(--um-radius, 3px);
 	background-color: #666;
 	color: #fff !important;
 }
@@ -95,7 +95,7 @@
 .um-single-fileinfo span.filename {
 	display: block;
 	font-size: 16px;
-	color: #888;
+	color: var(--um-text-muted, #888);
 	padding-top: 5px;
 }
 
@@ -128,11 +128,11 @@ div.um-modal .upload-progress {
 div.um-modal .upload-bar {
 	width: 0;
 	height: 10px;
-	color: #666;
-	background: #7ACF58;
-	-moz-border-radius: 3px;
-	-webkit-border-radius: 3px;
-	border-radius: 3px;
+	color: var(--um-text, #666);
+	background: var(--um-success, #7ACF58);
+	-moz-border-radius: var(--um-radius, 3px);
+	-webkit-border-radius: var(--um-radius, 3px);
+	border-radius: var(--um-radius, 3px);
 }
 
 /*
@@ -145,10 +145,10 @@ div.um-modal .ajax-upload-dragdrop {
 	vertical-align:middle;
 	padding: 20px;
 	box-sizing: border-box;
-	border: 2px dashed #ddd;
-	-moz-border-radius: 3px;
-	-webkit-border-radius: 3px;
-	border-radius: 3px;
+	border: 2px dashed var(--um-border, #ddd);
+	-moz-border-radius: var(--um-radius, 3px);
+	-webkit-border-radius: var(--um-radius, 3px);
+	border-radius: var(--um-radius, 3px);
 	font-size: 18px;
 	line-height: 1em;
 }
@@ -169,7 +169,7 @@ div.um-modal .ajax-upload-dragdrop span.icon {
 div.um-modal .ajax-upload-dragdrop span.help {
 	display: block;
 	font-size: 14px;
-	color: #aaa;
+	color: var(--um-text-light, #aaa);
 	margin: 0 0 12px 0;
 }
 
@@ -183,11 +183,11 @@ div.um-modal .upload {
 	height: 34px;
 	display: inline-block;
 	text-decoration: none;
-	-moz-border-radius: 3px;
-	-webkit-border-radius: 3px;
-	border-radius: 3px;
+	-moz-border-radius: var(--um-radius, 3px);
+	-webkit-border-radius: var(--um-radius, 3px);
+	border-radius: var(--um-radius, 3px);
 	padding: 0 20px;
-	color: #fff;
+	color: var(--um-on-primary, #fff);
 	vertical-align: middle;
 	font-size: 14px;
 	box-sizing: border-box;
@@ -195,7 +195,7 @@ div.um-modal .upload {
 }
   
 div.um-modal .upload:hover {
-	background: #44b0ec;
+	background: var(--um-primary-hover, #44b0ec);
 }
 
 .um-modal input[type="file"]::-webkit-file-upload-button { cursor: pointer }

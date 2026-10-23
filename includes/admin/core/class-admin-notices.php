@@ -645,7 +645,8 @@ if ( ! class_exists( 'um\admin\core\Admin_Notices' ) ) {
 			$invalid_folder = false;
 
 			$slug_array = explode( '/', UM_PLUGIN );
-			if ( $slug_array[0] != 'ultimate-member' ) {
+			// Members Plugin: Der Fork liegt bewusst in einem eigenen Ordner (z.B. "members-plugin").
+			if ( ! in_array( $slug_array[0], array( 'ultimate-member', 'members-plugin', 'MembersPlugin', 'membersplugin', 'MembersPlugin-main', 'membersplugin-main' ), true ) && 'members-plugin.php' !== $slug_array[ count( $slug_array ) - 1 ] ) {
 				$invalid_folder = true;
 			}
 
@@ -1226,6 +1227,11 @@ if ( ! class_exists( 'um\admin\core\Admin_Notices' ) ) {
 			$key = sanitize_key( $_POST['key'] );
 
 			check_ajax_referer( 'um_admin_notice_dismiss' . $key );
+
+			// Members Plugin: Zusätzliche Berechtigungsprüfung (Nonce allein reicht nicht).
+			if ( ! current_user_can( 'manage_options' ) ) {
+				wp_send_json_error( __( 'You do not have permission to do this action.', 'ultimate-member' ), 403 );
+			}
 
 			$this->dismiss( $key );
 

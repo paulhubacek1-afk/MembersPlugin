@@ -100,7 +100,7 @@ div.uimob340 .um-profile-photo-overlay i
 	margin: 0 !important;
 	left: 0 !important;
 	height: 100%;
-	background: #fff;
+	background: var(--um-bg, #fff);
 }
 
 .um-modal.uimob340,
@@ -119,7 +119,7 @@ div.uimob340 .um-profile-photo-overlay i
 	width: 100%;
 	box-sizing: border-box;
 	padding: 10px;
-	border-top: 1px solid #ddd;
+	border-top: 1px solid var(--um-border, #ddd);
 }
 
 .um-modal.uimob340 .um-modal-right {
@@ -224,7 +224,7 @@ div.uimob340 .um-account-main {
 
 div.uimob340 .um-account-tab {
 	padding-bottom: 20px;
-	border-bottom: 1px solid #eee;
+	border-bottom: 1px solid var(--um-border, #eee);
 }
 
 div.uimob340 .um-account-meta {
@@ -302,7 +302,7 @@ div.uimob500 .um-profile-photo-overlay i
 	margin: 0 !important;
 	left: 0 !important;
 	height: 100%;
-	background: #fff;
+	background: var(--um-bg, #fff);
 }
 
 .um-modal.uimob500,
@@ -321,7 +321,7 @@ div.uimob500 .um-profile-photo-overlay i
 	width: 100%;
 	box-sizing: border-box;
 	padding: 10px;
-	border-top: 1px solid #ddd;
+	border-top: 1px solid var(--um-border, #ddd);
 }
 
 .um-modal.uimob500 .um-modal-right {
@@ -426,7 +426,7 @@ div.uimob500 .um-account-main {
 
 div.uimob500 .um-account-tab {
 	padding-bottom: 20px;
-	border-bottom: 1px solid #eee;
+	border-bottom: 1px solid var(--um-border, #eee);
 }
 
 div.uimob500 .um-account-meta {
@@ -477,10 +477,10 @@ div.uimob800 .um-account-side {
 }
 
 div.uimob800 .um-account-side ul {
-	border: 1px solid #ddd;
-	-moz-border-radius: 3px;
-	-webkit-border-radius: 3px;
-	border-radius: 3px;
+	border: 1px solid var(--um-border, #ddd);
+	-moz-border-radius: var(--um-radius, 3px);
+	-webkit-border-radius: var(--um-radius, 3px);
+	border-radius: var(--um-radius, 3px);
 }
 
 div.uimob800 .um-account-side li {margin-bottom: 0 !important;background: transparent;}
@@ -490,7 +490,7 @@ div.uimob800 .um-account-side li a{
 	padding: 0 !important;
 	height: 44px;
 	line-height: 44px;
-	color: #666 !important;
+	color: var(--um-text, #666) !important;
 	text-align: center;
 	text-decoration: none !important;
 	background: transparent;
@@ -517,20 +517,20 @@ div.uimob800 .um-account-side li a span.um-account-icontip i {
 
 div.uimob800 .um-account-side li a.current,
 div.uimob800 .um-account-side li a.current:hover {
-	color: #fff !important;
+	color: var(--um-on-primary, #fff) !important;
 }
 
 div.uimob800 .um-account-meta a {
-	border: 1px solid #ddd;
+	border: 1px solid var(--um-border, #ddd);
 }
 
 div.uimob800 .um-account-meta a,
 div.uimob800 .um-account-meta img {
 	display: block;
 	overflow: hidden;
-	-moz-border-radius: 3px;
-	-webkit-border-radius: 3px;
-	border-radius: 3px;
+	-moz-border-radius: var(--um-radius, 3px);
+	-webkit-border-radius: var(--um-radius, 3px);
+	border-radius: var(--um-radius, 3px);
 	max-width: 100%;
 	height: auto;
 }
@@ -593,7 +593,7 @@ div.uimob960 .um-profile-photo a.um-profile-photo-img {
 		margin: 0 !important;
 		left: 0 !important;
 		height: 100%;
-		background: #fff;
+		background: var(--um-bg, #fff);
 	}
 
 	.um-modal.no-photo,
@@ -612,7 +612,7 @@ div.uimob960 .um-profile-photo a.um-profile-photo-img {
 		width: 100%;
 		box-sizing: border-box;
 		padding: 10px;
-		border-top: 1px solid #ddd;
+		border-top: 1px solid var(--um-border, #ddd);
 	}
 
 	.um-modal.no-photo .um-modal-right {

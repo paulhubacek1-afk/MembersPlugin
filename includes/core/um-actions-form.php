@@ -19,27 +19,27 @@ function um_submit_form_errors_hook__blockedemails( $submitted_data ) {
 
 	if ( isset( $submitted_data['user_email'] ) && is_email( $submitted_data['user_email'] ) ) {
 		if ( in_array( strtolower( $submitted_data['user_email'] ), $emails ) ) {
-			exit( wp_redirect( esc_url( add_query_arg( 'err', 'blocked_email' ) ) ) );
+			exit( wp_safe_redirect( esc_url_raw( add_query_arg( 'err', 'blocked_email' ) ) ) );
 		}
 
 		$domain       = explode( '@', $submitted_data['user_email'] );
 		$check_domain = str_replace( $domain[0], '*', $submitted_data['user_email'] );
 
 		if ( in_array( strtolower( $check_domain ), $emails ) ) {
-			exit( wp_redirect( esc_url( add_query_arg( 'err', 'blocked_domain' ) ) ) );
+			exit( wp_safe_redirect( esc_url_raw( add_query_arg( 'err', 'blocked_domain' ) ) ) );
 		}
 	}
 
 	if ( isset( $submitted_data['username'] ) && is_email( $submitted_data['username'] ) ) {
 		if ( in_array( strtolower( $submitted_data['username'] ), $emails ) ) {
-			exit( wp_redirect( esc_url( add_query_arg( 'err', 'blocked_email' ) ) ) );
+			exit( wp_safe_redirect( esc_url_raw( add_query_arg( 'err', 'blocked_email' ) ) ) );
 		}
 
 		$domain       = explode( '@', $submitted_data['username'] );
 		$check_domain = str_replace( $domain[0], '*', $submitted_data['username'] );
 
 		if ( in_array( strtolower( $check_domain ), $emails ) ) {
-			exit( wp_redirect( esc_url( add_query_arg( 'err', 'blocked_domain' ) ) ) );
+			exit( wp_safe_redirect( esc_url_raw( add_query_arg( 'err', 'blocked_domain' ) ) ) );
 		}
 	}
 }
@@ -61,7 +61,7 @@ function um_submit_form_errors_hook__blockedips() {
 	foreach ( $ips as $ip ) {
 		$ip = str_replace( '*', '', $ip );
 		if ( ! empty( $ip ) && strpos( $user_ip, $ip ) === 0 ) {
-			exit( wp_redirect( esc_url( add_query_arg( 'err', 'blocked_ip' ) ) ) );
+			exit( wp_safe_redirect( esc_url_raw( add_query_arg( 'err', 'blocked_ip' ) ) ) );
 		}
 	}
 }

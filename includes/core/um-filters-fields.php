@@ -34,11 +34,16 @@ function um_profile_field_filter_hook__oembed( $value, $data ) {
 			}
 		} else {
 			// Local resource from the third-party plugin that is not supported by WordPress Media Library.
-			$value = '<iframe src="' . esc_url( $value ) . '" title="' . esc_attr( $data['label'] ) . '" width="800" height="450"></iframe>';
+			// Members Plugin: Admin-/Login-Seiten nie einbetten (Clickjacking innerhalb derselben Domain).
+			$path = (string) wp_parse_url( $value, PHP_URL_PATH );
+			if ( false !== strpos( $path, '/wp-admin' ) || false !== strpos( $path, 'wp-login.php' ) || false !== strpos( $path, 'admin-ajax.php' ) || false !== strpos( $path, '/wp-json' ) ) {
+				return '<a href="' . esc_url( $value ) . '" target="_blank" rel="noopener noreferrer nofollow">' . esc_html( $value ) . '</a>';
+			}
+			$value = '<iframe src="' . esc_url( $value ) . '" title="' . esc_attr( isset( $data['label'] ) ? $data['label'] : '' ) . '" width="800" height="450" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe>';
 		}
 	} else {
 		// Other URL wrapped to the <a> tag.
-		$value = '<a href="' . esc_url( $value ) . '" target="_blank">' . esc_html( $value ) . '</a>';
+		$value = '<a href="' . esc_url( $value ) . '" target="_blank" rel="noopener noreferrer nofollow">' . esc_html( $value ) . '</a>';
 	}
 
 	return $value;
@@ -114,7 +119,7 @@ add_filter( 'um_profile_field_filter_hook__youtube_video', 'um_profile_field_fil
 function um_profile_field_filter_hook__spotify( $value, $data ) {
 	if ( preg_match( '/https:\/\/open.spotify.com\/.*/', $value ) ) {
 		if ( false !== strpos( $value, '/user/' ) ) {
-			$value = '<a href="' . esc_url( $value ) . '" target="_blank">' . esc_html( $value ) . '</a>';
+			$value = '<a href="' . esc_url( $value ) . '" target="_blank" rel="noopener noreferrer nofollow">' . esc_html( $value ) . '</a>';
 		} else {
 			$url = str_replace( 'open.spotify.com/', 'open.spotify.com/embed/', $value );
 
@@ -183,7 +188,7 @@ add_filter( 'um_profile_field_filter_hook__tel', 'um_profile_field_filter_hook__
 function um_profile_field_filter_hook__viber( $value, $data ) {
 	$value = str_replace( '+', '', $value );
 	$url   = 'viber://chat?number=%2B' . $value;
-	$value = '<a href="' . esc_url( $url, array( 'viber' ) ) . '" target="_blank"  rel="nofollow" title="' . esc_attr( $data['title'] ) . '">' . esc_html( $value ) . '</a>';
+	$value = '<a href="' . esc_url( $url, array( 'viber' ) ) . '" target="_blank"  rel="nofollow noopener noreferrer" title="' . esc_attr( $data['title'] ) . '">' . esc_html( $value ) . '</a>';
 	return $value;
 }
 add_filter( 'um_profile_field_filter_hook__viber', 'um_profile_field_filter_hook__viber', 99, 2 );
@@ -200,7 +205,7 @@ add_filter( 'um_profile_field_filter_hook__viber', 'um_profile_field_filter_hook
 function um_profile_field_filter_hook__whatsapp( $value, $data ) {
 	$value = str_replace( '+', '', $value );
 	$url   = add_query_arg( array( 'phone' => $value ), 'https://api.whatsapp.com/send' );
-	$value = '<a href="' . esc_url( $url ) . '" target="_blank"  rel="nofollow" title="' . esc_attr( $data['title'] ) . '">' . esc_html( $value ) . '</a>';
+	$value = '<a href="' . esc_url( $url ) . '" target="_blank"  rel="nofollow noopener noreferrer" title="' . esc_attr( $data['title'] ) . '">' . esc_html( $value ) . '</a>';
 	return $value;
 }
 add_filter( 'um_profile_field_filter_hook__whatsapp', 'um_profile_field_filter_hook__whatsapp', 99, 2 );
@@ -445,7 +450,7 @@ function um_profile_field_filter_hook__( $value, $data, $type = '' ) {
 
 	if ( isset( $data['type'] ) && 'text' === $data['type'] && isset( $data['validate'] ) && 'skype' === $data['validate'] ) {
 		$alt                = ! empty( $data['url_text'] ) ? $data['url_text'] : $value;
-		$url_rel            = ( isset( $data['url_rel'] ) && 'nofollow' === $data['url_rel'] ) ? 'rel="nofollow"' : '';
+		$url_rel            = ( isset( $data['url_rel'] ) && 'nofollow' === $data['url_rel'] ) ? 'rel="nofollow noopener noreferrer"' : 'rel="noopener noreferrer"';
 		$data['url_target'] = ( isset( $data['url_target'] ) ) ? $data['url_target'] : '_blank';
 
 		$protocols = wp_allowed_protocols();
@@ -463,7 +468,7 @@ function um_profile_field_filter_hook__( $value, $data, $type = '' ) {
 
 		if ( ( isset( $data['validate'] ) && isset( $data['type'] ) && '' !== $data['validate'] && 'spotify' !== $data['type'] && strstr( $data['validate'], 'url' ) ) || ( isset( $data['type'] ) && 'url' === $data['type'] && 'oembed' !== $data['type'] ) ) {
 			$alt     = ( isset( $data['url_text'] ) && ! empty( $data['url_text'] ) ) ? $data['url_text'] : $value;
-			$url_rel = ( isset( $data['url_rel'] ) && 'nofollow' === $data['url_rel'] ) ? 'rel="nofollow"' : '';
+			$url_rel = ( isset( $data['url_rel'] ) && 'nofollow' === $data['url_rel'] ) ? 'rel="nofollow noopener noreferrer"' : 'rel="noopener noreferrer"';
 			if ( ! strstr( $value, 'http' )
 				&& ! strstr( $value, '://' )
 				&& ! strstr( $value, 'www.' )
@@ -526,7 +531,7 @@ function um_profile_field_filter_hook__( $value, $data, $type = '' ) {
 
 	if ( ! is_array( $value ) ) {
 		if ( is_email( $value ) ) {
-			$value = '<a href="' . esc_url( 'mailto:' . $value ) . '" title="' . $value . '">' . $value . '</a>';
+			$value = '<a href="' . esc_url( 'mailto:' . $value ) . '" title="' . esc_attr( $value ) . '">' . esc_html( $value ) . '</a>';
 		}
 	} else {
 		$value = implode( ', ', $value );

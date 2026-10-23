@@ -1290,9 +1290,14 @@ if ( ! class_exists( 'um\core\Uploader' ) ) {
 					continue;
 				}
 
+				// Members Plugin: Nur reine Dateinamen aus dem Temp-Verzeichnis verschieben (Path-Traversal-Schutz).
+				if ( ! is_string( $filename ) || wp_basename( $filename ) !== $filename || false !== strpos( $filename, '..' ) ) {
+					continue;
+				}
+
 				//move temporary file from temp directory to the correct user directory
 				$temp_file_path = UM()->uploader()->get_core_temp_dir() . DIRECTORY_SEPARATOR . $filename;
-				if ( file_exists( $temp_file_path ) ) {
+				if ( is_file( $temp_file_path ) && um_mp_path_is_inside( $temp_file_path, UM()->uploader()->get_core_temp_dir() ) ) {
 					$extra_hash = hash( 'crc32b', time() );
 
 					if ( strpos( $filename , 'stream_photo_' ) !== false ) {

@@ -31,7 +31,7 @@
  * When the picker is opened, the input element is “activated”.
  */
 .um .picker__input.picker__input--active {
-  border-color: #0089ec;
+  border-color: var(--um-primary, #0089ec);
 }
 /**
  * The holder is the only “scrollable” top-level container element.
@@ -126,18 +126,18 @@
 @media (min-height: 33.875em) {
   .um .picker__box {
     display: block;
-    -webkit-border-radius: 2px;
-    -moz-border-radius: 2px;
-    border-radius: 2px;
+    -webkit-border-radius: var(--um-radius, 2px);
+    -moz-border-radius: var(--um-radius, 2px);
+    border-radius: var(--um-radius, 2px);
   }
 }
 @media (min-height: 40.125em) {
   .um .picker__box {
 
     border-bottom-width: 1px;
-    -webkit-border-radius: 2px;
-    -moz-border-radius: 2px;
-    border-radius: 2px;
+    -webkit-border-radius: var(--um-radius, 2px);
+    -moz-border-radius: var(--um-radius, 2px);
+    border-radius: var(--um-radius, 2px);
   }
 }
 /**

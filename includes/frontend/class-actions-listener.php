@@ -54,6 +54,13 @@ if ( ! class_exists( 'um\frontend\Actions_Listener' ) ) {
 
 			$action = sanitize_key( $_REQUEST['um_action'] );
 			// phpcs:enable WordPress.Security.NonceVerification -- there is nonce verification below for each case
+
+			// Members Plugin: Statusänderungen nur für Benutzer mit "edit_users" (vorher nur Nonce-Prüfung).
+			$status_actions = array( 'approve_user', 'reactivate_user', 'put_user_as_pending', 'resend_user_activation', 'reject_user', 'deactivate_user' );
+			if ( in_array( $action, $status_actions, true ) && ! current_user_can( 'edit_users' ) ) {
+				$this->set_action_error_and_redirect( 'edit_user' );
+			}
+
 			switch ( $action ) {
 				case 'approve_user':
 					if ( ! wp_verify_nonce( $_REQUEST['nonce'], "approve_user{$user_id}" ) ) {

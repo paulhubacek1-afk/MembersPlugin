@@ -370,6 +370,11 @@ if ( ! class_exists( 'um\admin\core\Admin_Upgrade' ) ) {
 
 			check_ajax_referer( 'um_run_upgrade_' . $pack );
 
+			// Members Plugin: Zusätzliche Berechtigungsprüfung (Nonce allein reicht nicht).
+			if ( ! current_user_can( 'manage_options' ) ) {
+				wp_send_json_error( __( 'You do not have permission to do this action.', 'ultimate-member' ), 403 );
+			}
+
 			if ( in_array( $pack, $this->necessary_packages, true ) ) {
 				$file = $this->packages_dir . $pack . DIRECTORY_SEPARATOR . 'init.php';
 				if ( file_exists( $file ) ) {
@@ -394,6 +399,11 @@ if ( ! class_exists( 'um\admin\core\Admin_Upgrade' ) ) {
 		 */
 		public function ajax_get_packages() {
 			check_ajax_referer( 'um_run_upgrade' );
+
+			// Members Plugin: Zusätzliche Berechtigungsprüfung (Nonce allein reicht nicht).
+			if ( ! current_user_can( 'manage_options' ) ) {
+				wp_send_json_error( __( 'You do not have permission to do this action.', 'ultimate-member' ), 403 );
+			}
 
 			$update_versions = $this->need_run_upgrades();
 

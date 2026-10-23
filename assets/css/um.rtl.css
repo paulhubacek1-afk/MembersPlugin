@@ -93,7 +93,7 @@ div.uimob800 .um-header .um-profile-meta {
 .um-account-side li a.current span.um-account-icon,
 .um-account-side li a.current:hover span.um-account-icon {
 	float: right;
-	border-left: 1px solid #ccc;
+	border-left: 1px solid var(--um-border-strong, #ccc);
 }
 
 .um-account-side li a span.um-account-title {

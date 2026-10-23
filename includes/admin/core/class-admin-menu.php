@@ -178,7 +178,7 @@ if ( ! class_exists( 'um\admin\core\Admin_Menu' ) ) {
 		 * Setup admin menu
 		 */
 		public function primary_admin_menu() {
-			$this->pagehook = add_menu_page( __( 'Ultimate Member', 'ultimate-member' ), __( 'Ultimate Member', 'ultimate-member' ), 'manage_options', $this->slug, array( &$this, 'admin_page' ), 'dashicons-admin-users', '42.78578' );
+			$this->pagehook = add_menu_page( __( 'Members Plugin', 'ultimate-member' ), __( 'Members Plugin', 'ultimate-member' ), 'manage_options', $this->slug, array( &$this, 'admin_page' ), 'dashicons-admin-users', '42.78578' );
 
 			add_action( 'load-' . $this->pagehook, array( &$this, 'on_load_page' ) );
 
@@ -335,7 +335,7 @@ if ( ! class_exists( 'um\admin\core\Admin_Menu' ) ) {
 
 				<div id="um-metaboxes-general" class="wrap">
 
-					<h1>Ultimate Member <sup><?php echo UM_VERSION; ?></sup></h1>
+					<h1><?php echo esc_html( UM_PLUGIN_NAME ); ?> <sup><?php echo esc_html( UM_VERSION ); ?></sup></h1>
 
 					<?php wp_nonce_field( 'um-metaboxes-general' ); ?>
 					<?php wp_nonce_field( 'closedpostboxes', 'closedpostboxesnonce', false ); ?>

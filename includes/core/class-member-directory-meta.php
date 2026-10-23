@@ -710,11 +710,14 @@ if ( ! class_exists( 'um\core\Member_Directory_Meta' ) ) {
 				$this->roles = array_merge( $this->roles, maybe_unserialize( $view_roles ) );
 			}
 
-			if ( ! empty( $directory_data['roles'] ) ) {
+			// Members Plugin: Rollen erst deserialisieren (sicher, ohne Objekte), dann auf "leer" prüfen.
+			$directory_roles = isset( $directory_data['roles'] ) ? um_maybe_unserialize( $directory_data['roles'] ) : array();
+			$directory_roles = is_array( $directory_roles ) ? array_filter( $directory_roles ) : ( '' === $directory_roles ? array() : array( $directory_roles ) );
+			if ( ! empty( $directory_roles ) ) {
 				if ( ! empty( $this->roles ) ) {
-					$this->roles = array_intersect( $this->roles, maybe_unserialize( $directory_data['roles'] ) );
+					$this->roles = array_intersect( $this->roles, $directory_roles );
 				} else {
-					$this->roles = array_merge( $this->roles, maybe_unserialize( $directory_data['roles'] ) );
+					$this->roles = array_merge( $this->roles, $directory_roles );
 				}
 
 				$this->roles_in_query = true;

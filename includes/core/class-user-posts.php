@@ -127,7 +127,7 @@ if ( ! class_exists( 'um\core\User_posts' ) ) {
 				wp_send_json_error( __( 'Too many requests', 'ultimate-member' ) );
 			}
 
-			$page = ! empty( $_POST['page'] ) ? absint( $_POST['page'] ) : 0;
+			$page = ! empty( $_POST['page'] ) ? max( 1, absint( $_POST['page'] ) ) : 1;
 
 			if ( ! um_can_view_profile( $author ) ) {
 				wp_send_json_error( __( 'You do not have permission to view this profile', 'ultimate-member' ) );
@@ -183,7 +183,7 @@ if ( ! class_exists( 'um\core\User_posts' ) ) {
 				wp_send_json_error( __( 'Too many requests', 'ultimate-member' ) );
 			}
 
-			$page = ! empty( $_POST['page'] ) ? absint( $_POST['page'] ) : 0;
+			$page = ! empty( $_POST['page'] ) ? max( 1, absint( $_POST['page'] ) ) : 1;
 
 			if ( ! um_can_view_profile( $user_id ) ) {
 				wp_send_json_error( __( 'You do not have permission to view this profile', 'ultimate-member' ) );

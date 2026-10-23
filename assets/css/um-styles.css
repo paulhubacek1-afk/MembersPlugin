@@ -6,7 +6,7 @@
 	width: 100%;
 	text-align: left;
 	box-sizing: border-box;
-	color: #666;
+	color: var(--um-text, #666);
 	font-size: 15px;
 	margin-bottom: 30px !important;
 	-webkit-font-smoothing: antialiased !important;
@@ -163,19 +163,19 @@
 
 p.um-notice {
 	width: auto;
-	color: #fff;
+	color: var(--um-on-primary, #fff);
 	box-sizing: border-box;
 	font-size: 15px;
 	padding: 12px !important;
 	margin: 12px 0 0 0 !important;
-	-moz-border-radius: 3px;
-	-webkit-border-radius: 3px;
-	border-radius: 3px;
+	-moz-border-radius: var(--um-radius, 3px);
+	-webkit-border-radius: var(--um-radius, 3px);
+	border-radius: var(--um-radius, 3px);
 	position: relative;
 }
 
 p.um-notice a {
-	color: #fff;
+	color: var(--um-on-primary, #fff);
 	text-decoration: underline;
 }
 
@@ -191,22 +191,22 @@ p.um-notice i {
 }
 
 p.um-notice.success {
-	background: #7ACF58;
+	background: var(--um-success, #7ACF58);
 }
 
 p.um-notice.err {
-	background: #C74A4A;
+	background: var(--um-error, #C74A4A);
 }
 
 p.um-notice.warning {
-	background: #f9f9d1;
-	color: #666;
-	border: 1px solid #efe4a2;
+	background: var(--um-warning-bg, #f9f9d1);
+	color: var(--um-text, #666);
+	border: 1px solid var(--um-warning-border, #efe4a2);
 	padding: 8px 15px !important;
 }
 
 p.um-notice.warning a {
-	color: #666;
+	color: var(--um-text, #666);
 	text-decoration: underline;
 }
 
@@ -217,10 +217,10 @@ p.um-notice.warning a {
 .um-field-error {
 	width: auto;
 	max-width: 100%;
-	background: #C74A4A;
-	-moz-border-radius: 3px;
-	-webkit-border-radius: 3px;
-	border-radius: 3px;
+	background: var(--um-error, #C74A4A);
+	-moz-border-radius: var(--um-radius, 3px);
+	-webkit-border-radius: var(--um-radius, 3px);
+	border-radius: var(--um-radius, 3px);
 	color: #fff;
 	box-sizing: border-box;
 	position: relative;
@@ -237,7 +237,7 @@ p.um-notice.warning a {
 	left: 10px;
 	position: absolute;
 	z-index: 1;
-	color: #C74A4A;
+	color: var(--um-error, #C74A4A);
 	font-size: 28px;
 	line-height: 1em !important;
 }
@@ -245,10 +245,10 @@ p.um-notice.warning a {
 .um-error-block {
 	width: auto;
 	max-width: 100%;
-	background: #C74A4A;
-	-moz-border-radius: 3px;
-	-webkit-border-radius: 3px;
-	border-radius: 3px;
+	background: var(--um-error, #C74A4A);
+	-moz-border-radius: var(--um-radius, 3px);
+	-webkit-border-radius: var(--um-radius, 3px);
+	border-radius: var(--um-radius, 3px);
 	color: #fff;
 	box-sizing: border-box;
 	position: relative;
@@ -264,10 +264,10 @@ p.um-notice.warning a {
 .um-field-notice {
 	width: auto;
 	max-width: 100%;
-	background: #497BC7;
-	-moz-border-radius: 3px;
-	-webkit-border-radius: 3px;
-	border-radius: 3px;
+	background: var(--um-info, #497BC7);
+	-moz-border-radius: var(--um-radius, 3px);
+	-webkit-border-radius: var(--um-radius, 3px);
+	border-radius: var(--um-radius, 3px);
 	color: #fff;
 	box-sizing: border-box;
 	position: relative;
@@ -284,7 +284,7 @@ p.um-notice.warning a {
 	left: 10px;
 	position: absolute;
 	z-index: 1;
-	color: #497BC7 !important;
+	color: var(--um-info, #497BC7) !important;
 	font-size: 28px;
 	line-height: 1em !important;
 }
@@ -292,11 +292,11 @@ p.um-notice.warning a {
 .um-notice-block {
 	width: auto;
 	max-width: 100%;
-	background: #497BC7;
-	-moz-border-radius: 3px;
-	-webkit-border-radius: 3px;
-	border-radius: 3px;
-	color: #fff;
+	background: var(--um-info, #497BC7);
+	-moz-border-radius: var(--um-radius, 3px);
+	-webkit-border-radius: var(--um-radius, 3px);
+	border-radius: var(--um-radius, 3px);
+	color: var(--um-on-primary, #fff);
 	box-sizing: border-box;
 	position: relative;
 	padding: 12px;
@@ -328,7 +328,7 @@ p.um-notice.warning a {
 	display: block;
 	font-size: 13px;
 	line-height: 15px;
-	color: #999;
+	color: var(--um-text-muted, #999);
 }
 
 /*
@@ -404,7 +404,7 @@ p.um-notice.warning a {
 }
 
 .um-toggle-password:hover i {
-	color: #44b0ec;
+	color: var(--um-primary-hover, #44b0ec);
 }
 
 .um-field-value p {
@@ -413,7 +413,7 @@ p.um-notice.warning a {
 }
 
 .um-field-block {
-	color: #777;
+	color: var(--um-text-muted, #777);
 	font-size: 17px;
 }
 
@@ -439,8 +439,8 @@ p.um-notice.warning a {
 }
 
 .um-field-divider-text span {
-	background: #fff;
-	color: #555;
+	background: var(--um-bg, #fff);
+	color: var(--um-text, #555);
 	display: inline-block;
 	padding: 0 15px;
 }
@@ -468,9 +468,9 @@ p.um-notice.warning a {
 	padding: 0 12px !important;
 	width: 100%;
 	display: block !important;
-	-moz-border-radius: 2px;
-	-webkit-border-radius: 2px;
-	border-radius: 2px;
+	-moz-border-radius: var(--um-radius, 2px);
+	-webkit-border-radius: var(--um-radius, 2px);
+	border-radius: var(--um-radius, 2px);
 	outline: none !important;
 	cursor: text !important;
 	font-size: 15px !important;
@@ -521,7 +521,7 @@ p.um-notice.warning a {
 .um-form input[type="time"].um-error,
 .um-form input[type="url"].um-error,
 .um-form input[type="tel"].um-error,
-.um-form input[type="password"].um-error { border-color: #C74A4A !important }
+.um-form input[type="password"].um-error { border-color: var(--um-error, #C74A4A) !important }
 
 .um-form textarea {
 	width: 100%;
@@ -529,10 +529,10 @@ p.um-notice.warning a {
 	display: block;
 	font-size: 15px !important;
 	line-height: 22px !important;
-	background: #fff;
-	-moz-border-radius: 2px;
-	-webkit-border-radius: 2px;
-	border-radius: 2px;
+	background: var(--um-bg, #fff);
+	-moz-border-radius: var(--um-radius, 2px);
+	-webkit-border-radius: var(--um-radius, 2px);
+	border-radius: var(--um-radius, 2px);
 	box-sizing: border-box;
 	min-height: 80px !important;
 	box-shadow: none;
@@ -544,12 +544,12 @@ p.um-notice.warning a {
 }
 
 .um-form .wp-editor-container {
-	border: 1px solid #ddd;
+	border: 1px solid var(--um-border, #ddd);
 }
 
 .um-form .wp-editor-container textarea {
-	background: #ddd !important;
-	color: #222 !important;
+	background: var(--um-border, #ddd) !important;
+	color: var(--um-text-strong, #222) !important;
 	border-radius: 0;
 }
 
@@ -575,7 +575,7 @@ p.um-notice.warning a {
 	cursor: pointer !important;
 }
 
-.um-field-checkbox:hover i, .um-field-radio:hover i {color: #666}
+.um-field-checkbox:hover i, .um-field-radio:hover i {color: var(--um-text, #666)}
 
 .um-field-checkbox input,
 .um-field-radio input{
@@ -599,7 +599,7 @@ p.um-notice.warning a {
 	font-size: 24px;
 	line-height: 24px;
 	height: 24px;
-	color: #aaa;
+	color: var(--um-text-light, #aaa);
 	transition: all .2s linear;
 }
 
@@ -607,7 +607,7 @@ p.um-notice.warning a {
 .um-field-radio-option {
 	margin: 0px 0px 0px 36px;
 	line-height: 24px;
-	color: #888 !important;
+	color: var(--um-text-muted, #888) !important;
 	display: block;
 }
 
@@ -621,16 +621,16 @@ p.um-notice.warning a {
 
 .um-field-group-head {
 	cursor: pointer;
-	color: #fff;
+	color: var(--um-on-primary, #fff);
 	font-size: 16px;
 	line-height: 22px;
 	padding: 10px 20px;
 
 	transition: 0.25s;
 	box-sizing: border-box;
-	-moz-border-radius: 4px !important;
-	-webkit-border-radius: 4px !important;
-	border-radius: 4px !important;
+	-moz-border-radius: var(--um-radius, 4px) !important;
+	-webkit-border-radius: var(--um-radius, 4px) !important;
+	border-radius: var(--um-radius, 4px) !important;
 	border-top: 1px solid rgba(0,0,0,0.0) !important;
 	border-bottom: 2px solid rgba(0, 0, 0, 0.1) !important;
 }
@@ -648,10 +648,10 @@ p.um-notice.warning a {
 	display: none;
 	margin: 15px 0 0 0;
 	padding: 15px 20px 5px 20px;
-	background: #f9f9f9;
-	-moz-border-radius: 3px;
-	-webkit-border-radius: 3px;
-	border-radius: 3px;
+	background: var(--um-bg-alt, #f9f9f9);
+	-moz-border-radius: var(--um-radius, 3px);
+	-webkit-border-radius: var(--um-radius, 3px);
+	border-radius: var(--um-radius, 3px);
 	position: relative;
 	box-sizing: border-box;
 	width: 100%;
@@ -667,10 +667,10 @@ p.um-notice.warning a {
 	z-index: 800;
 	right: 8px;
 	top: 8px;
-	color: #ccc !important;
+	color: var(--um-text-light, #ccc) !important;
 	text-decoration: none !important;
 }
-.um-field-group-cancel:hover {color: #777 !important}
+.um-field-group-cancel:hover {color: var(--um-text-muted, #777) !important}
 
 /*
 	- Buttons
@@ -724,9 +724,9 @@ input[type="submit"].um-button:hover {
 
 	transition: 0.25s;
 	box-sizing: border-box;
-	-moz-border-radius: 4px !important;
-	-webkit-border-radius: 4px !important;
-	border-radius: 4px !important;
+	-moz-border-radius: var(--um-button-radius, 4px) !important;
+	-webkit-border-radius: var(--um-button-radius, 4px) !important;
+	border-radius: var(--um-button-radius, 4px) !important;
 	-webkit-box-shadow: 0 4px 6px rgba(50,50,93,.11), 0 1px 3px rgba(0,0,0,.08);
 	box-shadow: 0 4px 6px rgba(50,50,93,.11), 0 1px 3px rgba(0,0,0,.08);
 	opacity: 1;
@@ -748,9 +748,9 @@ a.um-button {
 
 	transition: 0.25s;
 	box-sizing: border-box;
-	-moz-border-radius: 4px !important;
-	-webkit-border-radius: 4px !important;
-	border-radius: 4px !important;
+	-moz-border-radius: var(--um-button-radius, 4px) !important;
+	-webkit-border-radius: var(--um-button-radius, 4px) !important;
+	border-radius: var(--um-button-radius, 4px) !important;
 	-webkit-box-shadow: 0 4px 6px rgba(50,50,93,.11), 0 1px 3px rgba(0,0,0,.08);
 	box-shadow: 0 4px 6px rgba(50,50,93,.11), 0 1px 3px rgba(0,0,0,.08);
 	opacity: 1;
@@ -772,7 +772,7 @@ a.um-button:hover {
 
 a.um-link-alt {
 	line-height: 22px;
-	color: #888 !important;
+	color: var(--um-text-muted, #888) !important;
 	display: block !important;
 	text-decoration: none !important;
 	font-weight: normal;
@@ -788,13 +788,13 @@ a.um-link-alt:hover {text-decoration: underline !important;}
 .um-dropdown {
 	position: absolute;
 	height: auto;
-	background: #fff;
-	-moz-border-radius: 5px;
-	-webkit-border-radius: 5px;
-	border-radius: 5px;
+	background: var(--um-bg, #fff);
+	-moz-border-radius: var(--um-radius, 5px);
+	-webkit-border-radius: var(--um-radius, 5px);
+	border-radius: var(--um-radius, 5px);
 	z-index: 55;
 	display: none;
-    border: 1px solid #e5e5e5;
+    border: 1px solid var(--um-border, #e5e5e5);
 	box-sizing: border-box;
 	-webkit-box-shadow: 0 0 2px rgba(0,0,0,0.1);
 	box-shadow: 0 0 1px rgba(0,0,0,0.1);
@@ -808,7 +808,7 @@ a.um-link-alt:hover {text-decoration: underline !important;}
 }
 
 .um-dropdown ul {
-	background: #fff;
+	background: var(--um-bg, #fff);
 	position: relative;
 	z-index: 16;
 }
@@ -816,13 +816,13 @@ a.um-link-alt:hover {text-decoration: underline !important;}
 .um-dropdown li a {
 	display: block;
 	padding: 8px 12px;
-	color: #666;
+	color: var(--um-text, #666);
 	font-size: 14px;
 	line-height: 18px;
 }
 
 .um-dropdown li:last-child a {
-	border-top: 1px solid #e5e5e5;
+	border-top: 1px solid var(--um-border, #e5e5e5);
 	padding: 12px;
 }
 
@@ -860,13 +860,13 @@ div.um-photo {
 div.um-photo,
 div.um-photo a,
 div.um-photo img {
-	-moz-border-radius: 3px;
-	-webkit-border-radius: 3px;
-	border-radius: 3px;
+	-moz-border-radius: var(--um-radius, 3px);
+	-webkit-border-radius: var(--um-radius, 3px);
+	border-radius: var(--um-radius, 3px);
 }
 
 div.um-photo a {
-	border: 1px solid #e5e5e5;
+	border: 1px solid var(--um-border, #e5e5e5);
 	padding: 5px;
 	box-sizing: border-box;
 	display: inline-block;
@@ -889,7 +889,7 @@ span.um-req {
 
 small.um-max-filesize {
     display: block;
-    color: #999999;
+    color: var(--um-text-muted, #999999);
     padding-top: 5px;
 }
 small.um-max-filesize span{
@@ -900,7 +900,7 @@ small.um-max-filesize span{
 .um-form .um-field .um-field-area input.um-form-field.um-validate-not-matched:focus,
 .um-form .um-field .um-field-area input.um-form-field.um-validate-username-exists,
 .um-form .um-field .um-field-area input.um-form-field.um-validate-username-exists:focus {
-	border-color: #DB2929 !important;
+	border-color: var(--um-error, #DB2929) !important;
 }
 
 .um-form .um-field .um-field-area input.um-searching-username {
@@ -962,19 +962,19 @@ small.um-max-filesize span{
 	position: relative !important;
 	white-space: nowrap !important;
 	line-height: 35px !important;
-	color: #666 !important;
+	color: var(--um-text, #666) !important;
 	font-size: 15px !important;
-	-moz-border-radius: 2px !important;
-	-webkit-border-radius: 2px !important;
-	border-radius: 2px !important;
+	-moz-border-radius: var(--um-radius, 2px) !important;
+	-webkit-border-radius: var(--um-radius, 2px) !important;
+	border-radius: var(--um-radius, 2px) !important;
 	background-clip: padding-box !important;
 	-webkit-touch-callout: none;
 	-webkit-user-select: none;
 	-moz-user-select: none;
 	-ms-user-select: none;
 	user-select: none;
-	background: #fff !important;
-	border: 1px solid #ddd !important;
+	background: var(--um-bg, #fff) !important;
+	border: 1px solid var(--um-border, #ddd) !important;
 }
 .rtl .um-search-filter .select2.select2-container .select2-selection,
 .rtl .um-field .select2.select2-container .select2-selection {
@@ -1009,7 +1009,7 @@ small.um-max-filesize span{
 	line-height: 40px;
 	min-width: 1em;
 	text-align: center;
-	color: #aaaaaa;
+	color: var(--um-text-light, #aaaaaa);
 }
 
 .um-search-filter .select2.select2-container .select2-selection .select2-selection__arrow b[role="presentation"],
@@ -1019,7 +1019,7 @@ small.um-max-filesize span{
 
 .um-search-filter .select2-container.select2-container--open .select2-dropdown,
 .um-field .select2-container.select2-container--open .select2-dropdown {
-	border: 1px solid #ddd !important;
+	border: 1px solid var(--um-border, #ddd) !important;
 	border-radius: 0;
 }
 
@@ -1030,7 +1030,7 @@ small.um-max-filesize span{
 	background: none;
 	font-size: 15px;
 	margin: 5px !important;
-	color: #666 !important;
+	color: var(--um-text, #666) !important;
 	padding: 3px 7px 4px !important;
 	cursor: pointer;
 	min-height: 1em;
@@ -1075,19 +1075,19 @@ small.um-max-filesize span{
 
 .um-search-filter .select2-dropdown .select2-results li.select2-results__option.select2-results__option--highlighted,
 .um-field .select2-dropdown .select2-results li.select2-results__option.select2-results__option--highlighted {
-	background: #f4f4f4;
-	color: #666;
+	background: var(--um-bg-alt, #f4f4f4);
+	color: var(--um-text, #666);
 }
 .um-search-filter .select2-dropdown .select2-results li.select2-results__option[aria-selected="true"],
 .um-field .select2-dropdown .select2-results li.select2-results__option[aria-selected="true"] {
-	background-color: #ddd;
+	background-color: var(--um-border, #ddd);
 }
 
 .um-search-filter .select2-container--default .select2-selection--single .select2-selection__clear,
 .um-search-filter .select2-container--default .select2-selection--multiple .select2-selection__clear,
 .um-field .select2-container--default .select2-selection--single .select2-selection__clear,
 .um-field .select2-container--default .select2-selection--multiple .select2-selection__clear {
-	color: #aaaaaa;
+	color: var(--um-text-light, #aaaaaa);
 	font-size: 28px;
 	font-weight: normal;
 	line-height: 34px;

@@ -1,0 +1,36 @@
+/* Members Plugin – Klassen-Inspector (nur für Admins sichtbar) */
+#wp-admin-bar-mp-inspector .ab-icon:before { content: "\f179"; top: 2px; }
+html.mp-inspecting #wp-admin-bar-mp-inspector > .ab-item { background: #2271b1 !important; color: #fff !important; }
+html.mp-inspecting body * { cursor: crosshair !important; }
+html.mp-inspecting .mp-insp-panel, html.mp-inspecting .mp-insp-panel * { cursor: auto !important; }
+
+.mp-insp-box { position: fixed; z-index: 2147483000; pointer-events: none; border: 2px solid #2271b1; background: rgba(34, 113, 177, .08); border-radius: 2px; transition: all .05s linear; display: none; }
+.mp-insp-box.is-pinned { border-color: #d63638; background: rgba(214, 54, 56, .06); }
+.mp-insp-tag { position: fixed; z-index: 2147483001; pointer-events: none; display: none; max-width: min(560px, 90vw); background: #1d2327; color: #f0f0f1; font: 12px/1.45 Menlo, Consolas, monospace; padding: 4px 8px; border-radius: 4px; box-shadow: 0 2px 8px rgba(0, 0, 0, .3); word-break: break-all; }
+.mp-insp-tag b { color: #72aee6; font-weight: 600; }
+.mp-insp-tag i { color: #9ec2e6; font-style: normal; opacity: .75; }
+
+.mp-insp-panel { position: fixed; z-index: 2147483002; right: 16px; bottom: 16px; width: min(460px, calc(100vw - 32px)); max-height: 60vh; overflow: auto; background: #fff; color: #1d2327; border: 1px solid #c3c4c7; border-radius: 8px; box-shadow: 0 8px 28px rgba(0, 0, 0, .25); font: 13px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; display: none; }
+.mp-insp-panel.is-open { display: block; }
+.mp-insp-head { display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-bottom: 1px solid #f0f0f1; position: sticky; top: 0; background: #fff; }
+.mp-insp-head strong { flex: 1; font-size: 13px; }
+.mp-insp-head label { font-size: 12px; display: flex; gap: 4px; align-items: center; }
+.mp-insp-body { padding: 10px 12px; }
+.mp-insp-body h4 { margin: 10px 0 4px; font-size: 11px; text-transform: uppercase; letter-spacing: .04em; color: #646970; }
+.mp-insp-body h4:first-child { margin-top: 0; }
+.mp-insp-hint { color: #646970; font-size: 12px; margin: 0; }
+.mp-insp-sel { display: flex; gap: 6px; align-items: flex-start; }
+.mp-insp-sel code { flex: 1; background: #f6f7f7; padding: 6px 8px; border-radius: 4px; font: 12px/1.5 Menlo, Consolas, monospace; word-break: break-all; }
+.mp-insp-path { list-style: none; margin: 0; padding: 0; font: 12px/1.6 Menlo, Consolas, monospace; }
+.mp-insp-path li { padding: 2px 0; border-bottom: 1px dotted #f0f0f1; }
+.mp-insp-path li > span { color: #646970; margin-right: 4px; }
+.mp-insp-chip { display: inline-block; margin: 1px 2px; padding: 0 6px; border-radius: 3px; border: 1px solid #c5d9ed; background: #f0f6fc; color: #0a4b78; font: 12px/1.6 Menlo, Consolas, monospace; cursor: pointer !important; }
+.mp-insp-chip.is-other { background: #f6f7f7; border-color: #dcdcde; color: #50575e; }
+.mp-insp-chip:hover, .mp-insp-chip.is-copied { background: #2271b1; color: #fff; border-color: #2271b1; }
+.mp-insp-btn { border: 1px solid #2271b1; background: #2271b1; color: #fff; border-radius: 4px; padding: 3px 10px; font-size: 12px; cursor: pointer !important; }
+.mp-insp-btn.is-ghost { background: #fff; color: #2271b1; }
+.mp-insp-styles { display: grid; grid-template-columns: auto 1fr; gap: 2px 10px; font: 12px/1.5 Menlo, Consolas, monospace; }
+.mp-insp-styles span:nth-child(odd) { color: #646970; }
+.mp-insp-sw { display: inline-block; width: 10px; height: 10px; border: 1px solid rgba(0, 0, 0, .2); margin-right: 4px; vertical-align: -1px; }
+.mp-insp-foot { padding: 8px 12px 12px; }
+.mp-insp-foot a { font-size: 12px; }

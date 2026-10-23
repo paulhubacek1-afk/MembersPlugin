@@ -38,8 +38,8 @@
   margin-left: .25em;
   margin-right: .25em;
   font-size: 16px;
-  color: #999;
-  background: #fff !important;
+  color: var(--um-text-muted, #999);
+  background: var(--um-bg, #fff) !important;
   outline: 0 !important;
   border: 0 !important;
 }
@@ -70,7 +70,7 @@
   height: 1em;
   box-sizing: content-box !important;
   top: 8px;
-  color: #fff;
+  color: var(--um-on-primary, #fff);
 }
 .um-popup .picker__nav--prev,
 .um-popup .picker__nav--next {
@@ -80,7 +80,7 @@
   height: 1em;
   box-sizing: content-box !important;
   top: 8px;
-  color: #fff;
+  color: var(--um-on-primary, #fff);
 }
 @media (min-width: 24.5em) {
   .um .picker__nav--prev,
@@ -126,7 +126,7 @@
   border-top: .5em solid transparent;
   border-bottom: .5em solid transparent;
   
-  border-right: 0.5em solid #fff;
+  border-right: 0.5em solid var(--um-bg, #fff);
   
   width: 0;
   height: 0;
@@ -140,7 +140,7 @@
   border-top: .5em solid transparent;
   border-bottom: .5em solid transparent;
 
-  border-right: 0.5em solid #fff;
+  border-right: 0.5em solid var(--um-bg, #fff);
 
   width: 0;
   height: 0;
@@ -150,25 +150,25 @@
 .um .picker__nav--next:before {
   border-right: 0;
   
-  border-left: 0.5em solid #fff;
+  border-left: 0.5em solid var(--um-bg, #fff);
   
 }
 .um-popup .picker__nav--next:before {
   border-right: 0;
 
-  border-left: 0.5em solid #fff;
+  border-left: 0.5em solid var(--um-bg, #fff);
 
 }
 .um .picker__nav--prev:hover,
 .um .picker__nav--next:hover {
   cursor: pointer;
-  color: #fff;
+  color: var(--um-on-primary, #fff);
 }
 
 .um-popup .picker__nav--prev:hover,
 .um-popup .picker__nav--next:hover {
   cursor: pointer;
-  color: #fff;
+  color: var(--um-on-primary, #fff);
 }
 .um .picker__nav--disabled,
 .um .picker__nav--disabled:hover,
@@ -220,7 +220,7 @@
  */
 .um .picker__weekday {
   width: 14.285714286%;
-  color: #fff;
+  color: var(--um-on-primary, #fff);
   text-align: center;
   padding: 5px 0 !important;
   /* Increase the spacing a tad */
@@ -245,7 +245,7 @@
 }
 .um .picker__day--infocus:hover,
 .um .picker__day--outfocus:hover {
-  border-radius: 2px;
+  border-radius: var(--um-radius, 2px);
   cursor: pointer;
 }
 
@@ -254,7 +254,7 @@
 }
 .um .picker__day--highlighted:hover,
 .um .picker--focused .picker__day--highlighted {
-  border-radius: 2px;
+  border-radius: var(--um-radius, 2px);
 }
 
 .um .picker__day--selected,

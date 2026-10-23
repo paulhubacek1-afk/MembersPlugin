@@ -306,7 +306,7 @@ $postid = ! empty( $post->ID ) ? $post->ID : '';
 						<div class="um-member-directory-sorting">
 							<span><?php _e( 'Sort by:', 'ultimate-member' ); ?>&nbsp;</span>
 							<div class="um-member-directory-sorting-a">
-								<a href="javascript:void(0);" class="um-member-directory-sorting-a-text"><?php echo $sorting_options[ $sort_from_url ] ?></a>
+								<a href="javascript:void(0);" class="um-member-directory-sorting-a-text"><?php echo esc_html( $sorting_options[ $sort_from_url ] ); ?></a>
 								&nbsp;<i class="um-faicon-caret-down"></i><i class="um-faicon-caret-up"></i>
 							</div>
 						</div>

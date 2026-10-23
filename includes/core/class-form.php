@@ -92,7 +92,13 @@ if ( ! class_exists( 'um\core\Form' ) ) {
 
 			$arr_options           = array();
 			$arr_options['status'] = 'success';
-			$arr_options['post']   = $_POST;
+			// Members Plugin: Nur die vom Frontend benötigten Werte zurückgeben (vorher wurde $_POST komplett gespiegelt).
+			$arr_options['post'] = array(
+				'members_directory'  => ( isset( $_POST['members_directory'] ) && 'yes' === $_POST['members_directory'] ) ? 'yes' : 'no',
+				'child_name'         => isset( $_POST['child_name'] ) ? sanitize_key( wp_unslash( $_POST['child_name'] ) ) : '',
+				'parent_option_name' => sanitize_text_field( wp_unslash( $_POST['parent_option_name'] ) ),
+				'parent_option'      => isset( $_POST['parent_option'] ) ? map_deep( wp_unslash( $_POST['parent_option'] ), 'sanitize_text_field' ) : '',
+			);
 
 			// Callback validation
 			if ( empty( $_POST['child_callback'] ) ) {
@@ -140,10 +146,22 @@ if ( ! class_exists( 'um\core\Form' ) ) {
 			}
 			UM()->fields()->set_mode = 'profile';
 			$form_fields             = UM()->fields()->get_fields();
-			$arr_options['fields']   = $form_fields;
+			// Members Plugin: Die vollständige Feldkonfiguration wird nicht mehr an (anonyme) Besucher ausgeliefert.
 
 			if ( isset( $arr_options['post']['members_directory'] ) && 'yes' === $arr_options['post']['members_directory'] ) {
 				global $wpdb;
+
+				// Members Plugin: Nur echte, nicht gesperrte UM-Felder dürfen abgefragt werden.
+				$child_key  = $arr_options['post']['child_name'];
+				$all_fields = UM()->builtin()->all_user_fields();
+				if ( '' === $child_key || ! is_array( $all_fields ) || ! array_key_exists( $child_key, $all_fields ) || UM()->user()->is_metakey_banned( $child_key ) ) {
+					wp_send_json(
+						array(
+							'status'  => 'error',
+							'message' => __( 'This is not possible for security reasons.', 'ultimate-member' ),
+						)
+					);
+				}
 
 				$values_array = $wpdb->get_col(
 					$wpdb->prepare(
@@ -207,9 +225,9 @@ if ( ! class_exists( 'um\core\Form' ) ) {
 						! empty( $form_fields[ $_POST['child_name'] ]['custom_dropdown_options_source'] ) &&
 						$form_fields[ $_POST['child_name'] ]['custom_dropdown_options_source'] === $ajax_source_func ) {
 
-						$arr_options['field'] = $form_fields[ $_POST['child_name'] ];
+						$child_field = $form_fields[ $_POST['child_name'] ];
 
-						$arr_options['items'] = call_user_func( $ajax_source_func, $arr_options['field']['parent_dropdown_relationship'] );
+						$arr_options['items'] = call_user_func( $ajax_source_func, $child_field['parent_dropdown_relationship'] );
 					} else {
 						$arr_options['status']  = 'error';
 						$arr_options['message'] = __( 'This is not possible for security reasons.', 'ultimate-member' );

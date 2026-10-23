@@ -93,10 +93,10 @@ $unique_hash = UM()->member_directory()->get_directory_hash( $args['form_id'] );
 									continue;
 								} ?>
 
-								<# if ( typeof user['<?php echo $key; ?>'] !== 'undefined' ) { #>
+								<# if ( typeof user['<?php echo esc_attr( $key ); ?>'] !== 'undefined' ) { #>
 									<div class="um-member-tagline um-member-tagline-<?php echo esc_attr( $key ); ?>"
 									     data-key="<?php echo esc_attr( $key ); ?>">
-										{{{user['<?php echo $key; ?>']}}}
+										{{{user['<?php echo esc_attr( $key ); ?>']}}}
 									</div>
 								<# } #>
 
@@ -111,7 +111,7 @@ $unique_hash = UM()->member_directory()->get_directory_hash( $args['form_id'] );
 								if ( empty( $key ) ) {
 									unset( $reveal_fields[ $k ] );
 								} ?>
-								<# if ( typeof user['<?php echo $key; ?>'] !== 'undefined' ) {
+								<# if ( typeof user['<?php echo esc_attr( $key ); ?>'] !== 'undefined' ) {
 									$show_block = true;
 								} #>
 							<?php }
@@ -135,9 +135,9 @@ $unique_hash = UM()->member_directory()->get_directory_hash( $args['form_id'] );
 
 										<?php foreach ( $reveal_fields as $key ) { ?>
 
-											<# if ( typeof user['<?php echo $key; ?>'] !== 'undefined' ) { #>
-												<div class="um-member-metaline um-member-metaline-<?php echo $key; ?>">
-													<strong>{{{user['label_<?php echo $key;?>']}}}:</strong> {{{user['<?php echo $key;?>']}}}
+											<# if ( typeof user['<?php echo esc_attr( $key ); ?>'] !== 'undefined' ) { #>
+												<div class="um-member-metaline um-member-metaline-<?php echo esc_attr( $key ); ?>">
+													<strong>{{{user['label_<?php echo esc_attr( $key ); ?>']}}}:</strong> {{{user['<?php echo esc_attr( $key ); ?>']}}}
 												</div>
 											<# } #>
 
@@ -166,7 +166,7 @@ $unique_hash = UM()->member_directory()->get_directory_hash( $args['form_id'] );
 		<# } else { #>
 
 			<div class="um-members-none">
-				<p><?php echo $no_users; ?></p>
+				<p><?php echo wp_kses_post( $no_users ); ?></p>
 			</div>
 
 		<# } #>

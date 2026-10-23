@@ -279,14 +279,28 @@ function um_convert_tags( $content, $args = array(), $with_kses = true ) {
 function um_user_ip() {
 	$ip = '127.0.0.1';
 
-	if ( ! empty( $_SERVER['HTTP_CLIENT_IP'] ) ) {
-		//check ip from share internet
-		$ip = $_SERVER['HTTP_CLIENT_IP'];
-	} else if ( ! empty( $_SERVER['HTTP_X_FORWARDED_FOR'] ) ) {
-		//to check ip is pass from proxy
-		$ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
-	} else if ( ! empty( $_SERVER['REMOTE_ADDR'] ) ) {
-		$ip = $_SERVER['REMOTE_ADDR'];
+	// Members Plugin: Client-Header (X-Forwarded-For, Client-IP) sind frei fälschbar und dürfen
+	// nicht ungeprüft für IP-Sperren verwendet werden. Sie werden nur ausgewertet, wenn die Anfrage
+	// von einem vertrauenswürdigen Proxy kommt (Filter `mp_trusted_proxies`, z.B. array( '10.0.0.1' )).
+	$remote = isset( $_SERVER['REMOTE_ADDR'] ) ? trim( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : '';
+	if ( filter_var( $remote, FILTER_VALIDATE_IP ) ) {
+		$ip = $remote;
+	}
+
+	$trusted_proxies = (array) apply_filters( 'mp_trusted_proxies', array() );
+	if ( $remote && in_array( $remote, $trusted_proxies, true ) ) {
+		foreach ( array( 'HTTP_CF_CONNECTING_IP', 'HTTP_X_REAL_IP', 'HTTP_X_FORWARDED_FOR', 'HTTP_CLIENT_IP' ) as $header ) {
+			if ( empty( $_SERVER[ $header ] ) ) {
+				continue;
+			}
+			$candidates = array_map( 'trim', explode( ',', wp_unslash( $_SERVER[ $header ] ) ) );
+			foreach ( $candidates as $candidate ) {
+				if ( filter_var( $candidate, FILTER_VALIDATE_IP ) ) {
+					$ip = $candidate;
+					break 2;
+				}
+			}
+		}
 	}
 
 	/**
@@ -652,11 +666,14 @@ function um_redirect_home( $requested_user_id = '', $is_my_profile = '' ) {
  * @param $url
  */
 function um_js_redirect( $url ) {
+	// Members Plugin: Kein Host-Header-Vertrauen und nur Weiterleitungen auf erlaubte Hosts.
+	if ( '' == $url ) {
+		$request_uri = isset( $_SERVER['REQUEST_URI'] ) ? wp_unslash( $_SERVER['REQUEST_URI'] ) : '/';
+		$url         = um_mp_current_url_from_home( $request_uri );
+	}
+	$url = wp_validate_redirect( $url, home_url( '/' ) );
+
 	if ( headers_sent() || empty( $url ) ) {
-		//for blank redirects
-		if ( '' == $url ) {
-			$url = set_url_scheme( '//' . $_SERVER["HTTP_HOST"] . $_SERVER["REQUEST_URI"] );
-		}
 
 		register_shutdown_function( function( $url ) {
 			echo '<script data-cfasync="false" type="text/javascript">window.location = "' . esc_js( $url ) . '"</script>';
@@ -672,9 +689,29 @@ function um_js_redirect( $url ) {
 		</script>
 		<?php exit;
 	} else {
-		wp_redirect( $url );
+		wp_safe_redirect( $url );
 	}
 	exit;
+}
+
+/**
+ * Members Plugin: Baut die aktuelle URL aus home_url() (Schema/Host/Port) und REQUEST_URI –
+ * ohne dem vom Client gesendeten Host-Header zu vertrauen.
+ *
+ * @param string|null $request_uri Request-URI.
+ *
+ * @return string
+ */
+function um_mp_current_url_from_home( $request_uri = null ) {
+	if ( null === $request_uri ) {
+		$request_uri = isset( $_SERVER['REQUEST_URI'] ) ? wp_unslash( $_SERVER['REQUEST_URI'] ) : '/';
+	}
+	$home   = wp_parse_url( home_url() );
+	$scheme = is_ssl() ? 'https' : ( isset( $home['scheme'] ) ? $home['scheme'] : 'http' );
+	$host   = isset( $home['host'] ) ? $home['host'] : 'localhost';
+	$port   = isset( $home['port'] ) ? ':' . (int) $home['port'] : '';
+	$path   = '/' . ltrim( (string) $request_uri, '/' );
+	return $scheme . '://' . $host . $port . $path;
 }
 
 
@@ -1149,12 +1186,13 @@ function um_is_temp_upload( $url ) {
 	$url = explode( '/ultimatemember/temp/', $url );
 	if ( isset( $url[1] ) ) {
 
-		if ( strstr( $url[1], '../' ) || strstr( $url[1], '%' ) ) {
+		if ( strstr( $url[1], '..' ) || strstr( $url[1], '%' ) || strstr( $url[1], '\\' ) || strstr( $url[1], "\0" ) ) {
 			return false;
 		}
 
 		$src = UM()->files()->upload_temp . $url[1];
-		if ( ! file_exists( $src ) ) {
+		// Members Plugin: Datei muss tatsächlich im Temp-Verzeichnis liegen (Schutz vor Path Traversal/Symlinks).
+		if ( ! um_mp_path_is_inside( $src, UM()->files()->upload_temp ) || ! is_file( $src ) ) {
 			return false;
 		}
 
@@ -1162,6 +1200,25 @@ function um_is_temp_upload( $url ) {
 	}
 
 	return false;
+}
+
+/**
+ * Members Plugin: Prüft, ob ein Pfad (aufgelöst) innerhalb eines Basisverzeichnisses liegt.
+ *
+ * @param string $path Pfad.
+ * @param string $base Basisverzeichnis.
+ *
+ * @return bool
+ */
+function um_mp_path_is_inside( $path, $base ) {
+	$real_path = realpath( $path );
+	$real_base = realpath( $base );
+	if ( false === $real_path || false === $real_base ) {
+		return false;
+	}
+	$real_path = wp_normalize_path( $real_path );
+	$real_base = trailingslashit( wp_normalize_path( $real_base ) );
+	return 0 === strpos( $real_path, $real_base );
 }
 
 
@@ -1173,10 +1230,11 @@ function um_is_temp_upload( $url ) {
  * @return bool|string
  */
 function um_is_temp_image( $url ) {
-	$url = explode( '/ultimatemember/temp/', $url );
+	$url = explode( '/ultimatemember/temp/', (string) $url );
 	if (isset( $url[1] )) {
 		$src = UM()->files()->upload_temp . $url[1];
-		if (!file_exists( $src ))
+		// Members Plugin: Path-Traversal-Schutz.
+		if ( strstr( $url[1], '..' ) || ! um_mp_path_is_inside( $src, UM()->files()->upload_temp ) || ! is_file( $src ) )
 			return false;
 		list( $width, $height, $type, $attr ) = @getimagesize( $src );
 		if (isset( $width ) && isset( $height ))
@@ -1202,10 +1260,13 @@ function um_is_file_owner( $url, $user_id = null, $image_path = false ) {
 		$user_basedir = UM()->uploader()->get_upload_user_base_dir( 'temp' );
 	}
 
-	$filename = wp_basename( parse_url( $url, PHP_URL_PATH ) );
+	$filename = wp_basename( (string) parse_url( $url, PHP_URL_PATH ) );
+	if ( '' === $filename || '..' === $filename || '.' === $filename ) {
+		return false;
+	}
 
 	$file = $user_basedir . DIRECTORY_SEPARATOR . $filename;
-	if ( file_exists( $file ) ) {
+	if ( is_file( $file ) && um_mp_path_is_inside( $file, $user_basedir ) ) {
 		if ( $image_path ) {
 			return $file;
 		}
@@ -1223,11 +1284,16 @@ function um_is_file_owner( $url, $user_id = null, $image_path = false ) {
  * @return bool
  */
 function um_is_temp_file( $filename ) {
+	// Members Plugin: Nur reine Dateinamen akzeptieren – kein "../", keine Unterordner.
+	if ( ! is_string( $filename ) || '' === $filename || wp_basename( $filename ) !== $filename || false !== strpos( $filename, '..' ) || 0 !== validate_file( $filename ) ) {
+		return false;
+	}
+
 	$user_basedir = UM()->uploader()->get_upload_user_base_dir( 'temp' );
 
 	$file = $user_basedir . '/' . $filename;
 
-	if ( file_exists( $file ) ) {
+	if ( is_file( $file ) && um_mp_path_is_inside( $file, $user_basedir ) ) {
 		return true;
 	}
 	return false;

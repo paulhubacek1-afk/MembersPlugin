@@ -5,7 +5,7 @@
 .um-misc-with-img {
 	position: relative;
 	font-size: 15px;
-	border-bottom: 3px solid #eee;
+	border-bottom: 3px solid var(--um-border, #eee);
 	text-align: center;
 	
 	margin-bottom: 14px;
@@ -104,12 +104,12 @@
 .um-locked-content {
 	width: 100%;
 	box-sizing: border-box;
-	border: 2px dotted #cc3000;
-	color: #333;
-	background: #fff;
+	border: 2px dotted var(--um-error, #cc3000);
+	color: var(--um-text-strong, #333);
+	background: var(--um-bg, #fff);
 	font-size: 14px;
 	padding: 20px;
-	border-radius: 4px;
+	border-radius: var(--um-radius, 4px);
 	margin-bottom: 20px;
 }
 
