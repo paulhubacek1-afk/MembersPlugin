@@ -27,6 +27,7 @@ final class MP_Admin {
 	public static function init() {
 		add_action( 'admin_menu', array( __CLASS__, 'menu' ), 1001 );
 		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'assets' ) );
+		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'settings_media_assets' ), 20 );
 		add_action( 'admin_post_mp_save_design', array( __CLASS__, 'save' ) );
 		add_action( 'admin_post_mp_reset_design', array( __CLASS__, 'reset' ) );
 		add_action( 'admin_post_mp_download_starter', array( __CLASS__, 'download_starter' ) );
@@ -107,6 +108,19 @@ final class MP_Admin {
 	}
 
 	/**
+	 * Mediathek auf den Plugin-Einstellungen (z.B. Standard-Profilbild / Standard-Titelbild).
+	 *
+	 * Unabhängig vom internen Seitennamen: es zählt nur ?page=um_options.
+	 */
+	public static function settings_media_assets() {
+		if ( ! isset( $_GET['page'] ) || 'um_options' !== $_GET['page'] || ! current_user_can( 'manage_options' ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			return;
+		}
+		wp_enqueue_media();
+		wp_enqueue_script( 'mp-media-picker', MP_URL . 'assets/media-picker.js', array( 'jquery', 'media-editor', 'wp-i18n' ), MP_VERSION, true );
+	}
+
+	/**
 	 * Formular speichern.
 	 */
 	public static function save() {
@@ -122,6 +136,7 @@ final class MP_Admin {
 			$opts['auto_colors']   = empty( $_POST['auto_colors'] ) ? 0 : 1;
 			$opts['inspector']     = empty( $_POST['inspector'] ) ? 0 : 1;
 			$opts['editor_styles'] = empty( $_POST['editor_styles'] ) ? 0 : 1;
+			$opts['theme_typography'] = empty( $_POST['theme_typography'] ) ? 0 : 1;
 
 			$raw  = isset( $_POST['overrides'] ) && is_array( $_POST['overrides'] ) ? wp_unslash( $_POST['overrides'] ) : array(); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- wird unten pro Typ bereinigt.
 			$vars = MP_Design::variables();
@@ -346,7 +361,8 @@ final class MP_Admin {
 
 				<h2><?php esc_html_e( 'Werkzeuge', 'ultimate-member' ); ?></h2>
 				<label class="mp-switch"><input type="checkbox" name="inspector" value="1" <?php checked( ! empty( $opts['inspector'] ) ); ?>> <span><?php esc_html_e( 'Klassen-Inspector im Frontend (nur für Administratoren, über die Admin-Leiste „CSS-Klassen“)', 'ultimate-member' ); ?></span></label><br>
-				<label class="mp-switch"><input type="checkbox" name="editor_styles" value="1" <?php checked( ! empty( $opts['editor_styles'] ) ); ?>> <span><?php esc_html_e( 'Farben auch im Block-Editor anwenden', 'ultimate-member' ); ?></span></label>
+				<label class="mp-switch"><input type="checkbox" name="editor_styles" value="1" <?php checked( ! empty( $opts['editor_styles'] ) ); ?>> <span><?php esc_html_e( 'Farben auch im Block-Editor anwenden', 'ultimate-member' ); ?></span></label><br>
+				<label class="mp-switch"><input type="checkbox" name="theme_typography" value="1" <?php checked( ! empty( $opts['theme_typography'] ) ); ?>> <span><?php esc_html_e( 'Typografie des Themes übernehmen (Schriftart, Schriftgröße, Zeilenhöhe, Überschriften-Schrift)', 'ultimate-member' ); ?></span></label>
 
 				<p class="submit">
 					<?php submit_button( __( 'Speichern', 'ultimate-member' ), 'primary', 'submit', false ); ?>

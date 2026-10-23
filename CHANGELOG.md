@@ -1,3 +1,9 @@
+## 1.0.9.4 – 2026-10-23
+
+- Faster: the first page of a member directory is rendered directly into the page, so members appear without waiting for a second (AJAX) request after the page has loaded.
+- New: "Theme-Typografie übernehmen" (enabled by default, Design & CSS): plugin texts, form fields, buttons and lists use the theme's font family, font size and line height; member names and headings use the theme's heading font.
+- Fixed: the media picker for Default Profile Photo / Default Cover Photo is now always loaded on the settings page with an independent fallback handler.
+
 ## 1.0.9.3 – 2026-10-23
 
 - Fixed: the Default Profile Photo / Default Cover Photo buttons can open the WordPress Media Library again. Root cause: renaming the admin menu to "Members Plugin" changed WordPress' internal page names (`members-plugin_page_um_options`), so the settings scripts and the media library were never loaded on the settings pages.

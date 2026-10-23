@@ -244,6 +244,25 @@ $postid = ! empty( $post->ID ) ? $post->ID : '';
 	data-view_type="<?php echo esc_attr( $current_view ); ?>" data-page="<?php echo esc_attr( $current_page ); ?>"
 	data-sorting="<?php echo esc_attr( $sort_from_url ); ?>" data-nonce="<?php echo esc_attr( wp_create_nonce( 'um-directory-' . $unique_hash ) ); ?>">
 	<div class="um-members-overlay"><div class="um-ajax-loading"></div></div>
+	<?php
+	// Members Plugin: render the first page of members into the page, so the browser
+	// does not need a second request after the page has loaded.
+	// Only for the plain initial state: no search or filter parameters in the URL.
+	$mp_url_state = false;
+	foreach ( array_keys( $_GET ) as $mp_get_key ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$mp_get_key = (string) $mp_get_key;
+		if ( '_' . $unique_hash === substr( $mp_get_key, -strlen( '_' . $unique_hash ) ) && ! in_array( $mp_get_key, array( 'page_' . $unique_hash, 'sort_' . $unique_hash, 'view_type_' . $unique_hash ), true ) ) {
+			$mp_url_state = true;
+			break;
+		}
+	}
+	if ( empty( $must_search ) && ! $mp_url_state ) {
+		$mp_preload = UM()->member_directory()->mp_preload_response( $unique_hash, $current_page, $sort_from_url );
+		if ( is_array( $mp_preload ) ) {
+			echo '<script type="application/json" class="mp-members-preload">' . wp_json_encode( $mp_preload, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT ) . '</script>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- JSON with HTML characters hex-encoded.
+		}
+	}
+	?>
 
 	<div class="um-member-directory-header um-form">
 

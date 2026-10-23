@@ -4,7 +4,7 @@ Tags: membership, user-profile, community, user-registration, member-directory, 
 Requires at least: 6.2
 Tested up to: 7.1
 Requires PHP: 7.0
-Stable tag: 1.0.9.3
+Stable tag: 1.0.9.4
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -57,6 +57,11 @@ No. The profile checks the built-in birth_date field automatically.
 No. It searches for releases automatically and makes available updates visible in WordPress.
 
 == Changelog ==
+
+= 1.0.9.4 =
+* Faster: the first page of a member directory is rendered directly into the page, so members appear without waiting for a second (AJAX) request after the page has loaded.
+* New: Theme-Typografie übernehmen (enabled by default, Design & CSS): plugin texts, form fields, buttons and lists use the theme's font family, font size and line height; member names and headings use the theme's heading font.
+* Fixed: the media picker for Default Profile Photo / Default Cover Photo is now always loaded on the settings page with an independent fallback handler.
 
 = 1.0.9.3 =
 * Fixed: the Default Profile Photo / Default Cover Photo buttons can open the WordPress Media Library again (settings scripts were not loaded after the admin menu was renamed).

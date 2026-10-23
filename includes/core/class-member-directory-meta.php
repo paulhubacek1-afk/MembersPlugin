@@ -600,14 +600,18 @@ if ( ! class_exists( 'um\core\Member_Directory_Meta' ) ) {
 		 */
 		public function ajax_get_members() {
 			if ( empty( $_POST['directory_id'] ) ) {
-				wp_send_json_error( __( 'Wrong member directory data', 'ultimate-member' ) );
+				$this->mp_respond( __( 'Wrong member directory data', 'ultimate-member' ), false );
 			}
 			$unique_hash = sanitize_text_field( $_POST['directory_id'] );
 
-			check_ajax_referer( 'um-directory-' . $unique_hash );
+			// Members Plugin: no nonce check while preloading inside the page render
+			// (the request is built by the server itself, not sent by a browser).
+			if ( ! $this->mp_capture ) {
+				check_ajax_referer( 'um-directory-' . $unique_hash );
+			}
 
-			if ( UM()->is_rate_limited( 'member_directory' ) ) {
-				wp_send_json_error( __( 'Too many requests', 'ultimate-member' ) );
+			if ( ! $this->mp_capture && UM()->is_rate_limited( 'member_directory' ) ) {
+				$this->mp_respond( __( 'Too many requests', 'ultimate-member' ), false );
 			}
 
 			global $wpdb;
@@ -616,11 +620,11 @@ if ( ! class_exists( 'um\core\Member_Directory_Meta' ) ) {
 
 			$directory_id = $this->get_directory_by_hash( $unique_hash );
 			if ( empty( $directory_id ) ) {
-				wp_send_json_error( __( 'Wrong member directory data', 'ultimate-member' ) );
+				$this->mp_respond( __( 'Wrong member directory data', 'ultimate-member' ), false );
 			}
 
 			if ( ! $this->can_view_directory( $directory_id ) ) {
-				wp_send_json_error( __( 'You cannot see this member directory', 'ultimate-member' ) );
+				$this->mp_respond( __( 'You cannot see this member directory', 'ultimate-member' ), false );
 			}
 
 			$directory_data = UM()->query()->post_data( $directory_id );
@@ -746,7 +750,7 @@ if ( ! class_exists( 'um\core\Member_Directory_Meta' ) ) {
 					);
 					$member_directory_response = apply_filters( 'um_ajax_get_members_response', $member_directory_response, $directory_data );
 
-					wp_send_json_success( $member_directory_response );
+					$this->mp_respond( $member_directory_response );
 				}
 			}
 
@@ -1146,7 +1150,7 @@ if ( ! class_exists( 'um\core\Member_Directory_Meta' ) ) {
 			);
 			$member_directory_response = apply_filters( 'um_ajax_get_members_response', $member_directory_response, $directory_data );
 
-			wp_send_json_success( $member_directory_response );
+			$this->mp_respond( $member_directory_response );
 		}
 	}
 }
