@@ -67,3 +67,27 @@
 @media (prefers-reduced-motion: reduce) {
 	.mp-online-members__item { transition: none; }
 }
+
+/* Automatic status markers shown beside names in profiles and member directories. */
+.mp-presence-dot {
+	display: inline-block;
+	flex: 0 0 8px;
+	width: 8px;
+	height: 8px;
+	margin-inline-start: 0.4em;
+	border: 1px solid rgba(0, 0, 0, 0.08);
+	border-radius: 50%;
+	vertical-align: 0.08em;
+	box-sizing: content-box;
+}
+.mp-presence-dot--online {
+	background: #22c55e;
+	box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.14);
+}
+.mp-presence-dot--offline {
+	background: #9ca3af;
+	box-shadow: 0 0 0 2px rgba(156, 163, 175, 0.12);
+}
+.mp-presence-dot[role="img"] {
+	cursor: help;
+}
