@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Members Plugin – Profiles & Community
  * Plugin URI: https://github.com/paulhubacek1-afk/MembersPlugin
- * Description: Mitgliederprofile, Registrierung, Verzeichnisse, Theme-Farben, feste Profilbild-Zuordnung, Online-Status und sichere HTML-Überschriften in Formularen.
+ * Description: Mitgliederprofile, Registrierung, Verzeichnisse, Theme-Farben, feste Profilbild-Zuordnung, Online-Status und sichere HTML-Überschriften und Formatierungen in Formularen.
  * Version: 1.0.1
  * Author: Paul Hubacek
  * Author URI: https://github.com/paulhubacek1-afk
