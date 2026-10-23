@@ -1,10 +1,11 @@
 <?php
 /**
- * Plugin Name: Members Plugin
+ * Plugin Name: Members Plugin – Profiles & Community
  * Plugin URI: https://github.com/paulhubacek1-afk/MembersPlugin
- * Description: Mitgliederbereich, Profile, Registrierung und Mitgliederverzeichnis. Fork von Ultimate Member mit automatischer Theme-Farbanpassung, Design-Einstellungen, CSS-Klassen-Referenz und zusätzlicher Sicherheitshärtung.
- * Version: 1.0.0
- * Author: Members Plugin (basiert auf Ultimate Member)
+ * Description: Mitgliederverwaltung mit Profilen, Registrierung, Mitgliederverzeichnis, automatischer Theme-Farbanpassung, ID-basierten Profilbildern und integrierter Online-Mitgliederliste.
+ * Version: 1.0.1
+ * Author: Paul Hubacek
+ * Author URI: https://github.com/paulhubacek1-afk
  * License: GPLv3
  * License URI: http://www.gnu.org/licenses/gpl-3.0.txt
  * Text Domain: ultimate-member
@@ -21,9 +22,9 @@ defined( 'ABSPATH' ) || exit;
 require_once ABSPATH . 'wp-admin/includes/plugin.php';
 
 /*
- * Konfliktschutz: Dieses Plugin ist ein Fork von Ultimate Member und nutzt
- * dieselben Klassen (UM(), um\...). Ist das Original gleichzeitig aktiv,
- * wird der Fork nicht geladen, damit es zu keinem Fatal Error kommt.
+ * Compatibility guard: this plugin bundles its own complete membership core,
+ * but the legacy core still uses the same global symbols as the upstream plugin.
+ * Do not remove this guard until the internal API has been fully namespaced.
  */
 if ( function_exists( 'UM' ) || is_plugin_active( 'ultimate-member/ultimate-member.php' ) ) {
 	add_action(
@@ -33,7 +34,7 @@ if ( function_exists( 'UM' ) || is_plugin_active( 'ultimate-member/ultimate-memb
 				return;
 			}
 			echo '<div class="notice notice-error"><p>' .
-				esc_html__( 'Members Plugin ist ein Fork von Ultimate Member. Bitte deaktiviere das Original-Plugin "Ultimate Member", damit Members Plugin geladen werden kann. Deine Formulare, Rollen und Einstellungen bleiben erhalten.', 'ultimate-member' ) .
+				esc_html__( 'Members Plugin enthält einen eigenen Mitgliederverwaltungskern und benötigt keine separate Ultimate-Member-Installation. Beide Plugins dürfen aktuell jedoch nicht gleichzeitig aktiv sein, da ältere interne Klassen noch gemeinsame Namen verwenden. Bitte deaktiviere das Original-Plugin, bevor du Members Plugin verwendest.', 'ultimate-member' ) .
 				'</p></div>';
 		}
 	);
@@ -53,15 +54,13 @@ define( 'ultimatemember_plugin_name', $plugin_data['Name'] );
 define( 'UM_URL', plugin_dir_url( __FILE__ ) );
 define( 'UM_PATH', plugin_dir_path( __FILE__ ) );
 define( 'UM_PLUGIN', plugin_basename( __FILE__ ) );
-// UM-Kernversion bleibt 2.14.1, damit Upgrade-Routinen und Erweiterungen korrekt funktionieren.
+// Interne Kernversion; nicht mit der Members-Plugin-Version verwechseln.
 define( 'UM_VERSION', '2.14.1' );
 define( 'UM_PLUGIN_NAME', $plugin_data['Name'] );
-define( 'UM_WP_FUNCTIONS_VERSION', '7.0.1' ); // Updates every major WordPress release.
-define( 'UM_LICENSE_REQUEST_DEBUG', false ); // Set true, then need to debug the license request.
-define( 'UM_UPDATER_DEBUG', false ); // Set true, then need to debug the upgrade packages.
-// define( 'UM_DEV_MODE', true );
+define( 'UM_WP_FUNCTIONS_VERSION', '7.0.1' );
+define( 'UM_LICENSE_REQUEST_DEBUG', false );
+define( 'UM_UPDATER_DEBUG', false );
 
-// Members-Plugin-eigene Konstanten. Die Version kommt aus dem Plugin-Header (wird für Updates verglichen).
 define( 'MP_VERSION', $plugin_data['Version'] );
 define( 'MP_FILE', __FILE__ );
 define( 'MP_PATH', UM_PATH . 'includes/members-plugin/' );
