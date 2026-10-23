@@ -1,5 +1,11 @@
 # Members Plugin – Profiles & Community
 
+## Updated in 1.0.8.1
+
+- Fixed WordPress update discovery: the plugin now registers a standard update transient filter, fetches published GitHub releases, and supplies the ZIP to the WordPress updater.
+- The updater considers only the Members Plugin `1.0.x` release line, so unrelated bundled-core tags such as `2.14.1` are ignored.
+
+
 Members Plugin is evolving toward an independent WordPress membership system. It currently includes profile tools, theme-aware design controls, role-based avatar rings, automatic update checks, email diagnostics, and a standalone migration backup tool.
 
 ## Updated in 1.0.8
@@ -11,7 +17,7 @@ Members Plugin is evolving toward an independent WordPress membership system. It
 
 - **Migration backup:** open **Tools → MP Migration & Sicherung** to create a private ZIP snapshot before removing a separately installed legacy membership engine plugin. The tool is loaded before the legacy-core compatibility guard.
 - **MP-owned database index:** backup records use the WordPress table prefix plus `mp_backup_index`.
-- **Version display:** the WordPress plugin header reports Members Plugin version 1.0.8.
+- **Version display:** the WordPress plugin header reports Members Plugin version 1.0.8.1.
 - **Important limitation:** this snapshot is a safety net, not a one-click restore or a completed conversion to a fully independent membership engine. Keep a separate full-site/database backup too.
 
 ## Updated in 1.0.6
