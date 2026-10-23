@@ -82,7 +82,7 @@ final class MP_Migration_Backup {
 		echo '<p>' . esc_html__( 'Die Datei enthält private Benutzerdaten einschließlich Passwort-Hashes. Bewahre sie sicher auf.', 'members-plugin' ) . '</p>';
 		echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '"><input type="hidden" name="action" value="mp_migration_create_backup">';
 		wp_nonce_field( 'mp_migration_create_backup' );
-		submit_button( __( 'Jetzt Sicherung erstellen', 'members-plugin' ) );
+		submit_button( __( 'Export erstellen / Sicherung herunterladen', 'members-plugin' ) );
 		echo '</form><hr><h2>' . esc_html__( 'Sicherung importieren', 'members-plugin' ) . '</h2>';
 		echo '<p>' . esc_html__( 'Importiert eine zuvor exportierte ZIP-Sicherung derselben Website. Datensätze werden anhand ihrer IDs ergänzt oder aktualisiert; nicht enthaltene Datensätze werden nicht gelöscht. Erstelle vor dem Import eine zusätzliche vollständige Website-Sicherung.', 'members-plugin' ) . '</p>';
 		echo '<form method="post" enctype="multipart/form-data" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '"><input type="hidden" name="action" value="mp_migration_import_backup">';
@@ -392,17 +392,17 @@ final class MP_Migration_Backup {
 			self::redirect_import_error( 'partial_restore' );
 		}
 		wp_cache_flush();
-		wp_safe_redirect( add_query_arg( array( 'page' => self::PAGE, 'mp_import' => 'done' ), admin_url( 'admin.php' ) ) );
+		wp_safe_redirect( add_query_arg( array( 'page' => self::PAGE, 'mp_import' => 'done' ), admin_url( 'options-general.php' ) ) );
 		exit;
 	}
 
 	private static function redirect_import_error( $code ) {
-		wp_safe_redirect( add_query_arg( array( 'page' => self::PAGE, 'mp_import_error' => sanitize_key( $code ) ), admin_url( 'admin.php' ) ) );
+		wp_safe_redirect( add_query_arg( array( 'page' => self::PAGE, 'mp_import_error' => sanitize_key( $code ) ), admin_url( 'options-general.php' ) ) );
 		exit;
 	}
 
 	private static function redirect_error( $code ) {
-		wp_safe_redirect( add_query_arg( array( 'page' => self::PAGE, 'mp_backup_error' => sanitize_key( $code ) ), admin_url( 'tools.php' ) ) );
+		wp_safe_redirect( add_query_arg( array( 'page' => self::PAGE, 'mp_backup_error' => sanitize_key( $code ) ), admin_url( 'options-general.php' ) ) );
 		exit;
 	}
 }
