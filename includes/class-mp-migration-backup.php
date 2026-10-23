@@ -311,6 +311,45 @@ final class MP_Migration_Backup {
 				}
 			}
 		}
+		// Restore captured legacy membership tables only when they already exist on this same site.
+		if ( $ok && isset( $data['legacy_tables'] ) && is_array( $data['legacy_tables'] ) ) {
+			foreach ( $data['legacy_tables'] as $table_name => $rows ) {
+				if ( ! is_string( $table_name ) || ! preg_match( '/^[A-Za-z0-9_]+$/', $table_name ) || 0 !== strpos( $table_name, $wpdb->prefix ) || ! is_array( $rows ) ) {
+					$ok = false;
+					break;
+				}
+				$allowed_legacy = 0 === strpos( $table_name, $wpdb->prefix . 'um_' ) || 0 === strpos( $table_name, $wpdb->prefix . 'ultimate_member_' );
+				if ( ! $allowed_legacy ) {
+					continue;
+				}
+				$exists = $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table_name ) );
+				if ( $exists !== $table_name ) {
+					continue;
+				}
+				$keys = $wpdb->get_results( 'SHOW KEYS FROM `' . $table_name . '` WHERE Key_name = \'PRIMARY\'', ARRAY_A );
+				$primary = '';
+				foreach ( $keys as $key ) {
+					if ( isset( $key['Column_name'] ) ) {
+						$primary = $key['Column_name'];
+						break;
+					}
+				}
+				if ( '' !== $primary ) {
+					foreach ( $rows as $row ) {
+						if ( ! is_array( $row ) || ! array_key_exists( $primary, $row ) ) {
+							$ok = false;
+							break 2;
+						}
+						$exists_row = $wpdb->get_var( $wpdb->prepare( 'SELECT COUNT(*) FROM `' . $table_name . '` WHERE `' . $primary . '` = %s', $row[ $primary ] ) );
+						$result = $exists_row ? $wpdb->update( $table_name, $row, array( $primary => $row[ $primary ] ) ) : $wpdb->insert( $table_name, $row );
+						if ( false === $result ) {
+							$ok = false;
+							break 2;
+						}
+					}
+				}
+			}
+		}
 		// Restore archived profile files only into the two expected upload subfolders.
 		$upload = wp_upload_dir();
 		$media_map = array(
