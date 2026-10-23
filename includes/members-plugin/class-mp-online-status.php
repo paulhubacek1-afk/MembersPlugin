@@ -2,8 +2,8 @@
 /**
  * Members Plugin – online/offline presence indicators and activity tracking.
  *
- * Presence dots are added automatically next to names in member directories
- * and profile headers. The optional legacy list shortcodes remain supported.
+ * Presence dots are added automatically to profile headers only. Member-directory
+ * cards intentionally do not display online/offline status. Legacy list shortcodes remain supported.
  *
  * @package MembersPlugin
  */
@@ -20,7 +20,6 @@ final class MP_Online_Status {
 	 */
 	public static function init() {
 		add_action( 'init', array( __CLASS__, 'mark_current_user_online' ), 50 );
-		add_action( 'um_members_just_after_name', array( __CLASS__, 'directory_name_indicator' ), 20, 2 );
 		add_action( 'um_after_profile_name_inline', array( __CLASS__, 'profile_name_indicator' ), 20, 2 );
 		add_shortcode( 'mp_online_users', array( __CLASS__, 'render_online_users' ) );
 		add_shortcode( 'users_online', array( __CLASS__, 'render_online_users' ) );
@@ -66,20 +65,6 @@ final class MP_Online_Status {
 		$last   = absint( get_user_meta( $user_id, self::META_KEY, true ) );
 
 		return $last > 0 && $last >= ( time() - $window );
-	}
-
-	/**
-	 * Print a presence indicator directly after a member-directory name.
-	 *
-	 * @param int   $user_id        Member ID.
-	 * @param array $directory_data Directory settings.
-	 */
-	public static function directory_name_indicator( $user_id, $directory_data = array() ) {
-		if ( is_array( $directory_data ) && isset( $directory_data['show_name'] ) && empty( $directory_data['show_name'] ) ) {
-			return;
-		}
-
-		self::output_presence_indicator( $user_id );
 	}
 
 	/**
