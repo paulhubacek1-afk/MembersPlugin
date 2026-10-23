@@ -247,10 +247,12 @@ final class MP_Role_Avatar_Rings {
 		wp_register_style( 'mp-role-avatar-rings', false, array(), defined( 'MP_VERSION' ) ? MP_VERSION : null );
 		wp_enqueue_style( 'mp-role-avatar-rings' );
 
-		$css = '.mp-role-avatar-ring{border:0!important;outline:none!important;box-shadow:0 0 0 3px currentColor!important;}.um-profile .um-profile-photo-img{border:0!important;outline:none!important;box-shadow:none!important;}';
+		$css = '.mp-role-avatar-ring{border:0!important;outline:none!important;box-shadow:0 0 0 3px currentColor!important;}';
 		foreach ( $colors as $role => $color ) {
 			$role_class = sanitize_html_class( 'um-role-' . $role );
 			$ring_class = sanitize_html_class( 'mp-role-avatar-ring--' . $role );
+			$css .= '.um-profile.' . $role_class . ' .um-profile-photo-img{border:0!important;outline:none!important;box-shadow:none!important;}';
+
 			$selectors  = array(
 				'.' . $ring_class,
 				'.um-profile.' . $role_class . ' .um-profile-photo img',
