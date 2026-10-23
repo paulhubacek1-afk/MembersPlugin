@@ -4,7 +4,7 @@ Tags: membership, user-profile, community, user-registration, member-directory, 
 Requires at least: 6.2
 Tested up to: 7.1
 Requires PHP: 7.0
-Stable tag: 1.0.8
+Stable tag: 1.0.8.1
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -57,6 +57,11 @@ No. The profile checks the built-in birth_date field automatically.
 No. It searches for releases automatically and makes available updates visible in WordPress.
 
 == Changelog ==
+
+= 1.0.8.1 =
+* Fixed automatic update discovery in the WordPress dashboard using published GitHub Releases.
+* Ignore unrelated internal core version tags when checking for Members Plugin updates.
+
 
 = 1.0.6 - 2026-10-23 =
 * Changed: birthday effect now shows only full-page confetti.

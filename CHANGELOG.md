@@ -1,3 +1,9 @@
+## 1.0.8.1 – 2026-10-23
+
+- Fixed: register a WordPress-compatible update transient filter and plugin information response using the published GitHub release ZIP.
+- Fixed: updater checks published `1.0.x` product releases only and ignores unrelated core-version tags.
+- Improved: release workflow accepts four-part patch versions such as `1.0.8.1`.
+
 ## 1.0.8 – 2026-10-23
 
 - Fixed: Sicherung page navigation and export/import redirects consistently open **Einstellungen → Sicherung**.
