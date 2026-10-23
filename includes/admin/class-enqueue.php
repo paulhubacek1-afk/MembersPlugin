@@ -614,6 +614,13 @@ final class Enqueue extends \um\common\Enqueue {
 			$this->load_forms();
 		}
 
+		// Members Plugin: WordPress builds submenu hook names from the (translated) title of
+		// the parent menu. The menu is called "Members Plugin" in this fork, so the hooks are
+		// "members-plugin_page_um_options" etc. instead of "ultimate-member_page_um_options".
+		// The settings scripts and the WordPress Media Library were therefore never loaded
+		// (e.g. "Default Profile Photo" could not open the media library).
+		$hook = um_mp_normalize_admin_hook( $hook );
+
 		if ( 'users.php' === $hook ) {
 			wp_register_style( 'um_admin_users', $css_url . 'admin/users' . $suffix . '.css', array(), UM_VERSION );
 			wp_enqueue_style( 'um_admin_users' );

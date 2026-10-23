@@ -415,6 +415,15 @@ if ( ! class_exists( 'UM_Functions' ) ) {
 		 *               with boolean values indicating attribute allowance.
 		 */
 		public function get_allowed_html( $context = '', $ignore_global = false ) {
+			// Members Plugin: the base list is rebuilt dozens of times per member-directory
+			// request (several wp_kses() calls per card). Build it once per context.
+			static $base_cache = array();
+			$cache_key         = $context . '|' . ( $ignore_global ? '1' : '0' );
+			if ( isset( $base_cache[ $cache_key ] ) ) {
+				/** This filter is documented below in this method. */
+				return apply_filters( 'um_late_escaping_allowed_tags', $base_cache[ $cache_key ], $context );
+			}
+
 			switch ( $context ) {
 				case 'wp-admin':
 					$allowed_html = array(
@@ -425,6 +434,7 @@ if ( ! class_exists( 'UM_Functions' ) ) {
 							'height'   => true,
 							'hspace'   => true,
 							'loading'  => true,
+						'decoding' => true,
 							'longdesc' => true,
 							'vspace'   => true,
 							'src'      => true,
@@ -674,6 +684,7 @@ if ( ! class_exists( 'UM_Functions' ) ) {
 							'height'   => true,
 							'hspace'   => true,
 							'loading'  => true,
+						'decoding' => true,
 							'longdesc' => true,
 							'vspace'   => true,
 							'src'      => true,
@@ -914,6 +925,7 @@ if ( ! class_exists( 'UM_Functions' ) ) {
 			 * }
 			 * add_filter( 'um_late_escaping_allowed_tags', 'add_extra_kses_allowed_tags', 10, 2 );
 			 */
+			$base_cache[ $cache_key ] = $allowed_html;
 			return apply_filters( 'um_late_escaping_allowed_tags', $allowed_html, $context );
 		}
 

@@ -284,3 +284,19 @@ if ( ! empty( $delete_options ) ) {
 		wp_delete_post( $um_activity->ID, 1 );
 	}
 }
+
+// Members Plugin: always remove scheduled events and cached update/theme data.
+wp_clear_scheduled_hook( 'mp_automatic_update_check' );
+delete_site_transient( 'mp_github_release' );
+delete_site_transient( 'mp_github_release_v2' );
+delete_transient( 'mp_github_release_update_v1092' );
+global $wpdb;
+$wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE '\\_transient\\_mp\\_theme\\_colors\\_%' OR option_name LIKE '\\_transient\\_timeout\\_mp\\_theme\\_colors\\_%'" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+
+// Members Plugin settings are removed only when "Delete data on uninstall" is enabled.
+if ( ! empty( $delete_options ) ) {
+	foreach ( array( 'mp_design', 'mp_role_avatar_ring_colors', 'mp_mail_diagnostics_log', 'mp_github_token' ) as $mp_option ) {
+		delete_option( $mp_option );
+	}
+	delete_metadata( 'user', 0, '_mp_last_seen_at', '', true );
+}

@@ -1,5 +1,11 @@
 # Members Plugin – Profiles & Community
 
+## Updated in 1.0.9.3
+
+- **Faster member directories:** profile and cover photos are now browser-cacheable (stable, file-based URL versions instead of a new timestamp on every request), lists load small avatar thumbnails, per-member cache lookups are bundled into one query, and already loaded directory pages reappear instantly.
+- **Fixes:** dependent dropdown fields in forms work again, the updater only offers Members Plugin 1.x releases, missing photo files fall back to the default avatar, and several smaller birthday/uninstall issues are resolved.
+- **Security:** hardened backup import and the public online-status endpoint.
+
 ## Updated in 1.0.9.2
 
 - Cover-photo uploads are saved at maximum supported encoder quality (100), and the selected crop keeps its full resolution.

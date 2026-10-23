@@ -185,7 +185,25 @@ final class MP_Design {
 	 * @return array<string,string>
 	 */
 	public static function resolved_values() {
-		$opts   = self::get_options();
+		// Members Plugin: used by enqueue_frontend() and body_class() on every page; compute once per request.
+		static $cache = null;
+		static $cache_opts = null;
+		$opts = self::get_options();
+		if ( null !== $cache && $cache_opts === $opts ) {
+			return $cache;
+		}
+		$cache_opts = $opts;
+		$cache      = self::compute_resolved_values( $opts );
+		return $cache;
+	}
+
+	/**
+	 * Theme values (if enabled) plus manual overrides.
+	 *
+	 * @param array $opts Options.
+	 * @return array<string,string>
+	 */
+	private static function compute_resolved_values( $opts ) {
 		$values = ! empty( $opts['auto_colors'] ) ? self::auto_values() : array();
 		$vars   = self::variables();
 
@@ -299,7 +317,7 @@ final class MP_Design {
 			9999
 		);
 		add_action( 'enqueue_block_assets', array( __CLASS__, 'enqueue_editor' ), 20 );
-		add_action( 'switch_theme', array( 'MP_Theme_Colors', 'flush' ) );
+		MP_Theme_Colors::register_cache_invalidation();
 		add_filter( 'body_class', array( __CLASS__, 'body_class' ) );
 	}
 

@@ -119,6 +119,22 @@ if ( ! class_exists( 'um\core\Member_Directory' ) ) {
 
 
 		/**
+		 * Members Plugin: per-request cache of UM()->builtin()->all_user_fields().
+		 *
+		 * @var array|null
+		 */
+		protected $mp_all_user_fields = null;
+
+
+		/**
+		 * Members Plugin: per-request cache of profile form IDs.
+		 *
+		 * @var int[]|null
+		 */
+		protected $mp_profile_form_ids = null;
+
+
+		/**
 		 * Member_Directory constructor.
 		 */
 		public function __construct() {
@@ -2731,7 +2747,11 @@ if ( ! class_exists( 'um\core\Member_Directory' ) ) {
 		 * @return array
 		 */
 		public function build_user_card_data( $user_id, $directory_data ) {
-			$user_fields = UM()->builtin()->all_user_fields();
+			// Members Plugin: the field list is identical for every card of a request.
+			if ( null === $this->mp_all_user_fields ) {
+				$this->mp_all_user_fields = UM()->builtin()->all_user_fields();
+			}
+			$user_fields = $this->mp_all_user_fields;
 
 			um_fetch_user( $user_id );
 
@@ -2792,12 +2812,13 @@ if ( ! class_exists( 'um\core\Member_Directory' ) ) {
 
 			$description_key = UM()->profile()->get_show_bio_key( UM()->fields()->global_args );
 
-			static $profile_form_ids = null;
 			$profile_forms = array();
-			if ( empty( UM()->fields()->set_id ) ) {
-				// This list is identical for each card in this request.
-				if ( null === $profile_form_ids ) {
-					$profile_form_ids = get_posts(
+			$needs_forms   = ( ! empty( $directory_data['show_tagline'] ) && ! empty( $directory_data['tagline_fields'] ) ) || ( ! empty( $directory_data['show_userinfo'] ) && ! empty( $directory_data['reveal_fields'] ) );
+			if ( $needs_forms && empty( UM()->fields()->set_id ) ) {
+				// This list is identical for each card in this request; query it only
+				// when the directory actually displays tagline or reveal fields.
+				if ( null === $this->mp_profile_form_ids ) {
+					$this->mp_profile_form_ids = get_posts(
 						array(
 							'post_type'      => 'um_form',
 							'meta_query'     => array(
@@ -2812,7 +2833,7 @@ if ( ! class_exists( 'um\core\Member_Directory' ) ) {
 						)
 					);
 				}
-				$profile_forms = $profile_form_ids;
+				$profile_forms = $this->mp_profile_form_ids;
 			}
 
 			if ( ! empty( $directory_data['show_tagline'] ) && ! empty( $directory_data['tagline_fields'] ) ) {
@@ -3084,6 +3105,44 @@ if ( ! class_exists( 'um\core\Member_Directory' ) ) {
 		}
 
 		/**
+		 * Members Plugin: load everything a page of member cards needs with a few bulk
+		 * queries instead of several queries per member.
+		 *
+		 * - users and all their user meta (cache_users() / update_meta_cache()),
+		 * - the per-user profile cache options "um_cache_userdata_{ID}" (not autoloaded,
+		 *   otherwise one SELECT per member), primed with one query on WordPress 6.4+.
+		 *
+		 * @param array $user_ids User IDs of the current page.
+		 *
+		 * @return int[] Sanitized, unique user IDs in their original order.
+		 */
+		protected function prime_user_card_caches( $user_ids ) {
+			if ( empty( $user_ids ) || ! is_array( $user_ids ) ) {
+				return array();
+			}
+
+			$user_ids = array_values( array_unique( array_filter( array_map( 'absint', $user_ids ) ) ) );
+			if ( empty( $user_ids ) ) {
+				return array();
+			}
+
+			if ( function_exists( 'cache_users' ) ) {
+				cache_users( $user_ids );
+			}
+			update_meta_cache( 'user', $user_ids );
+
+			if ( function_exists( 'wp_prime_option_caches' ) && ! UM()->options()->get( 'um_profile_object_cache_stop' ) ) {
+				$option_names = array();
+				foreach ( $user_ids as $user_id ) {
+					$option_names[] = "um_cache_userdata_{$user_id}";
+				}
+				wp_prime_option_caches( $option_names );
+			}
+
+			return $user_ids;
+		}
+
+		/**
 		 * Main Query function for getting members via AJAX
 		 */
 		public function ajax_get_members() {
@@ -3252,15 +3311,8 @@ if ( ! class_exists( 'um\core\Member_Directory' ) ) {
 			 */
 			$user_ids = apply_filters( 'um_prepare_user_results_array', $user_ids, $this->query_args );
 
-			// Prime caches for the current result page to avoid repeated user/meta SQL
-			// lookups while building each member card.
-			if ( ! empty( $user_ids ) ) {
-				$user_ids = array_values( array_unique( array_filter( array_map( 'absint', $user_ids ) ) ) );
-				if ( function_exists( 'cache_users' ) ) {
-					cache_users( $user_ids );
-				}
-				update_meta_cache( 'user', $user_ids );
-			}
+			// Members Plugin: prime caches for the current result page.
+			$user_ids = $this->prime_user_card_caches( $user_ids );
 
 			$sizes = UM()->options()->get( 'cover_thumb_sizes' );
 			// Ensure we have valid sizes array and handle case when only one size is defined

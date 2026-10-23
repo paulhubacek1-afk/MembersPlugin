@@ -4,6 +4,54 @@ var um_member_directories = [];
 
 var um_member_directory_last_data = [];
 
+/**
+ * Members Plugin: short-lived client cache of directory responses and a request
+ * counter per directory. Paging back to an already loaded page (or switching sort
+ * back and forth) is answered instantly, and a slow older response can never
+ * overwrite the result of a newer request.
+ */
+var um_members_response_cache = {};
+var um_members_request_seq = {};
+
+function um_members_cache_ttl() {
+	return wp.hooks.applyFilters( 'um_member_directory_response_cache_ttl', 60000 );
+}
+
+function um_members_cache_get( hash, key ) {
+	var bucket = um_members_response_cache[ hash ];
+	if ( ! bucket || ! bucket[ key ] ) {
+		return null;
+	}
+	if ( Date.now() - bucket[ key ].time > um_members_cache_ttl() ) {
+		delete bucket[ key ];
+		return null;
+	}
+	return bucket[ key ].answer;
+}
+
+function um_members_cache_set( hash, key, answer ) {
+	if ( um_members_cache_ttl() <= 0 ) {
+		return;
+	}
+	if ( ! um_members_response_cache[ hash ] ) {
+		um_members_response_cache[ hash ] = {};
+	}
+	var bucket = um_members_response_cache[ hash ];
+	var keys = Object.keys( bucket );
+	if ( keys.length >= 20 ) {
+		delete bucket[ keys[0] ];
+	}
+	bucket[ key ] = { time: Date.now(), answer: answer };
+}
+
+function um_members_cache_clear( directory ) {
+	if ( directory ) {
+		delete um_members_response_cache[ um_members_get_hash( directory ) ];
+	} else {
+		um_members_response_cache = {};
+	}
+}
+
 function um_parse_current_url() {
 	var data = {};
 
@@ -326,9 +374,16 @@ function um_ajax_get_members( directory, args ) {
 
 	request = wp.hooks.applyFilters( 'um_member_directory_filter_request', request );
 
-	wp.ajax.send( 'um_get_members', {
-		data:  request,
-		success: function( answer ) {
+	um_members_request_seq[ hash ] = ( um_members_request_seq[ hash ] || 0 ) + 1;
+	var request_seq = um_members_request_seq[ hash ];
+	var cache_key = JSON.stringify( request );
+
+	var render_answer = function( answer ) {
+			// A newer request for this directory was started meanwhile - ignore this answer.
+			if ( request_seq !== um_members_request_seq[ hash ] ) {
+				return;
+			}
+
 			//set last data hard for using on layouts reloading
 			um_member_directory_last_data[ hash ] = answer;
 
@@ -354,8 +409,24 @@ function um_ajax_get_members( directory, args ) {
 			um_init_new_dropdown();
 
 			um_members_hide_preloader( directory );
+	};
+
+	var cached_answer = ( args && args.no_cache ) ? null : um_members_cache_get( hash, cache_key );
+	if ( cached_answer ) {
+		render_answer( cached_answer );
+		return;
+	}
+
+	wp.ajax.send( 'um_get_members', {
+		data:  request,
+		success: function( answer ) {
+			um_members_cache_set( hash, cache_key, answer );
+			render_answer( answer );
 		},
 		error: function( data ) {
+			if ( request_seq !== um_members_request_seq[ hash ] ) {
+				return;
+			}
 			console.log( data );
 
 			um_members_hide_preloader( directory );
@@ -384,7 +455,12 @@ function um_build_template( directory, data ) {
 		directory.addClass('um-loaded');
 
 		// It's made via hook because resize is triggered with debounce delay.
-		wp.hooks.addAction( 'um_window_resize', 'um_members', function() {
+		// Members Plugin: register one handler per directory. Previously a new handler
+		// was added on every page load/filter change, so each resize re-initialised
+		// the masonry grid once for every page the visitor had opened.
+		var resize_namespace = 'um_members_' + um_members_get_hash( directory );
+		wp.hooks.removeAction( 'um_window_resize', resize_namespace );
+		wp.hooks.addAction( 'um_window_resize', resize_namespace, function() {
 			if (directory.find('.um-members.um-members-grid').length) {
 				UM_Member_Grid(directory.find('.um-members.um-members-grid'));
 			}

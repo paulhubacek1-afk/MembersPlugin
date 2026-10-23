@@ -34,6 +34,8 @@ if ( ! class_exists( 'um\admin\core\Admin_Menu' ) ) {
 
 			add_filter( 'admin_footer_text', array( $this, 'admin_footer_text' ), 1000 );
 
+			// Members Plugin: the hook name depends on the parent menu title; it is registered
+			// with the real hook name returned by add_submenu_page() in primary_admin_menu().
 			add_action( 'load-ultimate-member_page_um_options', array( &$this, 'maybe_settings_redirect' ) );
 		}
 
@@ -92,7 +94,7 @@ if ( ! class_exists( 'um\admin\core\Admin_Menu' ) ) {
 			$um_pages[] = 'edit-um_directory';
 			$um_pages[] = 'ultimate-member_page_ultimatemember-extensions';
 
-			if ( isset( $current_screen->id ) && in_array( $current_screen->id, $um_pages ) ) {
+			if ( isset( $current_screen->id ) && in_array( um_mp_normalize_admin_hook( $current_screen->id ), $um_pages ) ) {
 				// Change the footer text
 				if ( ! get_option( 'um_admin_footer_text_rated' ) ) {
 					ob_start();
@@ -190,7 +192,10 @@ if ( ! class_exists( 'um\admin\core\Admin_Menu' ) ) {
 		 * Secondary admin menu (after settings)
 		 */
 		public function secondary_menu_items() {
-			add_submenu_page( $this->slug, __( 'Settings', 'ultimate-member' ), __( 'Settings', 'ultimate-member' ), 'manage_options', 'um_options', array( UM()->admin_settings(), 'settings_page' ) );
+			$settings_hook = add_submenu_page( $this->slug, __( 'Settings', 'ultimate-member' ), __( 'Settings', 'ultimate-member' ), 'manage_options', 'um_options', array( UM()->admin_settings(), 'settings_page' ) );
+			if ( $settings_hook && 'ultimate-member_page_um_options' !== $settings_hook ) {
+				add_action( 'load-' . $settings_hook, array( &$this, 'maybe_settings_redirect' ) );
+			}
 
 			add_submenu_page( $this->slug, __( 'Forms', 'ultimate-member' ), __( 'Forms', 'ultimate-member' ), 'manage_options', 'edit.php?post_type=um_form', '' );
 

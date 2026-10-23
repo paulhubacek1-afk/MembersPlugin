@@ -18,21 +18,30 @@ final class MP_Birthday_Celebration {
 	 */
 	public static function init() {
 		add_action( 'um_after_header_info', array( __CLASS__, 'render' ), 20, 2 );
-		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'enqueue_styles' ) );
+		// The stylesheet is only needed on a birthday; it is enqueued from render().
+		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'register_styles' ) );
 	}
 
 	/**
 	 * Enqueue the small celebration stylesheet before the document head is printed.
 	 */
-	public static function enqueue_styles() {
+	public static function register_styles() {
 		if ( defined( 'MP_URL' ) ) {
-			wp_enqueue_style(
+			wp_register_style(
 				'mp-birthday-celebration',
 				MP_URL . 'assets/birthday.css',
 				array(),
 				defined( 'MP_VERSION' ) ? MP_VERSION : null
 			);
 		}
+	}
+
+	/**
+	 * Backwards-compatible alias: registers and enqueues the stylesheet.
+	 */
+	public static function enqueue_styles() {
+		self::register_styles();
+		wp_enqueue_style( 'mp-birthday-celebration' );
 	}
 
 	/**
@@ -52,10 +61,17 @@ final class MP_Birthday_Celebration {
 			return;
 		}
 
-		$today = wp_date( 'm-d', time(), wp_timezone() );
-		if ( $birthday->format( 'm-d' ) !== $today ) {
+		$today       = wp_date( 'm-d', time(), wp_timezone() );
+		$birthday_md = $birthday->format( 'm-d' );
+		// Members born on 29 February celebrate on 28 February in non-leap years.
+		if ( '02-29' === $birthday_md && '02-28' === $today && ! wp_date( 'L', time(), wp_timezone() ) ) {
+			$birthday_md = '02-28';
+		}
+		if ( $birthday_md !== $today ) {
 			return;
 		}
+
+		self::enqueue_styles();
 
 		echo '<div class="mp-birthday-celebration" aria-hidden="true">';
 		echo '<div class="mp-birthday-celebration__confetti">';
@@ -102,10 +118,20 @@ final class MP_Birthday_Celebration {
 			'dob',
 		);
 
-		foreach ( $all_meta as $key => $values ) {
-			if ( ! in_array( $key, $priority_keys, true ) && ! preg_match( '/birth|geburt|(?:^|_)dob(?:_|$)/i', (string) $key ) ) {
-				continue;
+		// Check the well-known keys first (in this order), then any similarly named field.
+		$ordered = array();
+		foreach ( $priority_keys as $key ) {
+			if ( isset( $all_meta[ $key ] ) ) {
+				$ordered[ $key ] = $all_meta[ $key ];
 			}
+		}
+		foreach ( $all_meta as $key => $values ) {
+			if ( ! isset( $ordered[ $key ] ) && preg_match( '/birth|geburt|(?:^|_)dob(?:_|$)/i', (string) $key ) ) {
+				$ordered[ $key ] = $values;
+			}
+		}
+
+		foreach ( $ordered as $key => $values ) {
 
 			if ( ! is_array( $values ) || empty( $values[0] ) || ! is_scalar( $values[0] ) ) {
 				continue;

@@ -1113,6 +1113,9 @@ if ( ! class_exists( 'um\core\Member_Directory_Meta' ) ) {
 			 */
 			$user_ids = apply_filters( 'um_prepare_user_results_array_meta', $user_ids, $query );
 
+			// Members Plugin: bulk-load users, user meta and profile caches for this page.
+			$user_ids = $this->prime_user_card_caches( $user_ids );
+
 			$pagination_data = $this->calculate_pagination( $directory_data, $total_users );
 
 			$sizes = UM()->options()->get( 'cover_thumb_sizes' );
