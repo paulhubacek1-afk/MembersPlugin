@@ -1,0 +1,41 @@
+name: Validate PHP changes
+
+on:
+  pull_request:
+    paths:
+      - '**.php'
+      - '.github/workflows/validate.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  php-lint:
+    name: PHP syntax check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out changes
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '7.4'
+          coverage: none
+
+      - name: Lint changed PHP files
+        shell: bash
+        run: |
+          set -euo pipefail
+          files="$(git diff --name-only "${{ github.event.pull_request.base.sha }}...${{ github.event.pull_request.head.sha }}" -- '*.php')"
+          if [[ -z "$files" ]]; then
+            echo "No PHP files changed."
+            exit 0
+          fi
+          while IFS= read -r file; do
+            [[ -f "$file" ]] || continue
+            echo "Checking $file"
+            php -l "$file"
+          done <<< "$files"
