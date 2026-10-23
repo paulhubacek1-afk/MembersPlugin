@@ -26,11 +26,22 @@
 	}
 
 	function post(data) {
+		var body = new URLSearchParams();
+		Object.keys(data).forEach(function (key) {
+			if (key === 'user_ids' && Array.isArray(data[key])) {
+				data[key].forEach(function (id) {
+					body.append('user_ids[]', id);
+				});
+			} else {
+				body.append(key, data[key]);
+			}
+		});
+
 		return window.fetch(endpoint, {
 			method: 'POST',
 			credentials: 'same-origin',
 			headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
-			body: new URLSearchParams(data).toString()
+			body: body.toString()
 		}).then(function (response) {
 			if (!response.ok) {
 				throw new Error('Presence request failed.');
