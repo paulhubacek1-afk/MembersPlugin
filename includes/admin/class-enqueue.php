@@ -639,8 +639,9 @@ final class Enqueue extends \um\common\Enqueue {
 			}
 
 			// phpcs:ignore WordPress.Security.NonceVerification
-			if ( isset( $_GET['tab'] ) && 'appearance' === $_GET['tab'] && empty( $_GET['section'] ) ) {
-				// Init WP Media Uploader on the UM > Settings > Appearance > Profile screen.
+			if ( isset( $_GET['tab'] ) && 'appearance' === $_GET['tab'] ) {
+				// The media fields live in the profile_photo and cover_photo subtabs too.
+				// Enqueue WordPress Media Library assets on every Appearance settings section.
 				wp_enqueue_media();
 			}
 
