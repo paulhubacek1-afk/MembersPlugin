@@ -1,9 +1,16 @@
 # Members Plugin – Changelog
 
+## 2.14.1 – 2026-10-23
+
+- Added: administrator-only Sicherung page with ZIP export and import.
+- Added: same-site and database-prefix validation before import, plus ID-based upsert for captured WordPress users, user metadata, options, posts and post metadata.
+- Added: restore of archived profile media into expected upload folders.
+- Changed: visible backup page wording to Members Plugin terminology; legacy internal compatibility identifiers remain where required.
+
 ## 1.0.7 – 2026-10-23
 
-- Added: standalone migration backup screen under **Tools → MP Migration & Sicherung**, available even when the separately installed Ultimate Member plugin is detected.
-- Added: MP-owned database index table `mp_backup_index` and private ZIP backups containing user data, user metadata, UM-related options/tables, UM form/directory records, and common Ultimate Member upload folders.
+- Added: standalone migration backup screen under **Members Plugin → Sicherung**, available even when the separately installed separate legacy membership plugin is detected.
+- Added: MP-owned database index table `mp_backup_index` and private ZIP backups containing user data, user metadata, legacy-engine-related options/tables, UM form/directory records, and common profile upload folders.
 - Changed: WordPress plugin overview version is now **1.0.7**.
 - Safety: backups are stored outside the WordPress web root and can be downloaded only by an administrator through a nonce-protected action.
 - Note: this is a backup foundation, not yet a complete migration to a fully independent membership engine.
