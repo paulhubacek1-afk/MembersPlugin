@@ -16,6 +16,7 @@ require_once MP_PATH . 'class-mp-security.php';
 require_once MP_PATH . 'class-mp-updater.php';
 require_once MP_PATH . 'class-mp-avatar.php';
 require_once MP_PATH . 'class-mp-online-status.php';
+require_once MP_PATH . 'class-mp-role-avatar-rings.php';
 
 MP_Design::init();
 MP_Inspector::init();
@@ -23,6 +24,7 @@ MP_Security::init();
 MP_Updater::init();
 MP_Avatar::init();
 MP_Online_Status::init();
+MP_Role_Avatar_Rings::init();
 
 // MP_Admin::SLUG is also used in the front-end admin bar.
 require_once MP_PATH . 'class-mp-admin.php';
