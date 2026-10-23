@@ -14,7 +14,7 @@ A WordPress membership and profile system with theme-aware design tools, user-ID
 
 Members Plugin provides membership pages, login and registration forms, profile pages, member directories and account features, along with theme-aware design tools and a built-in online-member list.
 
-Version 1.0.1 includes a profile-image resolver that checks the correct WordPress user-ID folder first, helping avoid using a picture associated with a previously loaded profile. It also includes a responsive online-member list without requiring a separate online-user extension.
+Version 1.0.1 includes a profile-image resolver that checks the correct WordPress user-ID folder first, helping avoid using a picture associated with a previously loaded profile. It also includes a responsive online-member list without requiring a separate online-user extension. HTML-enabled text fields preserve safe h1–h6 heading tags after sanitization.
 
 Features:
 * Front-end profiles, registration, login and account pages
@@ -56,6 +56,7 @@ No. The shortcode displays the list only to logged-in visitors.
 
 = 1.0.1 - 2026-10-23 =
 * Fixed: resolve avatar pictures from the actual WordPress user-ID directory first.
+* Fixed: preserve safe h1–h6 tags in HTML-enabled form text fields.
 * Added: built-in online tracking and the [mp_online_users] shortcode.
 * Added: responsive online-member list styling.
 * Improved: plugin metadata and documentation.
