@@ -1,3 +1,10 @@
+## 1.0.8 – 2026-10-23
+
+- Fixed: Sicherung page navigation and export/import redirects consistently open **Einstellungen → Sicherung**.
+- Changed: plugin text domain to `members-plugin`.
+- Improved: release workflow rebuilds and replaces an existing ZIP, checks the packaged version, tests ZIP integrity, and verifies the published asset.
+- Note: legacy database table names and upload folder names remain recognized only for safe migration/backup compatibility; they are not used as visible product branding.
+
 # Members Plugin – Changelog
 
 ## 1.0.7 – 2026-10-23
