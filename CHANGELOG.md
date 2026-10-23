@@ -1,5 +1,10 @@
 # Members Plugin – Changelog
 
+## 1.0.5 – 2026-10-23
+
+- Fixed: role-colored avatar rings now appear on profile pages by applying the ring to the outer circular photo link, not the inner image whose shadow is clipped.
+- Fixed: inner profile images no longer add a second shadow ring.
+
 ## 1.0.4 – 2026-10-23
 
 - Changed: removed automatic online/offline dots from member-directory cards. Profile-header indicators remain.
