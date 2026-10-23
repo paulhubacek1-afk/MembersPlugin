@@ -64,7 +64,7 @@ final class MP_Migration_Backup {
 			$backups = $wpdb->get_results( "SELECT id, filename, created_at, file_size, checksum FROM {$table} ORDER BY id DESC LIMIT 20", ARRAY_A );
 		}
 		echo '<div class="wrap"><h1>' . esc_html__( 'Sicherung', 'members-plugin' ) . '</h1>';
-		echo '<nav class="nav-tab-wrapper"><a class="nav-tab nav-tab-active" href="' . esc_url( admin_url( 'admin.php?page=' . self::PAGE ) ) . '">' . esc_html__( 'Sicherung', 'members-plugin' ) . '</a></nav>';
+		echo '<nav class="nav-tab-wrapper"><a class="nav-tab nav-tab-active" href="' . esc_url( admin_url( 'options-general.php?page=' . self::PAGE ) ) . '">' . esc_html__( 'Sicherung', 'members-plugin' ) . '</a></nav>';
 		if ( isset( $_GET['mp_backup'] ) && 'created' === sanitize_key( wp_unslash( $_GET['mp_backup'] ) ) ) {
 			echo '<div class="notice notice-success"><p>' . esc_html__( 'Sicherung wurde erstellt.', 'members-plugin' ) . '</p></div>';
 		}
