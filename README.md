@@ -1,119 +1,58 @@
-# Members Plugin
+# Members Plugin – Profiles & Community
 
-Mitgliederbereich für WordPress – Registrierung, Login, Profile, Konto, Mitgliederverzeichnis.
-Fork von **Ultimate Member 2.14.1** (GPLv3) mit drei Schwerpunkten:
+Members Plugin is a WordPress membership and profile system with automatic theme colors, profile customization tools, and built-in online-member status.
 
-1. **Passt sich automatisch an das Farbspektrum deines Themes an**
-2. **Alles anpassbar – und alle CSS-Klassen sichtbar**, damit du gezielt nachbessern kannst
-3. **Zusätzliche Sicherheitsfixes** (siehe [SECURITY.md](SECURITY.md))
+## New in 1.0.1
 
-Alle Original-Klassen (`.um`, `.um-button`, `.um-profile-nav` …), Templates, Shortcodes und
-Hooks bleiben unverändert erhalten – bestehende Seiten, Formulare und eigenes CSS funktionieren weiter.
+- **ID-based profile photos:** avatar output checks the actual WordPress user-ID folder first: wp-content/uploads/ultimatemember/{USER_ID}/profile_photo.{jpg|jpeg|png|webp|gif|avif}. A photo from a previously loaded profile should no longer be selected for another user.
+- **Online members included:** online tracking is built into this plugin; no separate online-user extension is required.
+- **Responsive online list:** a compact, theme-aware grid with avatars and an online indicator.
+- **Improved plugin identity and documentation.**
 
 ## Installation
 
-1. Ordner als `wp-content/plugins/members-plugin/` hochladen (oder die ZIP unter *Plugins › Installieren › Plugin hochladen*).
-2. **Ultimate Member deaktivieren**, falls installiert (Formulare, Rollen und Einstellungen bleiben erhalten – der Fork nutzt dieselben Daten).
-3. *Members Plugin* aktivieren.
-4. *Members Plugin › Design & CSS* öffnen.
+1. Upload the plugin folder as wp-content/plugins/members-plugin/, or install the release ZIP from **Plugins → Add New → Upload Plugin**.
+2. If Ultimate Member is already installed and active, deactivate it first.
+3. Activate **Members Plugin – Profiles & Community**.
+4. Configure the design under **Members Plugin → Design & CSS**.
 
-## Automatische Theme-Farben
+**Important architecture note:** Members Plugin bundles its own membership core and does not require a separate Ultimate Member installation. Some legacy internal class/function names are still shared with the upstream code, so the two plugins must not be active at the same time. The compatibility guard is intentional. A complete internal namespace migration needs a separate compatibility-tested release so existing profiles, roles and uploaded pictures are not accidentally lost.
 
-Alle Stylesheets nutzen CSS-Variablen mit dem Originalwert als Fallback:
+## Online-member list
 
-```css
-.um a.um-button { background: var(--um-primary, #3ba1da); }
-```
+Add the shortcode [mp_online_users] to a page or a shortcode block.
 
-Die Werte werden automatisch ermittelt aus:
+Set the maximum number of people to show with [mp_online_users limit="20"].
 
-| Quelle | Beispiele |
-|--------|-----------|
-| `theme.json` / globale Stile (inkl. Website-Editor-Anpassungen und Stilvarianten) | Button-, Text-, Hintergrund-, Überschriftenfarbe, Button-Radius, Schrift |
-| Theme-Palette | `primary`, `accent`, `contrast`, `base` …, Astra, Kadence, Blocksy, GeneratePress |
-| Theme-/Builder-Optionen | Elementor Kit, OceanWP, Divi, Customizer-Hintergrund |
-| Live-Erkennung im Browser | für klassische Themes ohne `theme.json` (liest echte Button-/Text-/Hintergrundfarbe) |
+The list is visible only to logged-in visitors. A user is treated as online for five minutes after their last activity. Activity is saved at most once per minute to avoid unnecessary database writes.
 
-Daraus werden alle Abstufungen berechnet (Hover, Rahmen, gedämpfter Text, Flächen, lesbare
-Schrift auf Buttons nach WCAG-Kontrast) – **auch für dunkle Themes**. Getestet mit Twenty
-Seventeen, Twenty Twenty-One, Twenty Twenty-Three (inkl. dunkler Variante „Pitch“), Twenty
-Twenty-Four, Twenty Twenty-Five.
+The built-in image resolver checks the user folder by WordPress user ID. It does not guess the ID based on the currently viewed profile. If no valid image file is found, normal WordPress/avatar fallback behavior remains in place.
 
-## Anpassen
+## Automatic theme colors
 
-*Members Plugin › Design & CSS*
+Theme colors, backgrounds, typography and button shape are detected from global styles/theme.json, theme palettes, builder settings and browser-computed styles. Variables can be overridden in **Members Plugin → Design & CSS**.
 
-- **Farben & Form** – jede Variable einzeln überschreiben, mit Live-Vorschau aus echten Plugin-Klassen
-- **Eigenes CSS** – mit Code-Editor, wird nach den Plugin-Styles geladen
-- **CSS-Klassen** – durchsuchbare Liste aller ~480 Klassen mit „gestylt in“ / „verwendet in“, Klick kopiert den Selektor, **Starter-CSS mit allen Klassen** zum Download
-- **Variablen & Anleitung** – alle Variablen mit aktuellem Wert und Beispiele
+The existing .um classes and established profile data are retained for compatibility with sites migrating from the previous build.
 
-**Klassen-Inspector:** Im Frontend in der Admin-Leiste auf **„CSS-Klassen“** klicken, mit der Maus
-auf ein Element zeigen → Klassen werden angezeigt. Klick hält das Element fest und zeigt den
-Klassenpfad, einen empfohlenen Selektor (kopierbar) und die berechneten Werte. `Esc` beendet.
+## Design and developer tools
 
-### Variablen
+- Color and shape variables with live preview.
+- Custom CSS editor.
+- Searchable CSS class reference with copy-to-clipboard.
+- Front-end CSS class inspector in the admin bar.
+- Additional security checks and response headers.
+- GitHub release updater in the WordPress dashboard.
 
-`--um-primary`, `--um-primary-hover`, `--um-primary-soft`, `--um-on-primary`, `--um-secondary`,
-`--um-secondary-hover`, `--um-on-secondary`, `--um-text`, `--um-text-strong`, `--um-text-muted`,
-`--um-text-light`, `--um-bg`, `--um-bg-alt`, `--um-border`, `--um-border-strong`, `--um-tooltip-bg`,
-`--um-nav-bg`, `--um-nav-hover`, `--um-on-nav`, `--um-error`, `--um-success`, `--um-info`,
-`--um-warning-bg`, `--um-warning-border`, `--um-radius`, `--um-button-radius`, `--um-font-family`
+Relevant filters include mp_css_variables, mp_design_variables, mp_detected_theme_colors, mp_trusted_proxies, mp_send_security_headers, and mp_online_status_window.
 
-```css
-/* Beispiel: runde Buttons, aktiver Profil-Tab unterstrichen */
-.um .um-button { border-radius: 999px !important; }
-.um .um-profile-nav-item.active a {
-	background: transparent;
-	box-shadow: inset 0 -3px 0 var(--um-primary);
-}
-```
+## Updates from GitHub
 
-Body-Klassen: `um-mp-design`, `um-theme-dark` (bei dunklem Hintergrund).
+Updates are delivered through GitHub Releases. The repository is currently public, so no token should be required for public release downloads. If the repository becomes private, set a narrowly-scoped read-only token using MP_GITHUB_TOKEN in wp-config.php.
 
-### Für Entwickler
+To publish a release, update the plugin header version, create a matching Git tag such as v1.0.1, then publish the release. The GitHub Actions workflow checks the tag against the plugin header and creates members-plugin.zip.
 
-| Filter | Zweck |
-|--------|-------|
-| `mp_css_variables` | Endgültige Variablenwerte ändern |
-| `mp_design_variables` | Variablen registrieren/ändern |
-| `mp_detected_theme_colors` | Theme-Erkennung anpassen |
-| `mp_trusted_proxies` | IPs vertrauenswürdiger Reverse-Proxys (für korrekte Besucher-IP) |
-| `mp_send_security_headers` | Sicherheits-Header steuern |
+## Credits and license
 
-Templates überschreiben wie gewohnt: `wp-content/themes/DEIN-THEME/ultimate-member/…`
+This is a GPLv3-licensed derivative project that retains attribution and licensing for the bundled upstream membership core. The Members Plugin-specific tools and additions are maintained in includes/members-plugin/.
 
-## Updates aus GitHub
-
-Das Plugin aktualisiert sich wie jedes andere Plugin über *Dashboard › Aktualisierungen* bzw. die Pluginliste –
-die Updates kommen aus den **GitHub-Releases** dieses Repositorys.
-
-**Einrichtung (einmalig, weil das Repository privat ist):**
-1. Auf GitHub einen [Fine-grained Token](https://github.com/settings/personal-access-tokens/new) erstellen:
-   Repository access → *Only select repositories* → `MembersPlugin`, Permissions → *Contents: Read-only*.
-2. In WordPress unter *Members Plugin › Updates* eintragen – oder sicherer in die `wp-config.php`:
-   ```php
-   define( 'MP_GITHUB_TOKEN', 'github_pat_…' );
-   ```
-   (Bei einem öffentlichen Repository ist kein Token nötig.)
-
-**Neue Version veröffentlichen:**
-1. In `members-plugin.php` die Zeile `Version:` erhöhen (z.B. `1.0.1`), committen und pushen.
-2. Release auf GitHub erstellen mit Tag `v1.0.1` (oder `git tag v1.0.1 && git push --tags`).
-3. Die GitHub Action baut `members-plugin.zip` und hängt sie an das Release (sie bricht ab, wenn Tag und `Version:` nicht übereinstimmen).
-4. WordPress zeigt das Update spätestens nach 6 Stunden – sofort über *Members Plugin › Updates › Jetzt nach Updates suchen*.
-
-## Entwicklung
-
-- `tools/css-vars.py` – wandelt hartkodierte Farben in Stylesheets in Variablen um (idempotent, auch für `.min.css`)
-- `tools/minify-css.py` – einfacher CSS-Minifier ohne Abhängigkeiten
-- Code des Forks: `includes/members-plugin/`; Änderungen am UM-Kern sind mit `// Members Plugin:` kommentiert
-
-## Hinweise
-
-- Text-Domain bleibt `ultimate-member`, damit vorhandene Übersetzungen weiter funktionieren.
-- `Update URI` zeigt auf GitHub – WordPress.org kann den Fork daher nie mit dem Original überschreiben.
-- Die im Entwicklungsstand fehlenden Bibliotheken (Action Scheduler 3.9.3, wp-config-transformer 1.4.7) sind enthalten.
-- Behobener Original-Fehler: Mitgliederverzeichnisse ohne Rollenauswahl zeigten keine Mitglieder.
-
-Lizenz: GPLv3 – basiert auf [Ultimate Member](https://wordpress.org/plugins/ultimate-member/).
+License: GPLv3. See license.txt and SECURITY.md.
