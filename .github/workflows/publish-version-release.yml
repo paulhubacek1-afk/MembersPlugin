@@ -6,6 +6,7 @@ on:
       - main
     paths:
       - members-plugin.php
+      - .github/workflows/publish-version-release.yml
 
 permissions:
   contents: write
@@ -39,45 +40,36 @@ jobs:
         run: |
           set -euo pipefail
           if gh release view "$TAG" >/dev/null 2>&1; then
-            echo "Release $TAG already exists."
+            echo "Release $TAG already exists; the ZIP will be rebuilt from this commit."
           else
             gh release create "$TAG" --title "Members Plugin $TAG" --notes-file CHANGELOG.md --target "$GITHUB_SHA"
           fi
 
-      - name: Check whether release ZIP already exists
-        id: asset
-        env:
-          GH_TOKEN: ${{ github.token }}
-          TAG: ${{ steps.version.outputs.tag }}
+      - name: Build and validate distributable plugin ZIP
         shell: bash
         run: |
           set -euo pipefail
-          if gh release view "$TAG" --json assets --jq '.assets[].name' | grep -Fxq 'members-plugin.zip'; then
-            echo "exists=true" >> "$GITHUB_OUTPUT"
-            echo "Existing ZIP found; leaving the published asset unchanged."
-          else
-            echo "exists=false" >> "$GITHUB_OUTPUT"
-          fi
-
-      - name: Build distributable plugin ZIP
-        if: steps.asset.outputs.exists != 'true'
-        shell: bash
-        run: |
-          set -euo pipefail
-          rm -rf build/members-plugin
+          rm -rf build/members-plugin build/members-plugin.zip
           mkdir -p build/members-plugin
           git archive HEAD | tar -x -C build/members-plugin
           cd build/members-plugin
           rm -rf .github tools composer.json package.json .distignore .gitignore .gitattributes
+          HEADER_VERSION="$(awk -F': ' '/Version:/ { gsub(/[[:space:]]/, "", $2); print $2; exit }' members-plugin.php)"
+          test "$HEADER_VERSION" = "${{ steps.version.outputs.version }}"
           cd ../..
-          cd build
-          zip -qr members-plugin.zip members-plugin
-          cd ..
+          mkdir -p build
+          (cd build && zip -qr members-plugin.zip members-plugin)
+          unzip -t build/members-plugin.zip
+          unzip -p build/members-plugin.zip members-plugin/members-plugin.php | grep -Fq "* Version: ${{ steps.version.outputs.version }}"
+          test -s build/members-plugin.zip
           ls -lh build/members-plugin.zip
 
-      - name: Attach ZIP to GitHub Release
-        if: steps.asset.outputs.exists != 'true'
+      - name: Replace release ZIP with verified build
         env:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ steps.version.outputs.tag }}
-        run: gh release upload "$TAG" build/members-plugin.zip
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh release upload "$TAG" build/members-plugin.zip --clobber
+          gh release view "$TAG" --json isDraft,assets --jq '. as $r | if $r.isDraft == false and any($r.assets[]; .name == "members-plugin.zip" and .size > 0) then "Release asset verified" else error("Published release ZIP is missing or invalid") end'

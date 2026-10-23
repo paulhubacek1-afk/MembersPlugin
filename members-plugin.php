@@ -3,12 +3,12 @@
  * Plugin Name: Members Plugin – Profiles & Community
  * Plugin URI: https://github.com/paulhubacek1-afk/MembersPlugin
  * Description: Mitgliederprofile, Community-Funktionen, Profilbild-Ringfarben, automatische Updates sowie Sicherung und Import.
- * Version: 1.0.7
+ * Version: 1.0.8
  * Author: Paul Hubacek
  * Author URI: https://github.com/paulhubacek1-afk
  * License: GPLv3
  * License URI: http://www.gnu.org/licenses/gpl-3.0.txt
- * Text Domain: ultimate-member
+ * Text Domain: members-plugin
  * Domain Path: /languages
  * Requires at least: 6.2
  * Requires PHP: 7.0
