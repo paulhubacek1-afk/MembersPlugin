@@ -2,6 +2,11 @@
 
 Members Plugin is a self-managed WordPress membership and community system with profile tools, theme-aware design controls, role-based avatar rings, automatic update checks, and email diagnostics.
 
+## Fixed in 1.0.5
+
+- **Profile-page role ring:** the selected role color is now applied to the outer circular profile-photo link, so the ring remains visible instead of being clipped by the image container.
+- **No inner double ring:** the photo image's own shadow is suppressed while the role-colored ring remains on the outside.
+
 ## New in 1.0.4
 
 - **Profile-only online status:** green online and grey offline indicators appear in profile headers. Member-directory lists no longer show status dots.
@@ -39,7 +44,7 @@ The built-in membership form field `birth_date` is checked using the WordPress s
 
 Open **WordPress Dashboard → Members Plugin → Profilbild-Ringfarben**. Enable the ring for each role you want to style, then choose a separate color. Roles without an enabled ring keep the default avatar appearance. If a user has multiple roles, the first assigned role with an enabled ring color is used.
 
-A selected role color replaces the default ring on that avatar. The styles avoid putting a second ring on the profile-photo wrapper.
+A selected role color replaces the default ring on that avatar. The ring is drawn on the outer circular profile-photo wrapper. The inner image shadow is disabled so it cannot be clipped or create a second ring.
 
 ## Email handling and SMTP diagnostics
 

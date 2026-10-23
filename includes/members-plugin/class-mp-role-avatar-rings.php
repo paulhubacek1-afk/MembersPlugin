@@ -251,11 +251,13 @@ final class MP_Role_Avatar_Rings {
 		foreach ( $colors as $role => $color ) {
 			$role_class = sanitize_html_class( 'um-role-' . $role );
 			$ring_class = sanitize_html_class( 'mp-role-avatar-ring--' . $role );
-			$css .= '.um-profile.' . $role_class . ' .um-profile-photo-img{border:0!important;outline:none!important;box-shadow:none!important;}';
+			// The profile theme clips shadows on the inner image. Put the role ring
+			// on the circular photo link itself and remove any inner image ring.
+			$css .= '.um-profile.' . $role_class . ' .um-profile-photo-img img{border:0!important;outline:none!important;box-shadow:none!important;}';
 
 			$selectors  = array(
 				'.' . $ring_class,
-				'.um-profile.' . $role_class . ' .um-profile-photo img',
+				'.um-profile.' . $role_class . ' .um-profile-photo-img',
 				'.um-member.' . $role_class . ' .um-member-photo img',
 				'.um-member.' . $role_class . ' .um-member-photo .um-avatar',
 			);

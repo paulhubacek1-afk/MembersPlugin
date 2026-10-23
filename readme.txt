@@ -4,7 +4,7 @@ Tags: membership, user-profile, community, user-registration, member-directory, 
 Requires at least: 6.2
 Tested up to: 7.1
 Requires PHP: 7.0
-Stable tag: 1.0.4
+Stable tag: 1.0.5
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -12,7 +12,7 @@ A WordPress membership and profile system with per-role avatar rings, automatic 
 
 == Description ==
 
-Version 1.0.4 removes online/offline dots from member-directory lists, makes a role-colored ring replace the default avatar ring, adds a cake and confetti celebration on the profile owner's birthday, and schedules automatic GitHub release checks every six hours.
+Version 1.0.5 fixes profile-page role rings by applying the selected ring to the outer circular photo link and suppressing the clipped inner image shadow. Version 1.0.4 removes online/offline dots from member-directory lists, adds a birthday cake and confetti celebration, and schedules automatic GitHub release checks every six hours.
 
 It also retains the recipient suppression rule for @buehne-total.eu and the dashboard email diagnostics log.
 
@@ -55,6 +55,10 @@ No. The profile checks the built-in birth_date field automatically.
 No. It searches for releases automatically and makes available updates visible in WordPress.
 
 == Changelog ==
+
+= 1.0.5 - 2026-10-23 =
+* Fixed: role-colored ring is now visible on profile pages.
+* Fixed: inner image shadow no longer causes a clipped or doubled profile ring.
 
 = 1.0.4 - 2026-10-23 =
 * Changed: online/offline status dots no longer appear in member-directory lists.
