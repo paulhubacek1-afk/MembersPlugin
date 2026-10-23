@@ -59,6 +59,7 @@ No. It searches for releases automatically and makes available updates visible i
 == Changelog ==
 
 = 1.0.9.3 =
+* Fixed: the Default Profile Photo / Default Cover Photo buttons can open the WordPress Media Library again (settings scripts were not loaded after the admin menu was renamed).
 * Faster: member directory: cover photos and profile photos now use the file's modification time as URL version instead of the current time. Browsers can finally cache them, so returning to the directory or paging no longer re-downloads every image.
 * Faster: member directory: profile photos in lists load the matching small thumbnail (the original is offered via srcset for high-density screens) instead of the full-size original.
 * Faster: member directory: the per-member profile cache options are loaded with one query per page (WordPress 6.4+), the field list and allowed-HTML lists are built once per request, and profile forms are only queried when tagline/reveal fields are shown.

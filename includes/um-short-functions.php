@@ -3132,3 +3132,22 @@ function um_wp_safe_redirect_fallback( $url, $status ) {
 	 */
 	return apply_filters( 'um_wp_safe_redirect_fallback', home_url( '/' ), $url, $status );
 }
+
+
+/**
+ * Members Plugin: map admin page hook names / screen IDs of the plugin's submenu pages
+ * to the legacy "ultimate-member_page_*" names used throughout the bundled core.
+ *
+ * WordPress derives the prefix from the parent menu title ("Members Plugin" →
+ * "members-plugin_page_um_options"; translated titles give other prefixes).
+ *
+ * @param string $hook Hook suffix or screen ID.
+ *
+ * @return string
+ */
+function um_mp_normalize_admin_hook( $hook ) {
+	if ( is_string( $hook ) && preg_match( '/^[^\s]+_page_(um_options|um_roles|ultimatemember-extensions)$/', $hook, $matches ) ) {
+		return 'ultimate-member_page_' . $matches[1];
+	}
+	return $hook;
+}
