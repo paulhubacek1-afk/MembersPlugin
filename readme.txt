@@ -4,7 +4,7 @@ Tags: membership, user-profile, community, user-registration, member-directory, 
 Requires at least: 6.2
 Tested up to: 7.1
 Requires PHP: 7.0
-Stable tag: 1.0.9.3
+Stable tag: 1.0.9.4
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -58,10 +58,12 @@ No. It searches for releases automatically and makes available updates visible i
 
 == Changelog ==
 
-= 1.0.9.3 =
+= 1.0.9.4 =
 * Faster: the first page of a member directory is rendered directly into the page, so members appear without waiting for a second (AJAX) request after the page has loaded.
 * New: Theme-Typografie übernehmen (enabled by default, Design & CSS): plugin texts, form fields, buttons and lists use the theme's font family, font size and line height; member names and headings use the theme's heading font.
 * Fixed: the media picker for Default Profile Photo / Default Cover Photo is now always loaded on the settings page with an independent fallback handler.
+
+= 1.0.9.3 =
 * Fixed: the Default Profile Photo / Default Cover Photo buttons can open the WordPress Media Library again (settings scripts were not loaded after the admin menu was renamed).
 * Faster: member directory: cover photos and profile photos now use the file's modification time as URL version instead of the current time. Browsers can finally cache them, so returning to the directory or paging no longer re-downloads every image.
 * Faster: member directory: profile photos in lists load the matching small thumbnail (the original is offered via srcset for high-density screens) instead of the full-size original.
