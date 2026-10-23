@@ -1,3 +1,8 @@
+## 1.0.9.1 – 2026-10-23
+
+- Fixed: WordPress Media Library assets are now enqueued on every Appearance settings subsection, including Default Profile Photo and Default Cover Photo.
+- Fixed: the media picker can open from both profile and cover image settings.
+
 ## 1.0.9 – 2026-10-23
 
 - Fixed: register both `members-plugin` and legacy `ultimate-member` text domains on WordPress `init`, so translations follow the site's selected language without loading too early.
