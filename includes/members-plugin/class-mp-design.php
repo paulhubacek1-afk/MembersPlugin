@@ -95,6 +95,7 @@ final class MP_Design {
 			'inspector'     => 1,
 			'editor_styles' => 1,
 			'theme_typography' => 1,
+			'original_cards'   => 1,
 		);
 	}
 
@@ -340,6 +341,21 @@ final class MP_Design {
 			'.um-row-heading' => '1.1em', '.um-field-group-head' => '1.05em',
 		);
 
+		// With "original member cards" the cards keep the original sizes; they still use the theme font.
+		$opts = self::get_options();
+		if ( ! empty( $opts['original_cards'] ) ) {
+			$is_card = static function ( $selector ) {
+				return (bool) preg_match( '/\.um-member(?![\w-]*directory)|\.um-members\b/', $selector );
+			};
+			$body     = array_values( array_filter( $body, static function ( $sel ) use ( $is_card ) { return ! $is_card( $sel ); } ) );
+			$small    = array_values( array_filter( $small, static function ( $sel ) use ( $is_card ) { return ! $is_card( $sel ); } ) );
+			foreach ( array_keys( $headings ) as $sel ) {
+				if ( $is_card( $sel ) ) {
+					unset( $headings[ $sel ] );
+				}
+			}
+		}
+
 		$css  = implode( ',', $roots ) . '{font-size:inherit;line-height:inherit;letter-spacing:inherit}';
 		$css .= $list( $controls ) . '{font-family:inherit;letter-spacing:inherit}';
 		$css .= $list( $body ) . '{font-size:1em!important;line-height:inherit!important}';
@@ -347,7 +363,11 @@ final class MP_Design {
 		foreach ( $headings as $selector => $size ) {
 			$css .= $list( array( $selector ) ) . '{font-family:var(--um-heading-font-family,inherit)!important;font-size:' . $size . '!important;line-height:1.3!important}';
 		}
-		$css .= $list( array( '.um-name', '.um-name a', '.um-member-name', '.um-member-name a', '.um-account-name a', '.um-account-heading', '.um-row-heading' ) ) . '{font-weight:var(--um-heading-font-weight,inherit)}';
+		$weight_selectors = array( '.um-name', '.um-name a', '.um-account-name a', '.um-account-heading', '.um-row-heading' );
+		if ( empty( $opts['original_cards'] ) ) {
+			$weight_selectors = array_merge( $weight_selectors, array( '.um-member-name', '.um-member-name a' ) );
+		}
+		$css .= $list( $weight_selectors ) . '{font-weight:var(--um-heading-font-weight,inherit)}';
 
 		return $css;
 	}
