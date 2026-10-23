@@ -19,6 +19,7 @@ require_once MP_PATH . 'class-mp-online-status.php';
 require_once MP_PATH . 'class-mp-role-avatar-rings.php';
 require_once MP_PATH . 'class-mp-birthday-celebration.php';
 require_once MP_PATH . 'class-mp-mail-diagnostics.php';
+require_once MP_PATH . 'class-mp-original-cards.php';
 
 /*
  * Bundled core assets are versioned with the internal core version (2.14.1), which never
@@ -46,6 +47,7 @@ MP_Online_Status::init();
 MP_Role_Avatar_Rings::init();
 MP_Birthday_Celebration::init();
 MP_Mail_Diagnostics::init();
+MP_Original_Cards::init();
 
 // MP_Admin::SLUG is also used in the front-end admin bar.
 require_once MP_PATH . 'class-mp-admin.php';

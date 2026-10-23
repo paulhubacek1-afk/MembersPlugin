@@ -1,3 +1,7 @@
+## 1.0.9.6 – 2026-10-23
+
+- New: "Mitgliederkarten wie im Original" (enabled by default, Design & CSS): the member directory always uses the original card templates, and card styling that themes or other plugins add as inline CSS for `.um-member…` selectors is removed. Theme fonts are still used; card sizes stay original.
+
 ## 1.0.9.5 – 2026-10-23
 
 - Fixed: member directory stuck on the loading spinner when the theme/page builder converted "&&" in the directory card template into "&#038;&#038;" (JavaScript syntax error while compiling the template). Templates are repaired before use.
