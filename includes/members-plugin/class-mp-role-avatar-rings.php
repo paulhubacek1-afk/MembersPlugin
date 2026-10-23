@@ -121,7 +121,7 @@ final class MP_Role_Avatar_Rings {
 			<?php if ( isset( $_GET['mp-saved'] ) ) : // phpcs:ignore WordPress.Security.NonceVerification.Recommended ?>
 				<div class="notice notice-success is-dismissible"><p><?php esc_html_e( 'Ringfarben gespeichert.', 'ultimate-member' ); ?></p></div>
 			<?php endif; ?>
-			<p><?php esc_html_e( 'Aktiviere einen Ring und wähle für jede Benutzerrolle eine eigene Farbe. Nicht aktivierte Rollen behalten ihre normalen Profilbilder. Wenn ein Konto mehrere Rollen hat, wird die erste Rolle mit aktivierter Ringfarbe verwendet.', 'ultimate-member' ); ?></p>
+			<p><?php esc_html_e( 'Aktiviere einen Ring und wähle für jede Benutzerrolle eine eigene Farbe. Nicht aktivierte Rollen behalten ihre normalen Profilbilder. Bei Konten mit mehreren Rollen bestimmt die erste Rolle des Kontos die Ringfarbe.', 'ultimate-member' ); ?></p>
 			<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
 				<input type="hidden" name="action" value="mp_save_role_avatar_rings">
 				<?php wp_nonce_field( 'mp_save_role_avatar_rings' ); ?>
@@ -247,18 +247,17 @@ final class MP_Role_Avatar_Rings {
 		wp_register_style( 'mp-role-avatar-rings', false, array(), defined( 'MP_VERSION' ) ? MP_VERSION : null );
 		wp_enqueue_style( 'mp-role-avatar-rings' );
 
-		$css = '.mp-role-avatar-ring{box-shadow:0 0 0 3px currentColor;box-shadow:0 0 0 3px var(--mp-role-ring-color, currentColor)!important;}';
+		$css = '.mp-role-avatar-ring{box-shadow:0 0 0 3px currentColor!important;}';
 		foreach ( $colors as $role => $color ) {
 			$role_class = sanitize_html_class( 'um-role-' . $role );
 			$ring_class = sanitize_html_class( 'mp-role-avatar-ring--' . $role );
 			$selectors  = array(
 				'.' . $ring_class,
-				'.' . $role_class . ' .um-profile-photo img',
-				'.' . $role_class . ' .um-profile-photo-img',
-				'.' . $role_class . ' .um-profile-photo-img img',
-				'.' . $role_class . ' .um-member-photo img',
+				'.um-profile.' . $role_class . ' .um-profile-photo img',
+				'.um-profile.' . $role_class . ' .um-profile-photo-img',
+				'.um-profile.' . $role_class . ' .um-profile-photo-img img',
 				'.um-member.' . $role_class . ' .um-member-photo img',
-				'.' . $role_class . ' img.um-avatar',
+				'.um-member.' . $role_class . ' .um-member-photo .um-avatar',
 			);
 			$selectors = array_unique( $selectors );
 			$css .= implode( ',', $selectors ) . '{box-shadow:0 0 0 3px ' . $color . '!important;}';
