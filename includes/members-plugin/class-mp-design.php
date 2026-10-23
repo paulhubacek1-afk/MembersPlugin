@@ -96,6 +96,7 @@ final class MP_Design {
 			'editor_styles' => 1,
 			'theme_typography' => 1,
 			'original_cards'   => 1,
+			'strip_foreign_card_css' => 0,
 		);
 	}
 
