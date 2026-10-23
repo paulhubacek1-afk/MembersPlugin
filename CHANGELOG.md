@@ -2,7 +2,10 @@
 
 - Fixed: user-uploaded cover photos are saved at encoder quality 100, including the master image and generated thumbnails.
 - Fixed: the saved cover image keeps the full resolution of the user's selected crop instead of being downscaled by the generic image width limit.
-- Kept: configured cover thumbnail sizes are still generated for responsive display.
+- Improved: member directories prime user and user-meta caches for the current result page, reducing repeated database lookups while rendering cards.
+- Improved: profile-form IDs are queried once per request instead of once per member card.
+- Improved: directory cover photos use native lazy loading and asynchronous decoding to reduce competition from off-screen images.
+- Kept: configured cover thumbnail sizes and directory extension hooks remain supported.
 
 ## 1.0.9.1 – 2026-10-23
 
