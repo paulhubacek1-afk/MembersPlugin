@@ -13,6 +13,39 @@ var um_member_directory_last_data = [];
 var um_members_response_cache = {};
 var um_members_request_seq = {};
 
+/**
+ * Members Plugin: repair member-directory templates before they are compiled.
+ *
+ * Some themes/page builders run WordPress text filters (wptexturize) over the page and
+ * turn "&&" inside the template's <# #> JavaScript blocks into "&#038;&#038;". The
+ * template then fails to compile ("SyntaxError: Invalid or unexpected token") and the
+ * directory keeps showing the loading spinner. Decode entities inside those blocks.
+ */
+function um_members_repair_templates() {
+	jQuery( 'script[id^="tmpl-um-"]' ).each( function() {
+		if ( this.getAttribute( 'data-mp-repaired' ) ) {
+			return;
+		}
+		this.setAttribute( 'data-mp-repaired', '1' );
+
+		var source = this.innerHTML;
+		var decode = function( code ) {
+			return code
+				.replace( /&#0?38;|&amp;/g, '&' )
+				.replace( /&#0?60;|&lt;/g, '<' )
+				.replace( /&#0?62;|&gt;/g, '>' )
+				.replace( /&#8216;|&#8217;|&#039;|&#39;/g, "'" )
+				.replace( /&#8220;|&#8221;|&quot;/g, '"' );
+		};
+		var repaired = source.replace( /<#([\s\S]*?)#>/g, function( match, code ) {
+			return '<#' + decode( code ) + '#>';
+		} );
+		if ( repaired !== source ) {
+			this.innerHTML = repaired;
+		}
+	} );
+}
+
 function um_members_cache_ttl() {
 	return wp.hooks.applyFilters( 'um_member_directory_response_cache_ttl', 60000 );
 }
@@ -464,6 +497,8 @@ function um_ajax_get_members( directory, args ) {
 
 
 function um_build_template( directory, data ) {
+	um_members_repair_templates();
+
 	var layout = directory.data('view_type');
 	var template = wp.template( 'um-member-' + layout + '-' + um_members_get_hash( directory ) );
 
@@ -1719,6 +1754,8 @@ jQuery(document.body).ready( function() {
 	wp.hooks.doAction( 'um_member_directory_on_first_pages_loading' );
 
 	//Init Directories
+	um_members_repair_templates();
+
 	jQuery( '.um-directory' ).each( function() {
 		var directory = jQuery(this);
 		var hash = um_members_get_hash( directory );

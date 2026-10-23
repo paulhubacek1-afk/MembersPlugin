@@ -4,7 +4,7 @@ Tags: membership, user-profile, community, user-registration, member-directory, 
 Requires at least: 6.2
 Tested up to: 7.1
 Requires PHP: 7.0
-Stable tag: 1.0.9.4
+Stable tag: 1.0.9.5
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -57,6 +57,10 @@ No. The profile checks the built-in birth_date field automatically.
 No. It searches for releases automatically and makes available updates visible in WordPress.
 
 == Changelog ==
+
+= 1.0.9.5 =
+* Fixed: member directory stuck on the loading spinner when the theme/page builder converted && in the directory card template into &#038;&#038; (JavaScript syntax error while compiling the template). Templates are repaired before use.
+* Fixed: browsers and caching plugins kept serving old plugin scripts after updates because the bundled core assets were always versioned 2.14.1; the Members Plugin version is now appended.
 
 = 1.0.9.4 =
 * Faster: the first page of a member directory is rendered directly into the page, so members appear without waiting for a second (AJAX) request after the page has loaded.
