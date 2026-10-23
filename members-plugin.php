@@ -14,7 +14,7 @@
  * Requires PHP: 7.0
  * Update URI: https://github.com/paulhubacek1-afk/MembersPlugin
  *
- * @package UM
+ * @package MembersPlugin
  */
 
 defined( 'ABSPATH' ) || exit;
