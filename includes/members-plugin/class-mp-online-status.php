@@ -150,7 +150,8 @@ final class MP_Online_Status {
 			wp_send_json_error( array( 'message' => 'not_logged_in' ), 401 );
 		}
 
-		update_user_meta( get_current_user_id(), self::META_KEY, time() );
+		// mark_current_user_online() already ran on 'init' for this request and
+		// throttles writes to one per minute.
 		wp_send_json_success();
 	}
 
@@ -169,7 +170,18 @@ final class MP_Online_Status {
 		$user_ids = array_values( array_unique( array_filter( array_map( 'absint', array_slice( $user_ids, 0, 100 ) ) ) ) );
 		$states   = array();
 
+		// Load all requested users and their meta with two queries instead of two per user.
+		if ( ! empty( $user_ids ) ) {
+			cache_users( $user_ids );
+			update_meta_cache( 'user', $user_ids );
+		}
+
 		foreach ( $user_ids as $user_id ) {
+			// Only report members whose profile the visitor may see (no enumeration of
+			// arbitrary user IDs or private profiles through this public endpoint).
+			if ( function_exists( 'um_can_view_profile' ) && ! um_can_view_profile( $user_id ) ) {
+				continue;
+			}
 			if ( get_userdata( $user_id ) ) {
 				$states[ (string) $user_id ] = self::is_online( $user_id ) ? 'online' : 'offline';
 			}

@@ -219,7 +219,11 @@ if ( ! class_exists( 'um\core\Form' ) ) {
 					);
 				}
 
-				if ( ! empty( $_POST['child_callback'] ) && isset( $form_fields[ $_POST['child_name'] ] ) ) {
+				// Members Plugin: Always provide the keys the frontend script reads.
+				$arr_options['field'] = array( 'editable' => 1 );
+				$arr_options['items'] = array();
+
+				if ( ! empty( $_POST['child_callback'] ) && isset( $_POST['child_name'] ) && isset( $form_fields[ $_POST['child_name'] ] ) ) {
 					// If the requested callback function is added in the form or added in the field option, execute it with call_user_func.
 					if ( isset( $form_fields[ $_POST['child_name'] ]['custom_dropdown_options_source'] ) &&
 						! empty( $form_fields[ $_POST['child_name'] ]['custom_dropdown_options_source'] ) &&
@@ -227,7 +231,18 @@ if ( ! class_exists( 'um\core\Form' ) ) {
 
 						$child_field = $form_fields[ $_POST['child_name'] ];
 
-						$arr_options['items'] = call_user_func( $ajax_source_func, $child_field['parent_dropdown_relationship'] );
+						// Members Plugin: The frontend script reads `field.default` and `field.editable`.
+						// Return only these two values instead of the full field configuration.
+						$arr_options['field'] = array(
+							'default'  => isset( $child_field['default'] ) ? $child_field['default'] : null,
+							'editable' => isset( $child_field['editable'] ) ? (int) $child_field['editable'] : 1,
+						);
+						if ( null === $arr_options['field']['default'] ) {
+							unset( $arr_options['field']['default'] );
+						}
+
+						$parent_relationship  = isset( $child_field['parent_dropdown_relationship'] ) ? $child_field['parent_dropdown_relationship'] : '';
+						$arr_options['items'] = call_user_func( $ajax_source_func, $parent_relationship );
 					} else {
 						$arr_options['status']  = 'error';
 						$arr_options['message'] = __( 'This is not possible for security reasons.', 'ultimate-member' );

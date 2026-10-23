@@ -302,6 +302,11 @@ final class MP_Migration_Backup {
 					$ok = false;
 					break 2;
 				}
+				// Only restore rows of the same kind the export captures. A modified archive
+				// must not be able to overwrite unrelated options (e.g. siteurl) or posts.
+				if ( ! self::is_importable_row( $item[1], $row ) ) {
+					continue;
+				}
 				$exists = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$item[0]} WHERE {$item[2]} = %s", $row[ $item[2] ] ) );
 				$result = $exists ? $wpdb->update( $item[0], $row, array( $item[2] => $row[ $item[2] ] ) ) : $wpdb->insert( $item[0], $row );
 				if ( false === $result ) {
@@ -365,7 +370,12 @@ final class MP_Migration_Backup {
 					continue;
 				}
 				$relative = substr( $entry, strlen( $prefix ) );
-				if ( '' === $relative ) {
+				if ( '' === $relative || '/' === substr( $relative, -1 ) || false !== strpos( $relative, '\\' ) || false !== strpos( $relative, "\0" ) ) {
+					continue;
+				}
+				// Never write executable or unknown file types into the public uploads folder.
+				$filetype = wp_check_filetype( wp_basename( $relative ) );
+				if ( empty( $filetype['ext'] ) || preg_match( '/^(php\d*|phtml|phar|pht|shtml|htaccess|cgi|pl|py|sh|exe|js|html?|svgz?)$/i', $filetype['ext'] ) ) {
 					continue;
 				}
 				$target = $target_root . $relative;
@@ -394,6 +404,25 @@ final class MP_Migration_Backup {
 		wp_cache_flush();
 		wp_safe_redirect( add_query_arg( array( 'page' => self::PAGE, 'mp_import' => 'done' ), admin_url( 'options-general.php' ) ) );
 		exit;
+	}
+
+	/**
+	 * Whether a row from the archive belongs to the data set the export captures.
+	 *
+	 * @param string $kind Data set (users, usermeta, options, posts, postmeta).
+	 * @param array  $row  Row data.
+	 * @return bool
+	 */
+	private static function is_importable_row( $kind, $row ) {
+		if ( 'options' === $kind ) {
+			$name = isset( $row['option_name'] ) ? (string) $row['option_name'] : '';
+			return 0 === strpos( $name, 'um_' ) || 0 === strpos( $name, 'ultimatemember_' ) || false !== strpos( $name, 'ultimate_member' );
+		}
+		if ( 'posts' === $kind ) {
+			$type = isset( $row['post_type'] ) ? (string) $row['post_type'] : '';
+			return 0 === strpos( $type, 'um_' );
+		}
+		return true;
 	}
 
 	private static function redirect_import_error( $code ) {

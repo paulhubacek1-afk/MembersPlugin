@@ -1,3 +1,19 @@
+## 1.0.9.3 – 2026-10-23
+
+- Faster: member directory: cover photos and profile photos now use the file's modification time as URL version instead of the current time. Browsers can finally cache them, so returning to the directory or paging no longer re-downloads every image.
+- Faster: member directory: profile photos in lists load the matching small thumbnail (the original is offered via srcset for high-density screens) instead of the full-size original.
+- Faster: member directory: the per-member profile cache options are loaded with one query per page (WordPress 6.4+), the field list and allowed-HTML lists are built once per request, and profile forms are only queried when tagline/reveal fields are shown.
+- Faster: member directory script: pages that were already loaded are shown instantly from a 60-second client cache, slow older responses can no longer overwrite newer results, and the grid no longer re-initialises once per previously opened page on every window resize.
+- Faster: theme color detection is cached (flushed on theme/style changes), and the birthday stylesheet is loaded only on a member's birthday.
+- Faster: online status: no extra AJAX heartbeat on every page load; presence polling loads all users with two queries.
+- Fixed: dependent dropdown fields (child options) in profile/registration forms threw a JavaScript error because the AJAX response no longer contained the field's `default`/`editable` values.
+- Fixed: the updater could offer the bundled core's upstream tags (e.g. 2.14.1) as an update; only Members Plugin 1.x releases are considered now. The duplicate second updater was removed (it also caused a fatal error while a separate legacy core was active).
+- Fixed: a missing profile-photo file now shows the default avatar instead of a broken image URL.
+- Fixed: birthday: well-known birthday fields are checked first; members born on 29 February celebrate on 28 February in non-leap years.
+- Security: backup import only restores the option and post types the export captures and never writes executable file types into uploads.
+- Security: the public online-status endpoint only reports members whose profile the visitor may view.
+- Improved: uninstall removes the updater cron event and cached data; Members Plugin options are deleted when "delete data on uninstall" is enabled.
+
 ## 1.0.9.2 – 2026-10-23
 
 - Fixed: user-uploaded cover photos are saved at encoder quality 100, including the master image and generated thumbnails.

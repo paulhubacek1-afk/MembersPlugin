@@ -38,6 +38,41 @@ final class MP_Theme_Colors {
 			return self::$cache;
 		}
 
+		// Members Plugin: theme detection walks theme.json, palettes and builder options
+		// on every page view. Cache the result; it is flushed on theme/style changes.
+		$transient_key = self::transient_key();
+		if ( ! is_admin() ) {
+			$stored = get_transient( $transient_key );
+			if ( is_array( $stored ) && array_key_exists( 'primary', $stored ) ) {
+				self::$cache = $stored;
+				return self::$cache;
+			}
+		}
+
+		self::$cache = self::detect_uncached();
+		if ( ! is_admin() ) {
+			set_transient( $transient_key, self::$cache, 12 * HOUR_IN_SECONDS );
+		}
+
+		return self::$cache;
+	}
+
+	/**
+	 * Cache key for the detected colors (changes with the active theme and its version).
+	 *
+	 * @return string
+	 */
+	private static function transient_key() {
+		$theme = wp_get_theme();
+		return 'mp_theme_colors_' . md5( get_stylesheet() . '|' . get_template() . '|' . $theme->get( 'Version' ) . '|' . ( defined( 'MP_VERSION' ) ? MP_VERSION : '' ) );
+	}
+
+	/**
+	 * Performs the actual detection.
+	 *
+	 * @return array
+	 */
+	private static function detect_uncached() {
 		$palette = self::get_palette();
 		$found   = array(
 			'primary'       => null,
@@ -156,8 +191,7 @@ final class MP_Theme_Colors {
 		 * @param array $found   Erkannte Werte.
 		 * @param array $palette Theme-Palette.
 		 */
-		self::$cache = apply_filters( 'mp_detected_theme_colors', $found, $palette );
-		return self::$cache;
+		return apply_filters( 'mp_detected_theme_colors', $found, $palette );
 	}
 
 	/**
@@ -223,7 +257,11 @@ final class MP_Theme_Colors {
 	 * @return mixed
 	 */
 	private static function global_style( $path ) {
-		$value = self::walk( wp_get_global_styles(), $path );
+		static $styles = null;
+		if ( null === $styles ) {
+			$styles = wp_get_global_styles();
+		}
+		$value = self::walk( $styles, $path );
 		if ( null === $value ) {
 			return null;
 		}
@@ -476,5 +514,18 @@ final class MP_Theme_Colors {
 	 */
 	public static function flush() {
 		self::$cache = null;
+		delete_transient( self::transient_key() );
+	}
+
+	/**
+	 * Hooks that invalidate the cached theme colors.
+	 */
+	public static function register_cache_invalidation() {
+		foreach ( array( 'switch_theme', 'customize_save_after', 'save_post_wp_global_styles', 'upgrader_process_complete' ) as $hook ) {
+			add_action( $hook, array( __CLASS__, 'flush' ), 10, 0 );
+		}
+		foreach ( array( 'elementor_active_kit', 'theme_mods_' . get_option( 'stylesheet' ) ) as $option ) {
+			add_action( 'update_option_' . $option, array( __CLASS__, 'flush' ), 10, 0 );
+		}
 	}
 }

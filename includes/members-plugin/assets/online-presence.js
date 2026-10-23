@@ -106,15 +106,23 @@
 		heartbeat();
 	}
 
+	// The page request itself already marked the member as online on the server, so
+	// no heartbeat is sent on load (that was one extra admin-ajax request per page view).
 	if (document.readyState === 'loading') {
-		document.addEventListener('DOMContentLoaded', refresh);
+		document.addEventListener('DOMContentLoaded', pollPresence);
 	} else {
-		refresh();
+		pollPresence();
 	}
 
-	window.setInterval(refresh, interval);
+	var lastRefresh = Date.now();
+	window.setInterval(function () {
+		lastRefresh = Date.now();
+		refresh();
+	}, interval);
 	document.addEventListener('visibilitychange', function () {
-		if (document.visibilityState === 'visible') {
+		// Refresh when a tab becomes visible again, but not more often than the interval.
+		if (document.visibilityState === 'visible' && Date.now() - lastRefresh >= interval) {
+			lastRefresh = Date.now();
 			refresh();
 		}
 	});

@@ -2116,9 +2116,32 @@ function um_get_cover_uri( $image, $attrs ) {
 	$ext        = '.' . pathinfo( $image, PATHINFO_EXTENSION );
 
 	$ratio  = str_replace( ':1', '', UM()->options()->get( 'profile_cover_ratio' ) );
-	$height = round( $attrs / $ratio );
+	$height = ( is_numeric( $ratio ) && (float) $ratio > 0 ) ? round( $attrs / $ratio ) : 0;
 
-	$timestamp = time();
+	$user_id = um_user( 'ID' );
+
+	/*
+	 * Members Plugin: version the URL with the file modification time instead of time().
+	 * A changing time() value made every cover a new URL on every request, so browsers
+	 * could never cache covers and each member-directory page re-downloaded all of them.
+	 */
+	$find = static function ( $dir, $url ) use ( $user_id, $attrs, $height, $ext ) {
+		$found = false;
+		$candidates = array( "cover_photo{$ext}" );
+		if ( file_exists( $dir . $user_id . DIRECTORY_SEPARATOR . "cover_photo-{$attrs}{$ext}" ) ) {
+			$candidates[] = "cover_photo-{$attrs}{$ext}";
+		} elseif ( $height ) {
+			$candidates[] = "cover_photo-{$attrs}x{$height}{$ext}";
+		}
+		foreach ( $candidates as $filename ) {
+			$path = $dir . $user_id . DIRECTORY_SEPARATOR . $filename;
+			if ( file_exists( $path ) ) {
+				$mtime = @filemtime( $path ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
+				$found = $url . $user_id . '/' . $filename . '?' . ( $mtime ? $mtime : time() );
+			}
+		}
+		return $found;
+	};
 
 	if ( is_multisite() ) {
 		//multisite fix for old customers
@@ -2127,26 +2150,10 @@ function um_get_cover_uri( $image, $attrs ) {
 		$multisite_fix_dir = str_replace( DIRECTORY_SEPARATOR . 'sites' . DIRECTORY_SEPARATOR . get_current_blog_id() . DIRECTORY_SEPARATOR, DIRECTORY_SEPARATOR, $multisite_fix_dir );
 		$multisite_fix_url = str_replace( '/sites/' . get_current_blog_id() . '/', '/', $multisite_fix_url );
 
-		if ( file_exists( $multisite_fix_dir . um_user( 'ID' ) . DIRECTORY_SEPARATOR . "cover_photo{$ext}" ) ) {
-			$uri_common = $multisite_fix_url . um_user( 'ID' ) . "/cover_photo{$ext}?" . $timestamp;
-		}
-
-		if ( file_exists( $multisite_fix_dir . um_user( 'ID' ) . DIRECTORY_SEPARATOR . "cover_photo-{$attrs}{$ext}" ) ) {
-			$uri_common = $multisite_fix_url . um_user( 'ID' ) . "/cover_photo-{$attrs}{$ext}?" . $timestamp;
-		}elseif ( file_exists( $multisite_fix_dir . um_user( 'ID' ) . DIRECTORY_SEPARATOR . "cover_photo-{$attrs}x{$height}{$ext}" ) ) {
-			$uri_common = $multisite_fix_url . um_user( 'ID' ) . "/cover_photo-{$attrs}x{$height}{$ext}?". $timestamp;
-		}
+		$uri_common = $find( $multisite_fix_dir, $multisite_fix_url );
 	}
 
-	if ( file_exists( UM()->uploader()->get_upload_base_dir() . um_user( 'ID' ) . DIRECTORY_SEPARATOR . "cover_photo{$ext}" ) ) {
-		$uri = UM()->uploader()->get_upload_base_url() . um_user( 'ID' ) . "/cover_photo{$ext}?" . $timestamp;
-	}
-
-	if ( file_exists( UM()->uploader()->get_upload_base_dir() . um_user( 'ID' ) . DIRECTORY_SEPARATOR . "cover_photo-{$attrs}{$ext}" ) ) {
-		$uri = UM()->uploader()->get_upload_base_url() . um_user( 'ID' ) . "/cover_photo-{$attrs}{$ext}?" . $timestamp;
-	}elseif ( file_exists( UM()->uploader()->get_upload_base_dir() . um_user( 'ID' ) . DIRECTORY_SEPARATOR . "cover_photo-{$attrs}x{$height}{$ext}" ) ) {
-		$uri = UM()->uploader()->get_upload_base_url() . um_user( 'ID' ) . "/cover_photo-{$attrs}x{$height}{$ext}?". $timestamp;
-	}
+	$uri = $find( UM()->uploader()->get_upload_base_dir(), UM()->uploader()->get_upload_base_url() );
 
 	if ( ! empty( $uri_common ) && empty( $uri ) ) {
 		$uri = $uri_common;
@@ -2154,7 +2161,6 @@ function um_get_cover_uri( $image, $attrs ) {
 
 	return $uri;
 }
-
 
 
 /**
@@ -2260,12 +2266,56 @@ function um_get_avatar_uri( $image, $attrs ) {
 	 * }
 	 * ?>
 	 */
-	$cache_time = apply_filters( 'um_filter_avatar_cache_time', time(), um_user( 'ID' ) );
-	if ( ! empty( $cache_time ) ) {
+	// Members Plugin: default to the file modification time instead of time(), so
+	// unchanged avatars keep the same URL and browsers can cache them.
+	$cache_time = apply_filters( 'um_filter_avatar_cache_time', um_mp_upload_file_version( $uri ), um_user( 'ID' ) );
+	if ( ! empty( $uri ) && ! empty( $cache_time ) ) {
 		$uri .= "?{$cache_time}";
 	}
 
 	return $uri;
+}
+
+/**
+ * Members Plugin: returns a cache-busting version (file modification time) for a
+ * file URL inside the membership upload directory. Falls back to time() when the
+ * file cannot be resolved, which matches the previous behaviour.
+ *
+ * @param string|false $url File URL without query string.
+ *
+ * @return int
+ */
+function um_mp_upload_file_version( $url ) {
+	if ( empty( $url ) || ! is_string( $url ) ) {
+		return time();
+	}
+
+	$pairs = array(
+		array( UM()->uploader()->get_upload_base_url(), UM()->uploader()->get_upload_base_dir() ),
+	);
+	if ( is_multisite() ) {
+		$pairs[] = array(
+			str_replace( '/sites/' . get_current_blog_id() . '/', '/', $pairs[0][0] ),
+			str_replace( DIRECTORY_SEPARATOR . 'sites' . DIRECTORY_SEPARATOR . get_current_blog_id() . DIRECTORY_SEPARATOR, DIRECTORY_SEPARATOR, $pairs[0][1] ),
+		);
+	}
+
+	foreach ( $pairs as $pair ) {
+		list( $base_url, $base_dir ) = $pair;
+		if ( '' !== $base_url && 0 === strpos( $url, $base_url ) ) {
+			$relative = substr( $url, strlen( $base_url ) );
+			if ( false !== strpos( $relative, '..' ) ) {
+				break;
+			}
+			$path  = $base_dir . str_replace( '/', DIRECTORY_SEPARATOR, $relative );
+			$mtime = is_file( $path ) ? @filemtime( $path ) : false; // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
+			if ( $mtime ) {
+				return (int) $mtime;
+			}
+		}
+	}
+
+	return time();
 }
 
 /**
@@ -2312,6 +2362,13 @@ function um_get_user_avatar_data( $user_id = '', $size = '96' ) {
 		$data['url'] = um_get_avatar_uri( $profile_photo, $size );
 		$data['type'] = 'upload';
 		$data['class'] .= ' um-avatar-uploaded';
+		// Members Plugin: the stored photo file is missing - show the default avatar
+		// instead of a broken image URL.
+		if ( empty( $data['url'] ) ) {
+			$data['url']   = $data['default'];
+			$data['type']  = 'default';
+			$data['class'] = str_replace( ' um-avatar-uploaded', ' um-avatar-default', $data['class'] );
+		}
 	} elseif ( $synced_profile_photo = um_user( 'synced_profile_photo' ) ) {
 		$data['url'] = $synced_profile_photo;
 		$data['type'] = 'sync';

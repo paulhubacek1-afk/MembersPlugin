@@ -24,7 +24,7 @@ defined( 'ABSPATH' ) || exit;
  */
 final class MP_Updater {
 
-	const TRANSIENT    = 'mp_github_release';
+	const TRANSIENT    = 'mp_github_release_v2';
 	const TOKEN_OPTION = 'mp_github_token';
 	const PAGE         = 'mp-updates';
 	const ASSET_NAME   = 'members-plugin.zip';
@@ -156,20 +156,26 @@ final class MP_Updater {
 			return empty( $cached['version'] ) ? null : $cached;
 		}
 
+		// The repository also carries the bundled core's upstream tags (e.g. 2.14.1).
+		// "releases/latest" could therefore point at a foreign version, so fetch the
+		// recent releases and pick the highest Members Plugin release (1.x line).
 		$response = wp_remote_get(
-			'https://api.github.com/repos/' . self::repo() . '/releases/latest',
+			'https://api.github.com/repos/' . self::repo() . '/releases?per_page=30',
 			array(
 				'timeout' => 10,
 				'headers' => self::headers(),
 			)
 		);
 
-		$code = (int) wp_remote_retrieve_response_code( $response );
-		$data = json_decode( (string) wp_remote_retrieve_body( $response ), true );
+		$code     = (int) wp_remote_retrieve_response_code( $response );
+		$releases = json_decode( (string) wp_remote_retrieve_body( $response ), true );
+		$data     = is_array( $releases ) ? self::pick_release( $releases ) : null;
 
 		if ( is_wp_error( $response ) || 200 !== $code || ! is_array( $data ) || empty( $data['tag_name'] ) ) {
 			if ( is_wp_error( $response ) ) {
 				$error = $response->get_error_message();
+			} elseif ( 200 === $code ) {
+				$error = __( 'Kein passendes Members-Plugin-Release (1.x mit members-plugin.zip) gefunden.', 'ultimate-member' );
 			} elseif ( 404 === $code ) {
 				$error = '' === self::token()
 					? __( 'Kein Release gefunden. Bei einem privaten Repository wird ein GitHub-Token benötigt.', 'ultimate-member' )
@@ -213,6 +219,42 @@ final class MP_Updater {
 
 		set_site_transient( self::TRANSIENT, $release, 6 * HOUR_IN_SECONDS );
 		return $release;
+	}
+
+	/**
+	 * Select the newest published Members Plugin release (1.x line) from a list.
+	 * Releases with the members-plugin.zip asset win over source-only releases.
+	 *
+	 * @param array $releases GitHub API release objects.
+	 * @return array|null
+	 */
+	private static function pick_release( $releases ) {
+		$best = null;
+		foreach ( $releases as $item ) {
+			if ( ! is_array( $item ) || empty( $item['tag_name'] ) || ! empty( $item['draft'] ) || ! empty( $item['prerelease'] ) ) {
+				continue;
+			}
+			$version = ltrim( (string) $item['tag_name'], 'vV' );
+			if ( ! preg_match( '/^1\.\d+\.\d+(?:\.\d+)?$/', $version ) ) {
+				continue;
+			}
+			$has_asset = false;
+			if ( ! empty( $item['assets'] ) && is_array( $item['assets'] ) ) {
+				foreach ( $item['assets'] as $asset ) {
+					if ( isset( $asset['name'] ) && self::ASSET_NAME === $asset['name'] ) {
+						$has_asset = true;
+						break;
+					}
+				}
+			}
+			if ( ! $has_asset && empty( $item['zipball_url'] ) ) {
+				continue;
+			}
+			if ( null === $best || version_compare( $version, ltrim( (string) $best['tag_name'], 'vV' ), '>' ) ) {
+				$best = $item;
+			}
+		}
+		return $best;
 	}
 
 	/**

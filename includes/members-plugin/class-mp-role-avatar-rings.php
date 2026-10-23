@@ -42,9 +42,16 @@ final class MP_Role_Avatar_Rings {
 	 * @return array<string,string>
 	 */
 	public static function get_colors() {
+		// Called for every avatar on a page (e.g. each member-directory card); compute once.
+		static $cache = null;
+		if ( null !== $cache && ! doing_action( 'admin_post_mp_save_role_avatar_rings' ) ) {
+			return $cache;
+		}
+
 		$saved = get_option( self::OPTION, array() );
 		if ( ! is_array( $saved ) ) {
-			return array();
+			$cache = array();
+			return $cache;
 		}
 
 		$roles  = wp_roles()->roles;
@@ -60,6 +67,7 @@ final class MP_Role_Avatar_Rings {
 			}
 		}
 
+		$cache = $colors;
 		return $colors;
 	}
 
@@ -191,9 +199,13 @@ final class MP_Role_Avatar_Rings {
 			return $avatar;
 		}
 
+		$colors = self::get_colors();
+		if ( empty( $colors ) ) {
+			return $avatar;
+		}
+
 		$user  = get_userdata( $user_id );
 		$roles = $user instanceof WP_User ? (array) $user->roles : array();
-		$colors = self::get_colors();
 		$role   = '';
 		foreach ( $roles as $user_role ) {
 			if ( isset( $colors[ $user_role ] ) ) {
