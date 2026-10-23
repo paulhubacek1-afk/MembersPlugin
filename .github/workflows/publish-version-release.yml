@@ -1,0 +1,45 @@
+name: Publish versioned release
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - members-plugin.php
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    name: Publish release for the plugin header version
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out main
+        uses: actions/checkout@v4
+
+      - name: Read plugin version
+        id: version
+        shell: bash
+        run: |
+          set -euo pipefail
+          VERSION="$(grep -m1 -E '^\\s*\\*\\s*Version:' members-plugin.php | sed -E 's/.*Version:\\s*//' | tr -d '[:space:]')"
+          if [[ ! "$VERSION" =~ ^[0-9]+\\.[0-9]+(\\.[0-9]+)?$ ]]; then
+            echo "::error::Invalid plugin version: $VERSION"
+            exit 1
+          fi
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "tag=v$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Publish release if this version is not released yet
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.version.outputs.tag }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "Release $TAG already exists. Nothing to publish."
+            exit 0
+          fi
+          gh release create "$TAG" --title "Members Plugin $TAG" --notes-file CHANGELOG.md --target "$GITHUB_SHA"
