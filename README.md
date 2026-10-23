@@ -1,5 +1,10 @@
 # Members Plugin – Profiles & Community
 
+## Updated in 1.0.9.2
+
+- Cover-photo uploads are saved at maximum supported encoder quality (100). Quality is set before saving the master file, fixing the previous timing issue.
+- The master cover keeps the full resolution of the selected crop rather than being reduced by the generic image width limit. Configured cover thumbnails are still generated.
+
 ## Updated in 1.0.9.1
 
 - Fixed the WordPress Media Library picker for **Default Profile Photo** and **Default Cover Photo** under the Appearance settings sections. The media scripts are now loaded on the profile-photo and cover-photo subtabs too.
