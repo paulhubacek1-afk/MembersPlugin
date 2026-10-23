@@ -39,12 +39,28 @@ jobs:
         run: |
           set -euo pipefail
           if gh release view "$TAG" >/dev/null 2>&1; then
-            echo "Release $TAG already exists; preparing its ZIP asset."
+            echo "Release $TAG already exists."
           else
             gh release create "$TAG" --title "Members Plugin $TAG" --notes-file CHANGELOG.md --target "$GITHUB_SHA"
           fi
 
+      - name: Check whether release ZIP already exists
+        id: asset
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.version.outputs.tag }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if gh release view "$TAG" --json assets --jq '.assets[].name' | grep -Fxq 'members-plugin.zip'; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+            echo "Existing ZIP found; leaving the published asset unchanged."
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Build distributable plugin ZIP
+        if: steps.asset.outputs.exists != 'true'
         shell: bash
         run: |
           set -euo pipefail
@@ -60,7 +76,8 @@ jobs:
           ls -lh build/members-plugin.zip
 
       - name: Attach ZIP to GitHub Release
+        if: steps.asset.outputs.exists != 'true'
         env:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ steps.version.outputs.tag }}
-        run: gh release upload "$TAG" build/members-plugin.zip --clobber
+        run: gh release upload "$TAG" build/members-plugin.zip
