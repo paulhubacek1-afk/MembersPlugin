@@ -59,8 +59,9 @@ No. It searches for releases automatically and makes available updates visible i
 == Changelog ==
 
 = 1.0.9.2 =
-* Fixed: save uploaded cover photos and responsive thumbnails at quality 100.
-* Fixed: preserve full resolution of the selected cover crop instead of scaling the master image down.
+* Fixed: save uploaded cover photos and responsive thumbnails at quality 100 and preserve full resolution of the selected crop.
+* Improved: prime member/user-meta caches to reduce repeated database lookups.
+* Improved: query profile-form IDs once per request and lazy-load off-screen directory cover photos.
 
 = 1.0.9.1 =
 * Fixed: enqueue the WordPress Media Library on all Appearance settings subsections.
