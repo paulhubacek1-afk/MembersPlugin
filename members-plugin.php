@@ -2,8 +2,8 @@
 /**
  * Plugin Name: Members Plugin – Profiles & Community
  * Plugin URI: https://github.com/paulhubacek1-afk/MembersPlugin
- * Description: Members Plugin mit Profilen, Rollen-Ringfarben, Geburtstags-Konfetti, automatischer Update-Prüfung und E-Mail-Protokoll.
- * Version: 1.0.6
+ * Description: Eigenständige MP-Erweiterungen mit Profilen, Rollen-Ringfarben, Sicherung und automatischer Update-Prüfung.
+ * Version: 1.0.7
  * Author: Paul Hubacek
  * Author URI: https://github.com/paulhubacek1-afk
  * License: GPLv3
@@ -18,6 +18,10 @@
  */
 
 defined( 'ABSPATH' ) || exit;
+
+// This independent backup tool must load before the legacy-core guard so administrators
+// can export existing membership data before removing the separately installed UM plugin.
+require_once __DIR__ . '/includes/class-mp-migration-backup.php';
 
 require_once ABSPATH . 'wp-admin/includes/plugin.php';
 
