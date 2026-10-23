@@ -75,6 +75,10 @@ final class MP_Online_Status {
 	 * @param array $directory_data Directory settings.
 	 */
 	public static function directory_name_indicator( $user_id, $directory_data = array() ) {
+		if ( is_array( $directory_data ) && isset( $directory_data['show_name'] ) && empty( $directory_data['show_name'] ) ) {
+			return;
+		}
+
 		self::output_presence_indicator( $user_id );
 	}
 
