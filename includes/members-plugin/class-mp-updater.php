@@ -7,6 +7,8 @@
  *    nicht bei WordPress.org nachfragt, sondern den Filter `update_plugins_github.com` nutzt.
  *  - Dieser Updater fragt das neueste Release des Repos über die GitHub-API ab
  *    (Ergebnis 6 Stunden gecacht) und meldet es WordPress als Update.
+ *  - Ein WordPress-Cron prüft zusätzlich alle sechs Stunden automatisch nach neuen Releases;
+ *    verfügbare Updates werden angezeigt, aber nicht ungefragt installiert.
  *  - Paket: das Release-Asset "members-plugin.zip" (wird von der GitHub Action gebaut),
  *    ersatzweise das Quellcode-ZIP des Tags (der Ordner wird dann automatisch umbenannt).
  *  - Private Repos: GitHub-Token unter "Members Plugin › Updates" oder als Konstante
