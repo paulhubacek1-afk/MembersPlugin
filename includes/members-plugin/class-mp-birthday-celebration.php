@@ -3,8 +3,8 @@
  * Members Plugin – birthday celebration on the member profile.
  *
  * The built-in birth_date field is stored by the membership form as Y/m/d.
- * A cake and a short CSS confetti animation are displayed on that member's
- * profile on their birthday. No shortcode or external library is required.
+ * Decorative confetti overlays the full profile viewport on the member's
+ * birthday. No text, shortcode or external library is required.
  *
  * @package MembersPlugin
  */
@@ -36,7 +36,7 @@ final class MP_Birthday_Celebration {
 	}
 
 	/**
-	 * Display the birthday celebration when the profile owner's birthday is today.
+	 * Display the text-free confetti overlay when the profile owner's birthday is today.
 	 *
 	 * @param int   $user_id Profile owner ID.
 	 * @param array $args    Profile template arguments.
@@ -57,42 +57,26 @@ final class MP_Birthday_Celebration {
 			return;
 		}
 
-		$user = get_userdata( $user_id );
-		if ( ! $user instanceof WP_User ) {
-			return;
-		}
-
-		$name = $user->display_name ? $user->display_name : $user->user_login;
-
-		echo '<section class="mp-birthday-celebration" aria-live="polite" role="status">';
-		echo '<div class="mp-birthday-celebration__confetti" aria-hidden="true">';
-		for ( $i = 0; $i < 32; $i++ ) {
-			$left  = ( $i * 37 ) % 100;
-			$delay = -1 * ( ( $i * 7 ) % 18 ) / 10;
-			$turn  = ( $i * 53 ) % 360;
+		echo '<div class="mp-birthday-celebration" aria-hidden="true">';
+		echo '<div class="mp-birthday-celebration__confetti">';
+		for ( $i = 0; $i < 90; $i++ ) {
+			$left     = ( $i * 37 ) % 100;
+			$delay    = -1 * ( ( $i * 7 ) % 24 ) / 10;
+			$turn     = ( $i * 53 ) % 360;
+			$size     = 5 + ( ( $i * 3 ) % 7 );
+			$drift    = ( ( $i * 19 ) % 121 ) - 60;
+			$duration = 4.5 + ( ( $i * 11 ) % 20 ) / 10;
 			printf(
-				'<span class="mp-birthday-confetti-piece" style="--mp-confetti-left:%1$d%%;--mp-confetti-delay:%2$ss;--mp-confetti-rotate:%3$ddeg"></span>',
+				'<span class="mp-birthday-confetti-piece" style="--mp-confetti-left:%1$d%%;--mp-confetti-delay:%2$ss;--mp-confetti-rotate:%3$ddeg;--mp-confetti-size:%4$dpx;--mp-confetti-drift:%5$dpx;--mp-confetti-duration:%6$ss"></span>',
 				$left,
 				esc_attr( number_format( $delay, 1, '.', '' ) ),
-				$turn
+				$turn,
+				$size,
+				$drift,
+				esc_attr( number_format( $duration, 1, '.', '' ) )
 			);
 		}
-		echo '</div>';
-		echo '<div class="mp-birthday-celebration__content">';
-		echo '<span class="mp-birthday-celebration__cake" role="img" aria-label="' . esc_attr__( 'Geburtstagskuchen', 'ultimate-member' ) . '">🎂</span>';
-		echo '<div class="mp-birthday-celebration__text">';
-		printf(
-			'<h3>%1$s</h3>',
-			esc_html(
-				sprintf(
-					/* translators: %s: profile display name */
-					__( 'Alles Gute zum Geburtstag, %s!', 'ultimate-member' ),
-					$name
-				)
-			)
-		);
-		echo '<p>' . esc_html__( 'Wir wünschen dir einen wundervollen Tag!', 'ultimate-member' ) . '</p>';
-		echo '</div></div></section>';
+		echo '</div></div>';
 	}
 
 	/**

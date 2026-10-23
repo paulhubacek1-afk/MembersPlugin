@@ -3,7 +3,7 @@
  * Plugin Name: Members Plugin – Profiles & Community
  * Plugin URI: https://github.com/paulhubacek1-afk/MembersPlugin
  * Description: Members Plugin mit Profilen, Rollen-Ringfarben, Geburtstags-Konfetti, automatischer Update-Prüfung und E-Mail-Protokoll.
- * Version: 1.0.5
+ * Version: 1.0.6
  * Author: Paul Hubacek
  * Author URI: https://github.com/paulhubacek1-afk
  * License: GPLv3

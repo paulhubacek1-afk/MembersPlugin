@@ -1,5 +1,10 @@
 # Members Plugin – Changelog
 
+## 1.0.6 – 2026-10-23
+
+- Changed: the birthday effect is now confetti only, spread across the full profile viewport.
+- Removed: birthday cake, greeting and all celebration text.
+
 ## 1.0.5 – 2026-10-23
 
 - Fixed: role-colored avatar rings now appear on profile pages by applying the ring to the outer circular photo link, not the inner image whose shadow is clipped.

@@ -2,6 +2,10 @@
 
 Members Plugin is a self-managed WordPress membership and community system with profile tools, theme-aware design controls, role-based avatar rings, automatic update checks, and email diagnostics.
 
+## Updated in 1.0.6
+
+- **Confetti only:** on the profile owner's birthday, colorful confetti falls across the full visible profile page. No cake, greeting or other text is shown.
+
 ## Fixed in 1.0.5
 
 - **Profile-page role ring:** the selected role color is now applied to the outer circular profile-photo link, so the ring remains visible instead of being clipped by the image container.
@@ -36,9 +40,9 @@ Green means online; grey means offline. Indicators appear beside names in profil
 
 The optional compatibility shortcodes [users_online] and [mp_online_users] remain available for sites already using them, but they are not required for the automatic profile status dots.
 
-## Birthday cake and confetti
+## Birthday confetti
 
-The built-in membership form field `birth_date` is checked using the WordPress site's configured timezone. On the profile owner's birthday, Members Plugin shows a cake, birthday greeting and CSS confetti. It supports the common date formats stored by the built-in date field, including `Y/m/d` and `Y-m-d`. The celebration is automatically hidden on other days and while editing a profile.
+The built-in membership form field `birth_date` is checked using the WordPress site's configured timezone. On the profile owner's birthday, colorful CSS confetti falls across the full visible profile page. No cake, greeting or other text is shown. It supports common date formats stored by the built-in date field, including `Y/m/d` and `Y-m-d`. The effect is automatically hidden on other days and while editing a profile.
 
 ## Profile-picture ring colors
 
