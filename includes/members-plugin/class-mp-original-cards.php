@@ -5,8 +5,9 @@
  * Keeps the member-directory cards exactly as in the original Ultimate Member code:
  * - the bundled original templates (members-grid.php, members-list.php, …) are used,
  *   even if a theme or another plugin overrides them;
- * - card styling that other plugins/themes add as inline CSS for `.um-member…`
- *   selectors is removed, so the original stylesheet decides the look.
+ * - optionally, card styling that other plugins/themes add as inline CSS for
+ *   `.um-member…` selectors is removed (off by default, so add-ons such as the
+ *   Stückverwaltung can still decorate the original cards).
  *
  * Can be switched off under Members Plugin › Design & CSS.
  *
@@ -76,7 +77,8 @@ final class MP_Original_Cards {
 	 * Remove card rules that themes/other plugins add through wp_add_inline_style().
 	 */
 	public static function strip_foreign_card_css() {
-		if ( is_admin() || ! self::enabled() ) {
+		$opts = MP_Design::get_options();
+		if ( is_admin() || ! self::enabled() || empty( $opts['strip_foreign_card_css'] ) ) {
 			return;
 		}
 		$styles = wp_styles();
