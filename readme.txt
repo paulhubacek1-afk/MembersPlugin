@@ -4,7 +4,7 @@ Tags: membership, user-profile, community, user-registration, member-directory, 
 Requires at least: 6.2
 Tested up to: 7.1
 Requires PHP: 7.0
-Stable tag: 1.0.7
+Stable tag: 2.14.1
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -12,7 +12,7 @@ A WordPress membership and profile system with per-role avatar rings, birthday c
 
 == Description ==
 
-Version 1.0.7 adds a separate migration backup page under Tools → MP Migration & Sicherung. It can create a private ZIP snapshot before removing a separate Ultimate Member installation. The archive contains user data, user metadata, UM-related options/tables, form/directory records, and common UM upload folders. Backup records use an MP-owned table. The snapshot is not a complete restore or a finished independent membership engine.
+Version 2.14.1 adds an administrator-only Sicherung page with ZIP export and import. Import is limited to the same site URL and database prefix; it updates or inserts captured WordPress users, metadata, options, posts and post metadata by ID, and restores archived profile media. It does not delete records absent from the archive. Create a full site backup before importing. The membership engine is still undergoing separation from legacy internals; internal compatibility names are retained where required.
 
 Version 1.0.6 displays only colorful confetti across the full visible profile page on a member's birthday, without a cake or text. Version 1.0.5 fixes profile-page role rings by applying the selected ring to the outer circular photo link and suppressing the clipped inner image shadow.
 
