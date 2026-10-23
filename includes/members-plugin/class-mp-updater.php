@@ -26,11 +26,19 @@ final class MP_Updater {
 	const TOKEN_OPTION = 'mp_github_token';
 	const PAGE         = 'mp-updates';
 	const ASSET_NAME   = 'members-plugin.zip';
+	const CRON_HOOK    = 'mp_automatic_update_check';
 
 	/**
 	 * Hooks.
 	 */
 	public static function init() {
+		add_filter( 'cron_schedules', array( __CLASS__, 'add_cron_schedule' ) );
+		add_action( 'init', array( __CLASS__, 'schedule_automatic_check' ), 30 );
+		add_action( self::CRON_HOOK, array( __CLASS__, 'automatic_check' ) );
+		if ( defined( 'MP_FILE' ) && function_exists( 'register_deactivation_hook' ) ) {
+			register_deactivation_hook( MP_FILE, array( __CLASS__, 'deactivate' ) );
+		}
+
 		add_filter( 'update_plugins_github.com', array( __CLASS__, 'check_update' ), 10, 3 );
 		add_filter( 'plugins_api', array( __CLASS__, 'plugin_info' ), 20, 3 );
 		add_filter( 'upgrader_pre_download', array( __CLASS__, 'pre_download' ), 10, 3 );
@@ -42,6 +50,51 @@ final class MP_Updater {
 			add_action( 'admin_post_mp_updater_save', array( __CLASS__, 'save' ) );
 			add_action( 'admin_post_mp_updater_check', array( __CLASS__, 'force_check' ) );
 			add_filter( 'plugin_row_meta', array( __CLASS__, 'row_meta' ), 10, 2 );
+		}
+	}
+
+	/**
+	 * Add a six-hour WordPress cron interval for background release checks.
+	 *
+	 * @param array $schedules Registered schedules.
+	 * @return array
+	 */
+	public static function add_cron_schedule( $schedules ) {
+		if ( ! isset( $schedules['mp_every_six_hours'] ) ) {
+			$schedules['mp_every_six_hours'] = array(
+				'interval' => 6 * HOUR_IN_SECONDS,
+				'display'  => __( 'Alle sechs Stunden (Members Plugin)', 'ultimate-member' ),
+			);
+		}
+		return $schedules;
+	}
+
+	/**
+	 * Ensure automatic update checks are scheduled while the plugin is active.
+	 */
+	public static function schedule_automatic_check() {
+		if ( ! wp_next_scheduled( self::CRON_HOOK ) ) {
+			wp_schedule_event( time() + 5 * MINUTE_IN_SECONDS, 'mp_every_six_hours', self::CRON_HOOK );
+		}
+	}
+
+	/**
+	 * Remove the scheduled updater event on plugin deactivation.
+	 */
+	public static function deactivate() {
+		wp_clear_scheduled_hook( self::CRON_HOOK );
+	}
+
+	/**
+	 * Fetch the latest release and refresh WordPress's available-updates transient.
+	 * This only checks and advertises updates; it does not install them automatically.
+	 */
+	public static function automatic_check() {
+		self::get_release( true );
+		delete_site_transient( 'update_plugins' );
+
+		if ( function_exists( 'wp_update_plugins' ) ) {
+			wp_update_plugins();
 		}
 	}
 
