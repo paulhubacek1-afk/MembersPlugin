@@ -20,6 +20,23 @@ require_once MP_PATH . 'class-mp-role-avatar-rings.php';
 require_once MP_PATH . 'class-mp-birthday-celebration.php';
 require_once MP_PATH . 'class-mp-mail-diagnostics.php';
 
+/*
+ * Bundled core assets are versioned with the internal core version (2.14.1), which never
+ * changes between Members Plugin releases. Browsers and caching plugins therefore kept
+ * serving old scripts after an update. Append the Members Plugin version.
+ */
+function mp_bust_core_asset_version( $src ) {
+	if ( ! is_string( $src ) || 0 !== strpos( $src, UM_URL ) || ! defined( 'MP_VERSION' ) ) {
+		return $src;
+	}
+	if ( false !== strpos( $src, 'ver=' . UM_VERSION ) ) {
+		return str_replace( 'ver=' . UM_VERSION, 'ver=' . UM_VERSION . '-mp' . MP_VERSION, $src );
+	}
+	return $src;
+}
+add_filter( 'script_loader_src', 'mp_bust_core_asset_version', 20 );
+add_filter( 'style_loader_src', 'mp_bust_core_asset_version', 20 );
+
 MP_Design::init();
 MP_Inspector::init();
 MP_Security::init();
