@@ -1,12 +1,19 @@
 # Members Plugin – Changelog
 
+## 1.0.2 – 2026-10-23
+
+- Added: administrators can enable and choose a profile-picture ring color for each WordPress role under Members Plugin → Profilbild-Ringfarben.
+- Added: the [users_online] shortcode alias alongside [mp_online_users].
+- Improved: role ring colors for WordPress avatars, member profiles, directory cards, and the Users Online list.
+- Improved: product wording and documentation to present the plugin as Members Plugin.
+
 ## 1.0.1 – 2026-10-23
 
-- Fixed: avatar output now resolves the WordPress user ID and checks that user's own `uploads/ultimatemember/{ID}/profile_photo.{ext}` file first.
+- Fixed: avatar output now resolves the WordPress user ID and checks that user's own uploads/ultimatemember/{ID}/profile_photo.{ext} file first.
 - Fixed: a photo belonging to one user is not selected because another profile was previously loaded.
-- Added: built-in online-member tracking with a five-minute online window and a member-only `[mp_online_users]` shortcode.
+- Added: built-in online-member tracking with a five-minute online window and a member-only [mp_online_users] shortcode.
 - Added: responsive, theme-aware styling for the online-member list.
-- Fixed: HTML-enabled form text fields now preserve safe heading tags (`h1`–`h6`) instead of stripping them and rendering the heading text as ordinary text.
+- Fixed: HTML-enabled form text fields now preserve safe heading tags (h1–h6) instead of stripping them and rendering the heading text as ordinary text.
 - Improved: plugin metadata and installation/update documentation.
 
-Note: this is a replacement build with its own bundled core. The existing upstream core has not yet been fully renamed internally, so it must not be activated alongside the original Ultimate Member plugin; the activation guard remains in place deliberately.
+Note: the bundled membership engine retains a small compatibility guard for overlapping legacy internal symbols. Do not activate a second copy of that membership core alongside Members Plugin until the internal names have been fully separated and tested.

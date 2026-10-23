@@ -2,8 +2,8 @@
 /**
  * Plugin Name: Members Plugin – Profiles & Community
  * Plugin URI: https://github.com/paulhubacek1-afk/MembersPlugin
- * Description: Mitgliederprofile, Registrierung, Verzeichnisse, Theme-Farben, feste Profilbild-Zuordnung, Online-Status und sichere HTML-Überschriften und Formatierungen in Formularen.
- * Version: 1.0.1
+ * Description: Mitgliederprofile, Registrierung, Verzeichnisse, Theme-Farben, Profilbild-Ringfarben je Rolle, Online-Status und sichere HTML-Formatierung.
+ * Version: 1.0.2
  * Author: Paul Hubacek
  * Author URI: https://github.com/paulhubacek1-afk
  * License: GPLv3
@@ -22,9 +22,9 @@ defined( 'ABSPATH' ) || exit;
 require_once ABSPATH . 'wp-admin/includes/plugin.php';
 
 /*
- * Compatibility guard: this plugin bundles its own complete membership core,
- * but the legacy core still uses the same global symbols as the upstream plugin.
- * Do not remove this guard until the internal API has been fully namespaced.
+ * The bundled legacy membership core still contains overlapping internal symbols
+ * with the separately distributed upstream plugin. Keep the guard until those
+ * symbols are migrated and tested; do not run both cores at once.
  */
 if ( function_exists( 'UM' ) || is_plugin_active( 'ultimate-member/ultimate-member.php' ) ) {
 	add_action(
@@ -34,7 +34,7 @@ if ( function_exists( 'UM' ) || is_plugin_active( 'ultimate-member/ultimate-memb
 				return;
 			}
 			echo '<div class="notice notice-error"><p>' .
-				esc_html__( 'Members Plugin enthält einen eigenen Mitgliederverwaltungskern und benötigt keine separate Ultimate-Member-Installation. Beide Plugins dürfen aktuell jedoch nicht gleichzeitig aktiv sein, da ältere interne Klassen noch gemeinsame Namen verwenden. Bitte deaktiviere das Original-Plugin, bevor du Members Plugin verwendest.', 'ultimate-member' ) .
+				esc_html__( 'Members Plugin bringt eine eigene Mitgliederverwaltung mit. Die frühere, separat installierte Mitgliederverwaltung darf aktuell nicht parallel aktiviert sein, da noch interne Funktionsnamen überschneiden. Bitte deaktiviere die separate Installation, bevor du Members Plugin verwendest.', 'ultimate-member' ) .
 				'</p></div>';
 		}
 	);

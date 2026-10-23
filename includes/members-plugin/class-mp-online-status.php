@@ -1,9 +1,9 @@
 <?php
 /**
- * Members Plugin – built-in online member list.
+ * Members Plugin – built-in Users Online list and activity tracking.
  *
  * A user's last-seen timestamp is updated at most once per minute. The
- * [mp_online_users] shortcode is restricted to logged-in visitors.
+ * [mp_online_users] and [users_online] shortcodes are restricted to logged-in visitors.
  *
  * @package MembersPlugin
  */
@@ -16,11 +16,12 @@ final class MP_Online_Status {
 	const DEFAULT_WINDOW = 300;
 
 	/**
-	 * Register tracking and the built-in shortcode.
+	 * Register tracking and the built-in shortcodes.
 	 */
 	public static function init() {
 		add_action( 'init', array( __CLASS__, 'mark_current_user_online' ), 50 );
 		add_shortcode( 'mp_online_users', array( __CLASS__, 'render_online_users' ) );
+		add_shortcode( 'users_online', array( __CLASS__, 'render_online_users' ) );
 		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'register_styles' ) );
 	}
 
@@ -60,12 +61,14 @@ final class MP_Online_Status {
 	/**
 	 * Render a member-only list of users seen in the last five minutes.
 	 *
-	 * Usage: [mp_online_users] or [mp_online_users limit="20"].
+	 * Usage: [mp_online_users], [mp_online_users limit="20"], or [users_online].
 	 *
 	 * @param array|string $atts Shortcode attributes.
 	 * @return string
 	 */
 	public static function render_online_users( $atts = array() ) {
+		wp_enqueue_style( 'mp-online-members' );
+
 		if ( ! is_user_logged_in() ) {
 			return '<p class="mp-online-notice">' . esc_html__( 'Bitte anmelden, um die Online-Mitglieder zu sehen.', 'ultimate-member' ) . '</p>';
 		}
@@ -99,8 +102,6 @@ final class MP_Online_Status {
 		if ( empty( $users ) ) {
 			return '<div class="mp-online-members"><p class="mp-online-empty">' . esc_html__( 'Momentan ist niemand online.', 'ultimate-member' ) . '</p></div>';
 		}
-
-		wp_enqueue_style( 'mp-online-members' );
 
 		$output = '<div class="mp-online-members"><ul class="mp-online-members__list" role="list">';
 		foreach ( $users as $user ) {
