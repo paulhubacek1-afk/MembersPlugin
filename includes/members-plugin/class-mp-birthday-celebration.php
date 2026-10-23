@@ -18,6 +18,21 @@ final class MP_Birthday_Celebration {
 	 */
 	public static function init() {
 		add_action( 'um_after_header_info', array( __CLASS__, 'render' ), 20, 2 );
+		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'enqueue_styles' ) );
+	}
+
+	/**
+	 * Enqueue the small celebration stylesheet before the document head is printed.
+	 */
+	public static function enqueue_styles() {
+		if ( defined( 'MP_URL' ) ) {
+			wp_enqueue_style(
+				'mp-birthday-celebration',
+				MP_URL . 'assets/birthday.css',
+				array(),
+				defined( 'MP_VERSION' ) ? MP_VERSION : null
+			);
+		}
 	}
 
 	/**
@@ -45,15 +60,6 @@ final class MP_Birthday_Celebration {
 		$user = get_userdata( $user_id );
 		if ( ! $user instanceof WP_User ) {
 			return;
-		}
-
-		if ( defined( 'MP_URL' ) ) {
-			wp_enqueue_style(
-				'mp-birthday-celebration',
-				MP_URL . 'assets/birthday.css',
-				array(),
-				defined( 'MP_VERSION' ) ? MP_VERSION : null
-			);
 		}
 
 		$name = $user->display_name ? $user->display_name : $user->user_login;
