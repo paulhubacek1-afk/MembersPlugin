@@ -4,7 +4,7 @@ Tags: membership, user-profile, community, user-registration, member-directory, 
 Requires at least: 6.2
 Tested up to: 7.1
 Requires PHP: 7.0
-Stable tag: 1.0.9.6
+Stable tag: 1.0.9.7
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -58,8 +58,12 @@ No. It searches for releases automatically and makes available updates visible i
 
 == Changelog ==
 
+= 1.0.9.7 =
+* Fixed: member-card styling of add-ons (e.g. Stückverwaltung: red card background, statistics) was removed by 1.0.9.6. Removing other plugins' card CSS is now an opt-in option (Design & CSS), off by default.
+* New: admin-only profile-tab diagnostics: open a profile with ?mp_debug=tabs to see which tabs exist at each step and which callbacks change them.
+
 = 1.0.9.6 =
-* New: Mitgliederkarten wie im Original (enabled by default, Design & CSS): the member directory always uses the original card templates, and card styling that themes or other plugins add as inline CSS for .um-member… selectors is removed. Theme fonts are still used; card sizes stay original.
+* New: original member cards (Design & CSS, enabled by default): the member directory always uses the bundled original card templates, even when the theme overrides them. Optional (off by default): remove card styling that themes/other plugins add for .um-member selectors. Add-ons such as the Stückverwaltung can still decorate the cards through the standard hooks.
 
 = 1.0.9.5 =
 * Fixed: member directory stuck on the loading spinner when the theme/page builder converted && in the directory card template into &#038;&#038; (JavaScript syntax error while compiling the template). Templates are repaired before use.
