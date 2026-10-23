@@ -2750,12 +2750,28 @@ if ( ! class_exists( 'um\core\Member_Directory' ) ) {
 			do_action( 'um_members_after_user_name', $user_id, $directory_data );
 			$hook_after_user_name = ob_get_clean();
 
+			$cover_photo = um_user( 'cover_photo', $this->cover_size );
+			$cover_photo = preg_replace_callback(
+				'/<img\\b[^>]*>/i',
+				static function ( $matches ) {
+					$tag = $matches[0];
+					if ( ! preg_match( '/\\bloading\\s*=/i', $tag ) ) {
+						$tag = preg_replace( '/<img\\b/i', '<img loading="lazy"', $tag, 1 );
+					}
+					if ( ! preg_match( '/\\bdecoding\\s*=/i', $tag ) ) {
+						$tag = preg_replace( '/<img\\b/i', '<img decoding="async"', $tag, 1 );
+					}
+					return $tag;
+				},
+				(string) $cover_photo
+			);
+
 			$data_array = array(
 				'card_anchor'          => esc_html( $this->get_user_hash( $user_id ) ),
 				'role'                 => 'undefined', // make the role hidden here.
 				'account_status'       => 'undefined', // make the status hidden here.
 				'account_status_name'  => esc_html__( 'Undefined', 'ultimate-member' ), // make the status hidden here.
-				'cover_photo'          => wp_kses( um_user( 'cover_photo', $this->cover_size ), UM()->get_allowed_html( 'templates' ) ),
+				'cover_photo'          => wp_kses( $cover_photo, UM()->get_allowed_html( 'templates' ) ),
 				'display_name'         => esc_html( um_user( 'display_name' ) ),
 				'profile_url'          => esc_url( um_user_profile_url() ),
 				'can_edit'             => (bool) $can_edit,
@@ -2776,21 +2792,27 @@ if ( ! class_exists( 'um\core\Member_Directory' ) ) {
 
 			$description_key = UM()->profile()->get_show_bio_key( UM()->fields()->global_args );
 
+			static $profile_form_ids = null;
 			$profile_forms = array();
 			if ( empty( UM()->fields()->set_id ) ) {
-				$profile_forms = get_posts(
-					array(
-						'post_type'      => 'um_form',
-						'meta_query'     => array(
-							array(
-								'key'   => '_um_mode',
-								'value' => 'profile',
+				// This list is identical for each card in this request.
+				if ( null === $profile_form_ids ) {
+					$profile_form_ids = get_posts(
+						array(
+							'post_type'      => 'um_form',
+							'meta_query'     => array(
+								array(
+									'key'   => '_um_mode',
+									'value' => 'profile',
+								),
 							),
-						),
-						'posts_per_page' => -1,
-						'fields'         => 'ids',
-					)
-				);
+							'posts_per_page' => -1,
+							'fields'         => 'ids',
+							'no_found_rows'  => true,
+						)
+					);
+				}
+				$profile_forms = $profile_form_ids;
 			}
 
 			if ( ! empty( $directory_data['show_tagline'] ) && ! empty( $directory_data['tagline_fields'] ) ) {
@@ -3229,6 +3251,16 @@ if ( ! class_exists( 'um\core\Member_Directory' ) ) {
 			 * add_filter( 'um_prepare_user_results_array', 'my_custom_um_prepare_user_results_array', 10, 2 );
 			 */
 			$user_ids = apply_filters( 'um_prepare_user_results_array', $user_ids, $this->query_args );
+
+			// Prime caches for the current result page to avoid repeated user/meta SQL
+			// lookups while building each member card.
+			if ( ! empty( $user_ids ) ) {
+				$user_ids = array_values( array_unique( array_filter( array_map( 'absint', $user_ids ) ) ) );
+				if ( function_exists( 'cache_users' ) ) {
+					cache_users( $user_ids );
+				}
+				update_meta_cache( 'user', $user_ids );
+			}
 
 			$sizes = UM()->options()->get( 'cover_thumb_sizes' );
 			// Ensure we have valid sizes array and handle case when only one size is defined
