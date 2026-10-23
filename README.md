@@ -2,7 +2,7 @@
 
 Members Plugin is evolving toward an independent WordPress membership system. It currently includes profile tools, theme-aware design controls, role-based avatar rings, automatic update checks, email diagnostics, and a standalone migration backup tool.
 
-## Updated in 2.14.1
+## Updated in 1.0.7
 
 - **Migration backup:** open **Tools → MP Migration & Sicherung** to create a private ZIP snapshot before removing a separately installed legacy membership engine plugin. The tool is loaded before the legacy-core compatibility guard.
 - **MP-owned database index:** backup records use the WordPress table prefix plus `mp_backup_index`.
