@@ -36,7 +36,7 @@ final class MP_Birthday_Celebration {
 	}
 
 	/**
-	 * Display the birthday celebration when the profile owner's birthday is today.
+	 * Display the text-free confetti overlay when the profile owner's birthday is today.
 	 *
 	 * @param int   $user_id Profile owner ID.
 	 * @param array $args    Profile template arguments.
