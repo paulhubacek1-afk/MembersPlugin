@@ -4,7 +4,7 @@ Tags: membership, user-profile, community, user-registration, member-directory, 
 Requires at least: 6.2
 Tested up to: 7.1
 Requires PHP: 7.0
-Stable tag: 1.0.8.1
+Stable tag: 1.0.9
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -57,6 +57,11 @@ No. The profile checks the built-in birth_date field automatically.
 No. It searches for releases automatically and makes available updates visible in WordPress.
 
 == Changelog ==
+
+= 1.0.9 =
+* Fixed: register both translation domains at WordPress init so the plugin uses the site's language setting.
+* Fixed: release ZIP includes the official German translation file for the bundled membership core.
+* Kept: legacy CSS classes and compatibility identifiers unchanged.
 
 = 1.0.8.1 =
 * Fixed automatic update discovery in the WordPress dashboard using published GitHub Releases.
