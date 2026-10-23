@@ -64,7 +64,7 @@ final class MP_Theme_Colors {
 	 */
 	private static function transient_key() {
 		$theme = wp_get_theme();
-		return 'mp_theme_colors_' . md5( get_stylesheet() . '|' . get_template() . '|' . $theme->get( 'Version' ) . '|' . ( defined( 'MP_VERSION' ) ? MP_VERSION : '' ) );
+		return 'mp_theme_colors_' . md5( 'v2|' .  get_stylesheet() . '|' . get_template() . '|' . $theme->get( 'Version' ) . '|' . ( defined( 'MP_VERSION' ) ? MP_VERSION : '' ) );
 	}
 
 	/**
@@ -83,6 +83,8 @@ final class MP_Theme_Colors {
 			'bg'            => null,
 			'button_radius' => null,
 			'font_family'   => null,
+			'heading_font_family' => null,
+			'heading_font_weight' => null,
 			'sources'       => array(),
 		);
 
@@ -126,6 +128,17 @@ final class MP_Theme_Colors {
 			if ( is_string( $font ) && '' !== $font ) {
 				$found['font_family']            = self::resolve_font( $font );
 				$found['sources']['font_family'] = 'theme.json: typography › fontFamily';
+			}
+
+			$heading_font = self::global_style( array( 'elements', 'heading', 'typography', 'fontFamily' ) );
+			if ( is_string( $heading_font ) && '' !== $heading_font ) {
+				$found['heading_font_family']            = self::resolve_font( $heading_font );
+				$found['sources']['heading_font_family'] = 'theme.json: elements › heading › typography › fontFamily';
+			}
+			$heading_weight = self::global_style( array( 'elements', 'heading', 'typography', 'fontWeight' ) );
+			if ( is_scalar( $heading_weight ) && preg_match( '/^(\d{3}|normal|bold|bolder|lighter)$/', (string) $heading_weight ) ) {
+				$found['heading_font_weight']            = (string) $heading_weight;
+				$found['sources']['heading_font_weight'] = 'theme.json: elements › heading › typography › fontWeight';
 			}
 		}
 

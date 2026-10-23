@@ -59,6 +59,8 @@ final class MP_Design {
 			'radius'          => array( __( 'Eckenradius', 'ultimate-member' ), __( 'Felder, Karten, Tags. Leer = Original (2–8px).', 'ultimate-member' ), '', 'shape' ),
 			'button-radius'   => array( __( 'Button-Eckenradius', 'ultimate-member' ), __( 'Leer = vom Theme bzw. Original.', 'ultimate-member' ), '', 'shape' ),
 			'font-family'     => array( __( 'Schriftart', 'ultimate-member' ), __( 'Leer = Schrift des Themes (inherit).', 'ultimate-member' ), 'inherit', 'shape' ),
+			'heading-font-family' => array( __( 'Schriftart Überschriften/Namen', 'ultimate-member' ), __( 'Leer = Überschriften-Schrift des Themes.', 'ultimate-member' ), '', 'shape' ),
+			'heading-font-weight' => array( __( 'Schriftstärke Überschriften/Namen', 'ultimate-member' ), __( 'z.B. 600 oder bold. Leer = vom Theme.', 'ultimate-member' ), '', 'shape' ),
 		);
 
 		$out = array();
@@ -68,7 +70,7 @@ final class MP_Design {
 				'desc'    => $v[1],
 				'default' => $v[2],
 				'group'   => $v[3],
-				'type'    => 'shape' === $v[3] ? ( 'font-family' === $key ? 'font' : 'size' ) : 'color',
+				'type'    => 'shape' === $v[3] ? ( in_array( $key, array( 'font-family', 'heading-font-family', 'heading-font-weight' ), true ) ? 'font' : 'size' ) : 'color',
 			);
 		}
 
@@ -92,6 +94,7 @@ final class MP_Design {
 			'custom_css'    => '',
 			'inspector'     => 1,
 			'editor_styles' => 1,
+			'theme_typography' => 1,
 		);
 	}
 
@@ -174,6 +177,12 @@ final class MP_Design {
 		}
 		if ( $t['font_family'] ) {
 			$values['font-family'] = $t['font_family'];
+		}
+		if ( ! empty( $t['heading_font_family'] ) ) {
+			$values['heading-font-family'] = $t['heading_font_family'];
+		}
+		if ( ! empty( $t['heading_font_weight'] ) ) {
+			$values['heading-font-weight'] = $t['heading_font_weight'];
 		}
 
 		return $values;
@@ -266,7 +275,81 @@ final class MP_Design {
 	 * @return string
 	 */
 	public static function base_css() {
-		return '.um,.um-modal,.um-account,.um-directory{font-family:var(--um-font-family,inherit)}';
+		$css  = '.um,.um-modal,.um-account,.um-directory{font-family:var(--um-font-family,inherit)}';
+		$opts = self::get_options();
+		if ( ! empty( $opts['theme_typography'] ) ) {
+			$css .= self::theme_typography_css();
+		}
+		return $css;
+	}
+
+	/**
+	 * "Typografie des Themes übernehmen": Schriftart, Schriftgröße und Zeilenhöhe kommen
+	 * vom Theme statt aus den festen Pixelwerten des Plugins. Größenverhältnisse bleiben
+	 * relativ zur Theme-Schrift (em), Namen/Überschriften nutzen die Überschriften-Schrift.
+	 * Icon-Schriften werden nicht verändert.
+	 *
+	 * @return string
+	 */
+	public static function theme_typography_css() {
+		$scope = 'body.um-mp-typo';
+		$wrap  = array( '.um', '.um-modal' );
+
+		$list = static function ( $selectors ) use ( $scope, $wrap ) {
+			$out = array();
+			foreach ( $selectors as $selector ) {
+				foreach ( $wrap as $w ) {
+					$out[] = $scope . ' ' . $w . ' ' . $selector;
+				}
+			}
+			return implode( ',', $out );
+		};
+
+		$roots = array();
+		foreach ( $wrap as $w ) {
+			$roots[] = $scope . ' ' . $w;
+		}
+
+		// Formularelemente erben die Schrift im Browser standardmäßig nicht.
+		$controls = array( 'input', 'select', 'textarea', 'button', '.um-button', '.select2-selection', '.select2-results__option', '.select2-search__field' );
+
+		// Fließtext: Größe des Themes.
+		$body = array(
+			'.um-field-label label', '.um-field-label', '.um-field-block', '.um-field-value', '.um-field-area',
+			'.um-form input[type="text"]', '.um-form input[type="date"]', '.um-form input[type="time"]', '.um-form input[type="search"]',
+			'.um-form input[type="url"]', '.um-form input[type="email"]', '.um-form input[type="tel"]', '.um-form input[type="number"]',
+			'.um-form input[type="password"]', '.um-form textarea', '.um-form select',
+			'.select2-container .select2-selection', '.select2-container .select2-results li',
+			'input[type="submit"].um-button', '.um-button', 'a.um-button', 'p.um-notice', '.um-meta', '.um-profile-note span',
+			'.um-profile-nav-item a', '.um-profile-subnav a', '.um-item-link a', '.um-field-divider-text', '.um-field-group-head',
+			'.um-account-main label', '.um-account-nav a', '.um-account-side li a', '.um-dropdown li a', '.um-new-dropdown',
+			'.um-members-pagi', '.um-members-pagidrop', '.um-member-directory-header', '.um-members-none',
+		);
+
+		// Kleinere Zusatztexte: relativ zur Theme-Schrift.
+		$small = array(
+			'.um-field-error', '.um-error-block', '.um-field-notice', '.um-notice-block', '.um-tip-text', '.um-meta span', '.um-meta-text',
+			'.um-item-meta span', '.um-member-tagline', '.um-member-metaline', '.um-members-filter-tag', '.um-account-profile-link a',
+			'.um-member-status', '.um-members-edit-btn a.um-edit-profile-btn', 'small.um-max-filesize span', '.um-profile-nav-item span.count',
+		);
+
+		// Namen und Überschriften: Überschriften-Schrift des Themes.
+		$headings = array(
+			'.um-name' => '1.6em', '.um-name a' => '1em', '.um-member-name' => '1.15em', '.um-member-name a' => '1em',
+			'.um-account-name a' => '1.2em', '.um-account-heading' => '1.2em', '.um-members-total' => '1.25em',
+			'.um-row-heading' => '1.1em', '.um-field-group-head' => '1.05em',
+		);
+
+		$css  = implode( ',', $roots ) . '{font-size:inherit;line-height:inherit;letter-spacing:inherit}';
+		$css .= $list( $controls ) . '{font-family:inherit;letter-spacing:inherit}';
+		$css .= $list( $body ) . '{font-size:1em!important;line-height:inherit!important}';
+		$css .= $list( $small ) . '{font-size:0.875em!important;line-height:1.5!important}';
+		foreach ( $headings as $selector => $size ) {
+			$css .= $list( array( $selector ) ) . '{font-family:var(--um-heading-font-family,inherit)!important;font-size:' . $size . '!important;line-height:1.3!important}';
+		}
+		$css .= $list( array( '.um-name', '.um-name a', '.um-member-name', '.um-member-name a', '.um-account-name a', '.um-account-heading', '.um-row-heading' ) ) . '{font-weight:var(--um-heading-font-weight,inherit)}';
+
+		return $css;
 	}
 
 	/**
@@ -337,6 +420,16 @@ final class MP_Design {
 		}
 		wp_add_inline_style( 'mp-design', $css );
 
+		// Classic themes have no theme.json heading font: read it from the page in the browser.
+		if ( ! empty( $opts['theme_typography'] ) && empty( $values['heading-font-family'] ) ) {
+			wp_register_script( 'mp-typography', false, array(), MP_VERSION, true );
+			wp_enqueue_script( 'mp-typography' );
+			wp_add_inline_script(
+				'mp-typography',
+				"(function(){function r(){if(!document.querySelector('.um'))return;var h=null,l=document.querySelectorAll('h1,h2,h3,.entry-title,.wp-block-post-title');for(var i=0;i<l.length;i++){if(!l[i].closest('.um,.um-modal,#wpadminbar')){h=l[i];break;}}if(!h)return;var c=window.getComputedStyle(h),s=document.documentElement.style;s.setProperty('--um-heading-font-family',c.fontFamily);if(!getComputedStyle(document.documentElement).getPropertyValue('--um-heading-font-weight').trim()){s.setProperty('--um-heading-font-weight',c.fontWeight);}}if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',r);}else{r();}})();"
+			);
+		}
+
 		// Live-Erkennung im Browser für Werte, die serverseitig nicht ermittelt werden konnten.
 		if ( ! empty( $opts['auto_colors'] ) ) {
 			$have = array_keys( $values );
@@ -398,6 +491,10 @@ final class MP_Design {
 			$classes[] = 'um-theme-dark';
 		}
 		$classes[] = 'um-mp-design';
+		$opts      = self::get_options();
+		if ( ! empty( $opts['theme_typography'] ) ) {
+			$classes[] = 'um-mp-typo';
+		}
 		return $classes;
 	}
 }

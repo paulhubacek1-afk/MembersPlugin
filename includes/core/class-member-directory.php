@@ -9,6 +9,25 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+if ( ! class_exists( 'um\core\MP_Directory_Response' ) ) {
+	/**
+	 * Members Plugin: carries a member-directory response out of ajax_get_members()
+	 * when the first page is rendered directly into the page (no extra AJAX request).
+	 */
+	class MP_Directory_Response extends Exception {
+		/** @var mixed */
+		public $data;
+		/** @var bool */
+		public $success;
+
+		public function __construct( $data, $success ) {
+			parent::__construct( 'mp_directory_response' );
+			$this->data    = $data;
+			$this->success = (bool) $success;
+		}
+	}
+}
+
 if ( ! class_exists( 'um\core\Member_Directory' ) ) {
 
 	/**
@@ -132,6 +151,102 @@ if ( ! class_exists( 'um\core\Member_Directory' ) ) {
 		 * @var int[]|null
 		 */
 		protected $mp_profile_form_ids = null;
+
+
+		/**
+		 * Members Plugin: when true, responses are returned instead of sent as JSON.
+		 *
+		 * @var bool
+		 */
+		protected $mp_capture = false;
+
+
+		/**
+		 * Members Plugin: send a directory response, or hand it back while preloading.
+		 *
+		 * @param mixed $data    Response data.
+		 * @param bool  $success Success flag.
+		 *
+		 * @throws MP_Directory_Response While preloading.
+		 */
+		protected function mp_respond( $data, $success = true ) {
+			if ( $this->mp_capture ) {
+				throw new MP_Directory_Response( $data, $success );
+			}
+			if ( $success ) {
+				wp_send_json_success( $data );
+			}
+			wp_send_json_error( $data );
+		}
+
+
+		/**
+		 * Members Plugin: build the response for the initial state of a directory while the
+		 * page is rendered. The browser then shows the members immediately instead of
+		 * loading the page first and requesting the members with a second request.
+		 *
+		 * @param string $hash    Directory hash.
+		 * @param int    $page    Page number.
+		 * @param string $sorting Sorting key.
+		 *
+		 * @return array|null Response data, or null if it could not be built.
+		 */
+		public function mp_preload_response( $hash, $page, $sorting ) {
+			if ( ! apply_filters( 'mp_member_directory_preload', true, $hash ) ) {
+				return null;
+			}
+
+			$backup_post    = $_POST;    // phpcs:ignore WordPress.Security.NonceVerification
+			$backup_request = $_REQUEST; // phpcs:ignore WordPress.Security.NonceVerification
+
+			$request = array(
+				'directory_id' => $hash,
+				'page'         => max( 1, absint( $page ) ),
+				'search'       => '',
+				'sorting'      => (string) $sorting,
+				'_wpnonce'     => wp_create_nonce( 'um-directory-' . $hash ),
+			);
+			$_POST    = $request;
+			$_REQUEST = array_merge( $_REQUEST, $request );
+
+			$previous_user_id = um_user( 'ID' );
+
+			$this->mp_capture = true;
+			$result           = null;
+			try {
+				$this->ajax_get_members();
+			} catch ( MP_Directory_Response $response ) {
+				if ( $response->success && is_array( $response->data ) ) {
+					$result = $response->data;
+				}
+			} catch ( \Exception $e ) {
+				$result = null;
+			} catch ( \Throwable $e ) {
+				$result = null;
+			}
+			$this->mp_capture = false;
+
+			$_POST    = $backup_post;
+			$_REQUEST = $backup_request;
+
+			// Reset the directory query state for any later use in this request.
+			$this->query_args = array();
+			$this->is_search  = false;
+			if ( $previous_user_id ) {
+				um_fetch_user( $previous_user_id );
+			} else {
+				um_reset_user();
+			}
+
+			if ( null !== $result ) {
+				$result['mp_preload'] = array(
+					'page'    => $request['page'],
+					'sorting' => $request['sorting'],
+				);
+			}
+
+			return $result;
+		}
 
 
 		/**
@@ -3100,7 +3215,7 @@ if ( ! class_exists( 'um\core\Member_Directory' ) ) {
 				$pagination_data['header'] = $this->convert_tags( $directory_data['header'], $pagination_data );
 				$pagination_data['header_single'] = $this->convert_tags( $directory_data['header_single'], $pagination_data );
 
-				wp_send_json_success( array( 'users' => array(), 'pagination' => $pagination_data ) );
+				$this->mp_respond( array( 'users' => array(), 'pagination' => $pagination_data ) );
 			}
 		}
 
@@ -3147,25 +3262,29 @@ if ( ! class_exists( 'um\core\Member_Directory' ) ) {
 		 */
 		public function ajax_get_members() {
 			if ( empty( $_POST['directory_id'] ) ) {
-				wp_send_json_error( __( 'Wrong member directory data', 'ultimate-member' ) );
+				$this->mp_respond( __( 'Wrong member directory data', 'ultimate-member' ), false );
 			}
 			$unique_hash = sanitize_text_field( $_POST['directory_id'] );
 
-			check_ajax_referer( 'um-directory-' . $unique_hash );
+			// Members Plugin: no nonce check while preloading inside the page render
+			// (the request is built by the server itself, not sent by a browser).
+			if ( ! $this->mp_capture ) {
+				check_ajax_referer( 'um-directory-' . $unique_hash );
+			}
 
-			if ( UM()->is_rate_limited( 'member_directory' ) ) {
-				wp_send_json_error( __( 'Too many requests', 'ultimate-member' ) );
+			if ( ! $this->mp_capture && UM()->is_rate_limited( 'member_directory' ) ) {
+				$this->mp_respond( __( 'Too many requests', 'ultimate-member' ), false );
 			}
 
 			global $wpdb;
 
 			$directory_id = $this->get_directory_by_hash( $unique_hash );
 			if ( empty( $directory_id ) ) {
-				wp_send_json_error( __( 'Wrong member directory data', 'ultimate-member' ) );
+				$this->mp_respond( __( 'Wrong member directory data', 'ultimate-member' ), false );
 			}
 
 			if ( ! $this->can_view_directory( $directory_id ) ) {
-				wp_send_json_error( __( 'You cannot see this member directory', 'ultimate-member' ) );
+				$this->mp_respond( __( 'You cannot see this member directory', 'ultimate-member' ), false );
 			}
 
 			$directory_data = UM()->query()->post_data( $directory_id );
@@ -3243,7 +3362,7 @@ if ( ! class_exists( 'um\core\Member_Directory' ) ) {
 					'is_search'     => $this->is_search,
 				), $directory_data );
 
-				wp_send_json_success( $member_directory_response );
+				$this->mp_respond( $member_directory_response );
 			}
 			/**
 			 * Fires just before the users query for getting users in member directory.
@@ -3344,7 +3463,7 @@ if ( ! class_exists( 'um\core\Member_Directory' ) ) {
 				'is_search'     => $this->is_search,
 			), $directory_data );
 
-			wp_send_json_success( $member_directory_response );
+			$this->mp_respond( $member_directory_response );
 		}
 
 

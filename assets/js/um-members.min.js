@@ -411,6 +411,34 @@ function um_ajax_get_members( directory, args ) {
 			um_members_hide_preloader( directory );
 	};
 
+	// Members Plugin: first page rendered into the page by the server - use it instead
+	// of a second request, as long as the request matches what the server prepared.
+	if ( args && args.first_load ) {
+		var preload_el = directory.find( 'script.mp-members-preload' );
+		if ( preload_el.length ) {
+			var preload = null;
+			try {
+				preload = JSON.parse( preload_el.first().text() );
+			} catch ( e ) {
+				preload = null;
+			}
+			preload_el.remove();
+
+			var base_keys = [ 'directory_id', 'page', 'search', 'sorting', 'gmt_offset', 'post_refferer', '_wpnonce' ];
+			var only_base = Object.keys( request ).every( function( key ) {
+				return base_keys.indexOf( key ) !== -1;
+			});
+
+			if ( preload && preload.mp_preload && only_base && ! request.search &&
+				String( preload.mp_preload.page ) === String( request.page ) &&
+				String( preload.mp_preload.sorting ) === String( request.sorting ) ) {
+				um_members_cache_set( hash, cache_key, preload );
+				render_answer( preload );
+				return;
+			}
+		}
+	}
+
 	var cached_answer = ( args && args.no_cache ) ? null : um_members_cache_get( hash, cache_key );
 	if ( cached_answer ) {
 		render_answer( cached_answer );
