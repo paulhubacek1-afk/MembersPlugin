@@ -1,3 +1,11 @@
+## 1.1.4 – 2026-10-24
+
+- Fixed: cover uploads now replace the canonical `cover_photo.jpg` and regenerate predictable high-quality `cover_photo-600.jpg`, `cover_photo-1200.jpg`, and `cover_photo-1800.jpg` variants (only when the source is large enough).
+- Fixed: back up old cover files during replacement so WordPress cannot silently switch to `cover_photo-1.jpg`; restore the previous files if the new master save fails.
+- Improved: profile and member-directory cover resolution prefer the requested high-resolution thumbnail, with safe fallbacks for legacy filenames.
+- Fixed: each new cover upload gets a persisted cache token so rapid replacements don't reuse the old cover URL; directory HTML keeps this token instead of replacing it with a coarse file timestamp.
+- Maintained: JPEG encoder quality 100 for master and thumbnails; thumbnails are never upscaled from small sources.
+
 ## 1.1.3 – 2026-10-24
 
 - Fixed: retain Ultimate Member's native bold and font-weight styling unless a heading-weight override is explicitly set.
