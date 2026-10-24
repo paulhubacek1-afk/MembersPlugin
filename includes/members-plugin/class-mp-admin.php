@@ -138,6 +138,8 @@ final class MP_Admin {
 			$opts['editor_styles'] = empty( $_POST['editor_styles'] ) ? 0 : 1;
 			$opts['theme_typography'] = empty( $_POST['theme_typography'] ) ? 0 : 1;
 			$opts['original_cards']   = empty( $_POST['original_cards'] ) ? 0 : 1;
+			$opts['card_layout_stage'] = empty( $_POST['card_layout_stage'] ) ? 0 : 1;
+			$opts['fontawesome5']      = empty( $_POST['fontawesome5'] ) ? 0 : 1;
 			$opts['strip_foreign_card_css'] = empty( $_POST['strip_foreign_card_css'] ) ? 0 : 1;
 
 			$raw  = isset( $_POST['overrides'] ) && is_array( $_POST['overrides'] ) ? wp_unslash( $_POST['overrides'] ) : array(); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- wird unten pro Typ bereinigt.
@@ -312,6 +314,7 @@ final class MP_Admin {
 					'colors' => __( 'Farben', 'ultimate-member' ),
 					'status' => __( 'Statusfarben', 'ultimate-member' ),
 					'shape'  => __( 'Form & Schrift', 'ultimate-member' ),
+					'cards'  => __( 'Mitgliederkarten (Bühnen-Layout)', 'ultimate-member' ),
 				);
 				foreach ( $group_labels as $group => $glabel ) :
 					?>
@@ -366,6 +369,8 @@ final class MP_Admin {
 				<label class="mp-switch"><input type="checkbox" name="editor_styles" value="1" <?php checked( ! empty( $opts['editor_styles'] ) ); ?>> <span><?php esc_html_e( 'Farben auch im Block-Editor anwenden', 'ultimate-member' ); ?></span></label><br>
 				<label class="mp-switch"><input type="checkbox" name="theme_typography" value="1" <?php checked( ! empty( $opts['theme_typography'] ) ); ?>> <span><?php esc_html_e( 'Typografie des Themes übernehmen (Schriftart, Schriftgröße, Zeilenhöhe, Überschriften-Schrift)', 'ultimate-member' ); ?></span></label><br>
 				<label class="mp-switch"><input type="checkbox" name="original_cards" value="1" <?php checked( ! empty( $opts['original_cards'] ) ); ?>> <span><?php esc_html_e( 'Mitgliederkarten aus den Original-Vorlagen (Vorlagen-Überschreibungen des Themes ignorieren)', 'ultimate-member' ); ?></span></label><br>
+				<label class="mp-switch"><input type="checkbox" name="card_layout_stage" value="1" <?php checked( ! empty( $opts['card_layout_stage'] ) ); ?>> <span><?php esc_html_e( 'Mitgliederkarten im Bühnen-Layout (4 Spalten, Foto ragt über die Karte, Hover-Effekte; Schriften und Farben unten unter „Mitgliederkarten“)', 'ultimate-member' ); ?></span></label><br>
+				<label class="mp-switch"><input type="checkbox" name="fontawesome5" value="1" <?php checked( ! empty( $opts['fontawesome5'] ) ); ?>> <span><?php esc_html_e( 'Font Awesome 5 für Icons verwenden (statt Font Awesome 6 – passend zu Theme und Erweiterungen)', 'ultimate-member' ); ?></span></label><br>
 				<label class="mp-switch"><input type="checkbox" name="strip_foreign_card_css" value="1" <?php checked( ! empty( $opts['strip_foreign_card_css'] ) ); ?>> <span><?php esc_html_e( 'Karten-Stile anderer Plugins/des Themes entfernen (reines Original-Design, z.B. ohne Stückverwaltungs-Hintergrund)', 'ultimate-member' ); ?></span></label>
 
 				<p class="submit">
