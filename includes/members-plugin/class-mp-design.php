@@ -289,9 +289,9 @@ final class MP_Design {
 		// Page builders (e.g. Elementor text widgets) run wpautop over the directory card
 		// templates; the resulting empty paragraphs make cards tall and break the grid.
 		$css .= '.um-directory .um-members > p:empty,.um-directory .um-member > p:empty,.um-directory .um-member-card > p:empty{display:none!important}.um-directory .um-member > p,.um-directory .um-member-card > p{margin:0!important;padding:0!important}';
-		// Members Plugin: with theme typography, take font, size and line height from the
-		// page itself (<body>), not from whatever block wraps the shortcode (e.g. an
-		// Elementor text widget with its own small "Text" typography).
+		// Theme typography changes the font family only. Keep font sizes and line heights
+		// controlled by UM's own stylesheets so page-builder text settings cannot distort
+		// the plugin's native typography scale.
 		$opts_tmp = self::get_options();
 		if ( ! empty( $opts_tmp['theme_typography'] ) ) {
 			$css .= 'body.um-mp-typo .um,body.um-mp-typo .um-modal,body.um-mp-typo .um-account,body.um-mp-typo .um-directory{font-family:var(--um-font-family,inherit)!important}';
@@ -422,9 +422,11 @@ final class MP_Design {
 	}
 
 	/**
-	 * Theme typography: read the page's body and heading typography right after <body>
-	 * opens (before any content is shown) and expose it as CSS variables. Values found
-	 * on the server (theme.json) or set manually take precedence.
+	 * Theme typography: read the page's body and heading font information right after
+	 * <body> opens (before any content is shown) and expose it as CSS variables. UM's own
+	 * font-size and line-height rules remain authoritative; the body-size variables stay
+	 * available for custom CSS compatibility. Values found on the server or set manually
+	 * take precedence.
 	 */
 	public static function print_typography_script() {
 		static $done = false;
