@@ -1,3 +1,9 @@
+## 1.1.2 – 2026-10-24
+
+- Fixed: restored Ultimate Member's native font-size and line-height behavior across profiles, forms, account pages and member directories; theme typography now changes font families instead of forcing a 14–16 px base size.
+- Improved: MP member-card name and supporting-text defaults match UM's standard 16 px and 13 px directory sizes while remaining adjustable in Design & CSS.
+- Maintained: high-resolution cover variants, safe cleanup of obsolete cover thumbnails and directory cache-busting from 1.1.1.
+
 ## 1.1.1 – 2026-10-24 (follow-up fixes)
 
 - Fixed: keep UM profile and directory typography readable by capping inherited base text size at 16px and using rem-based heading sizes.

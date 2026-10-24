@@ -56,9 +56,9 @@ final class MP_Member_Cards {
 		return array(
 			'card-font-family'      => array( __( 'Schriftart Karten', 'ultimate-member' ), __( 'Leer = Schrift der Website.', 'ultimate-member' ), '', 'cards' ),
 			'card-name-font-family' => array( __( 'Schriftart Namen', 'ultimate-member' ), __( 'Leer = wie „Schriftart Karten“.', 'ultimate-member' ), '', 'cards' ),
-			'card-name-font-size'   => array( __( 'Schriftgröße Namen', 'ultimate-member' ), '', '1.2rem', 'cards' ),
+			'card-name-font-size'   => array( __( 'Schriftgröße Namen', 'ultimate-member' ), '', '16px', 'cards' ),
 			'card-name-font-weight' => array( __( 'Schriftstärke Namen', 'ultimate-member' ), __( 'z.B. 700 oder bold.', 'ultimate-member' ), '700', 'cards' ),
-			'card-text-font-size'   => array( __( 'Schriftgröße Zusatztext', 'ultimate-member' ), __( 'Untertitel/Tagline.', 'ultimate-member' ), '0.9rem', 'cards' ),
+			'card-text-font-size'   => array( __( 'Schriftgröße Zusatztext', 'ultimate-member' ), __( 'Untertitel/Tagline.', 'ultimate-member' ), '13px', 'cards' ),
 			'card-bg'               => array( __( 'Kartenhintergrund', 'ultimate-member' ), __( 'Grundfarbe; Hintergründe von Erweiterungen liegen darüber.', 'ultimate-member' ), '#6d0019', 'cards' ),
 			'card-text'             => array( __( 'Textfarbe Karten', 'ultimate-member' ), '', '#ffffff', 'cards' ),
 			'card-photo-border'     => array( __( 'Rahmen Profilfoto', 'ultimate-member' ), '', '#ffffff', 'cards' ),
@@ -102,10 +102,10 @@ final class MP_Member_Cards {
 			// Card text.
 			$m . ' .um-member-card' => 'position:static!important;padding:.5em .5em 1em!important;text-shadow:1px 1px 3px rgba(0,0,0,.85)',
 			$m . ' .um-member-card,' . $m . ' .um-member-card a' => 'color:var(--um-card-text,#fff)!important',
-			$m . ' .um-member-card .um-member-name' => 'position:relative;z-index:1;margin:0 0 .5rem!important;font-family:var(--um-card-name-font-family,var(--um-card-font-family,inherit))!important;font-weight:var(--um-card-name-font-weight,700)!important;font-size:var(--um-card-name-font-size,1.2rem)!important;line-height:1.1!important',
+			$m . ' .um-member-card .um-member-name' => 'position:relative;z-index:1;margin:0 0 .5rem!important;font-family:var(--um-card-name-font-family,var(--um-card-font-family,inherit))!important;font-weight:var(--um-card-name-font-weight,700)!important;font-size:var(--um-card-name-font-size,16px)!important;line-height:1.1!important',
 			$m . ' .um-member-card .um-member-name a' => 'font:inherit!important;text-decoration:none!important;transition:background-color .3s ease,outline-color .3s ease',
 			$m . ' .um-member-card .um-member-name a:hover,' . $m . ' .um-member-card .um-member-name a:focus-visible' => 'background-color:var(--um-card-hover,#3c6999)!important;outline:5px solid var(--um-card-hover,#3c6999)!important;opacity:1!important',
-			$m . ' .um-member-card .um-member-tagline,' . $m . ' .um-member-card .um-member-metaline' => 'position:relative;z-index:1;font-family:var(--um-card-font-family,inherit)!important;font-size:var(--um-card-text-font-size,.9rem)!important;line-height:1.1!important',
+			$m . ' .um-member-card .um-member-tagline,' . $m . ' .um-member-card .um-member-metaline' => 'position:relative;z-index:1;font-family:var(--um-card-font-family,inherit)!important;font-size:var(--um-card-text-font-size,13px)!important;line-height:1.1!important',
 			$m . ' .um-members-edit-btn' => 'display:none!important',
 
 			// Statistics chips (Stückverwaltung add-on).
