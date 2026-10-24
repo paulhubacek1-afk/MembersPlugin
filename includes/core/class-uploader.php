@@ -1058,6 +1058,7 @@ if ( ! class_exists( 'um\core\Uploader' ) ) {
 		 * @return array
 		 */
 		public function cover_photo( $response, $image_path, $src, $key, $user_id, $coord, $crop ) {
+			$target_user_id = absint( $user_id ) ? absint( $user_id ) : absint( $this->user_id );
 			$sizes = UM()->options()->get( 'cover_thumb_sizes' );
 
 			// Members Plugin: always generate high-resolution cover variants while
@@ -1126,9 +1127,13 @@ if ( ! class_exists( 'um\core\Uploader' ) ) {
 					$old_path     = dirname( $image_path ) . DIRECTORY_SEPARATOR . $old_filename;
 					$new_path     = dirname( $image_path ) . DIRECTORY_SEPARATOR . $new_filename;
 						if ( $old_path !== $new_path && file_exists( $old_path ) ) {
-							rename( $old_path, $new_path );
-						}
-						if ( is_file( $new_path ) ) {
+							if ( rename( $old_path, $new_path ) ) {
+								$keep_cover_files[] = $new_filename;
+							} else {
+								// Keep the legacy variant if the filesystem refuses the rename.
+								$keep_cover_files[] = $old_filename;
+							}
+						} elseif ( is_file( $new_path ) ) {
 							$keep_cover_files[] = $new_filename;
 						}
 					}
@@ -1162,7 +1167,7 @@ if ( ! class_exists( 'um\core\Uploader' ) ) {
 				$response['image']['source_path'] = $save_result['path'];
 				$response['image']['filename']    = $save_result['file'];
 
-				update_user_meta( $this->user_id, $key, $save_result['file'] );
+				update_user_meta( $target_user_id, $key, wp_basename( $save_result['file'] ) );
 				delete_user_meta( $this->user_id, "{$key}_metadata_temp" );
 			} else {
 				// translators: %s is the file src.

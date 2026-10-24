@@ -1,3 +1,11 @@
+## 1.1.3 – 2026-10-24
+
+- Fixed: retain Ultimate Member's native bold and font-weight styling unless a heading-weight override is explicitly set.
+- New: add a configurable Konto-Tabs builder under Ultimate Member. Administrators can create/remove account tabs, configure icons and save-button text, and add text, long text, email, URL, number, date, dropdown, radio and checkbox fields with validation and user-meta storage.
+- Fixed: cover URI lookup checks exact MP and legacy thumbnail names, falls back to the existing full-size cover or another valid thumbnail, and uses the default cover when a saved cover file is missing.
+- Fixed: the Bühnen-Layout no longer hides UM directory cover photos; configured covers are visible behind each member card's overlapping profile photo.
+- Fixed: cover upload metadata is saved against the actual target user; failed thumbnail renames no longer cause existing files to be removed accidentally.
+
 ## 1.1.2 – 2026-10-24
 
 - Fixed: restored Ultimate Member's native font-size and line-height behavior across profiles, forms, account pages and member directories; theme typography now changes font families instead of forcing a 14–16 px base size.

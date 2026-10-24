@@ -88,7 +88,12 @@ final class MP_Member_Cards {
 			'body.um-mp-cards-stage .um-directory.uimob960 .um-members-wrapper .um-members.um-members-grid .um-member,body.um-mp-cards-stage .um-directory.uimob800 .um-members-wrapper .um-members.um-members-grid .um-member' => 'width:32.6667%!important',
 			'body.um-mp-cards-stage .um-directory.uimob500 .um-members-wrapper .um-members.um-members-grid .um-member,body.um-mp-cards-stage .um-directory.uimob340 .um-members-wrapper .um-members.um-members-grid .um-member' => 'width:49.5%!important;margin-bottom:12px!important',
 			$g . ' .um-gutter-sizer' => 'width:1%!important',
-			$m . ' .um-member-cover' => 'display:none!important',
+			// Keep Ultimate Member directory cover photos visible in the MP stage layout.
+			// The cover is a decorative image layer behind the overlapping profile photo.
+			$m . ' .um-member-cover' => 'display:block!important;position:absolute!important;top:0!important;left:0!important;right:0!important;width:100%!important;height:140px!important;overflow:hidden!important;border-radius:5px 5px 0 0!important;z-index:0!important;background:rgba(0,0,0,.12)!important',
+			$m . ' .um-member-cover .um-member-cover-e' => 'display:block!important;width:100%!important;height:140px!important;overflow:hidden!important',
+			$m . ' .um-member-cover .um-member-cover-e img' => 'display:block!important;width:100%!important;height:140px!important;max-width:none!important;object-fit:cover!important;object-position:center!important;opacity:.62!important;transition:opacity .3s ease!important',
+			$m . ':hover .um-member-cover .um-member-cover-e img' => 'opacity:.82!important',
 			$m . ' .stuecke-um-card-bg' => 'inset:0!important;z-index:-1!important;border-radius:5px',
 
 			// Photo overlapping the top edge of the card.
