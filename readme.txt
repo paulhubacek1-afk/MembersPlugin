@@ -4,7 +4,7 @@ Tags: membership, user-profile, community, user-registration, member-directory, 
 Requires at least: 6.2
 Tested up to: 7.1
 Requires PHP: 7.0
-Stable tag: 1.0.9.8
+Stable tag: 1.0.9.9
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -57,6 +57,10 @@ No. The profile checks the built-in birth_date field automatically.
 No. It searches for releases automatically and makes available updates visible in WordPress.
 
 == Changelog ==
+
+= 1.0.9.9 =
+* Fixed: with Typografie des Themes übernehmen the plugin used the typography of the block around the shortcode (e.g. an Elementor text widget: Roboto, small sizes) instead of the site's typography. Font family, size and line height are now read from the page body right after it opens.
+* Fixed: empty paragraphs that page builders insert into the directory card templates (wpautop) no longer make cards tall or break the grid.
 
 = 1.0.9.8 =
 * Fixed: profile tabs added by other plugins (e.g. Portfolio from the Stückverwaltung) were hidden until the profile-menu settings had been saved once, although the settings screen showed them as enabled. Tabs without a stored setting now use the default shown there (enabled, visible to everyone).
