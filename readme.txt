@@ -4,7 +4,7 @@ Tags: membership, user-profile, community, user-registration, member-directory, 
 Requires at least: 6.2
 Tested up to: 7.1
 Requires PHP: 7.0
-Stable tag: 1.0.9.7
+Stable tag: 1.0.9.8
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -57,6 +57,9 @@ No. The profile checks the built-in birth_date field automatically.
 No. It searches for releases automatically and makes available updates visible in WordPress.
 
 == Changelog ==
+
+= 1.0.9.8 =
+* Fixed: profile tabs added by other plugins (e.g. Portfolio from the Stückverwaltung) were hidden until the profile-menu settings had been saved once, although the settings screen showed them as enabled. Tabs without a stored setting now use the default shown there (enabled, visible to everyone).
 
 = 1.0.9.7 =
 * Fixed: member-card styling of add-ons (e.g. Stückverwaltung: red card background, statistics) was removed by 1.0.9.6. Removing other plugins' card CSS is now an opt-in option (Design & CSS), off by default.
