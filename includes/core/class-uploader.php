@@ -1060,6 +1060,16 @@ if ( ! class_exists( 'um\core\Uploader' ) ) {
 		public function cover_photo( $response, $image_path, $src, $key, $user_id, $coord, $crop ) {
 			$sizes = UM()->options()->get( 'cover_thumb_sizes' );
 
+			// Members Plugin: always generate high-resolution cover variants while
+			// preserving any additional sizes configured by the site administrator.
+			$sizes = array_values(
+				array_unique(
+					array_filter(
+						array_merge( array_map( 'absint', (array) $sizes ), array( 600, 1200, 1800 ) )
+					)
+				)
+			);
+
 			$image = wp_get_image_editor( $image_path ); // Return an implementation that extends WP_Image_Editor
 
 			$temp_image_path = $image_path;
@@ -1100,18 +1110,43 @@ if ( ! class_exists( 'um\core\Uploader' ) ) {
 				// Keep the configured thumbnail sizes, but render them at quality 100 too.
 				$resize = $image->multi_resize( $sizes_array );
 
+				// Track the files belonging to this newly saved cover. Once every new
+				// file exists, obsolete cover variants from earlier uploads/sizes can
+				// be removed without touching unrelated user files.
+				$keep_cover_files = array( wp_basename( $save_result['file'] ) );
+
 				// Change filenames of resized images.
 				if ( is_array( $resize ) ) {
 					foreach ( $resize as $row ) {
 						if ( empty( $row['file'] ) || empty( $row['height'] ) ) {
 							continue;
 						}
-						$new_filename = str_replace( "x{$row['height']}", '', $row['file'] );
-						$old_filename = $row['file'];
-						$old_path     = dirname( $image_path ) . DIRECTORY_SEPARATOR . $old_filename;
-						$new_path     = dirname( $image_path ) . DIRECTORY_SEPARATOR . $new_filename;
+					$new_filename = str_replace( "x{$row['height']}", '', $row['file'] );
+					$old_filename = $row['file'];
+					$old_path     = dirname( $image_path ) . DIRECTORY_SEPARATOR . $old_filename;
+					$new_path     = dirname( $image_path ) . DIRECTORY_SEPARATOR . $new_filename;
 						if ( $old_path !== $new_path && file_exists( $old_path ) ) {
 							rename( $old_path, $new_path );
+						}
+						if ( is_file( $new_path ) ) {
+							$keep_cover_files[] = $new_filename;
+						}
+					}
+				}
+
+				// Remove only obsolete generated cover files in this user's own upload
+				// directory. Keep the master and every thumbnail generated above.
+				$cover_dir   = dirname( $image_path );
+				$cover_files = glob( $cover_dir . DIRECTORY_SEPARATOR . 'cover_photo*' );
+				if ( is_array( $cover_files ) ) {
+					foreach ( $cover_files as $cover_file ) {
+						$cover_basename = wp_basename( $cover_file );
+						if (
+							is_file( $cover_file ) &&
+							preg_match( '/^cover_photo(?:-\\d+)?\\.[a-z0-9]+$/i', $cover_basename ) &&
+							! in_array( $cover_basename, $keep_cover_files, true )
+						) {
+							wp_delete_file( $cover_file );
 						}
 					}
 				}
