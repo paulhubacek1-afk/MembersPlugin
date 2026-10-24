@@ -2111,57 +2111,105 @@ function um_closest_num( $array, $number ) {
  * @return bool|string
  */
 function um_get_cover_uri( $image, $attrs ) {
-	$uri        = false;
-	$uri_common = false;
-	$ext        = '.' . pathinfo( $image, PATHINFO_EXTENSION );
+	if ( empty( $image ) ) {
+		return false;
+	}
 
-	$ratio  = str_replace( ':1', '', UM()->options()->get( 'profile_cover_ratio' ) );
-	$height = ( is_numeric( $ratio ) && (float) $ratio > 0 ) ? round( $attrs / $ratio ) : 0;
+	$user_id = absint( um_user( 'ID' ) );
+	if ( ! $user_id ) {
+		return false;
+	}
 
-	$user_id = um_user( 'ID' );
+	$base_dir = trailingslashit( UM()->uploader()->get_upload_base_dir() );
+	$base_url = trailingslashit( UM()->uploader()->get_upload_base_url() );
+	$user_dir = trailingslashit( $base_dir . $user_id );
+	$user_url = $base_url . $user_id . '/';
 
-	/*
-	 * Members Plugin: version the URL with the file modification time instead of time().
-	 * A changing time() value made every cover a new URL on every request, so browsers
-	 * could never cache covers and each member-directory page re-downloaded all of them.
-	 */
-	$find = static function ( $dir, $url ) use ( $user_id, $attrs, $height, $ext ) {
-		$found = false;
-		$candidates = array( "cover_photo{$ext}" );
-		if ( file_exists( $dir . $user_id . DIRECTORY_SEPARATOR . "cover_photo-{$attrs}{$ext}" ) ) {
-			$candidates[] = "cover_photo-{$attrs}{$ext}";
-		} elseif ( $height ) {
-			$candidates[] = "cover_photo-{$attrs}x{$height}{$ext}";
+	$locations = array(
+		array( 'dir' => $user_dir, 'url' => $user_url ),
+	);
+
+	// Keep compatibility with covers saved before WordPress multisite upload paths
+	// included /sites/{blog_id}/.
+	if ( is_multisite() ) {
+		$legacy_dir = str_replace( DIRECTORY_SEPARATOR . 'sites' . DIRECTORY_SEPARATOR . get_current_blog_id() . DIRECTORY_SEPARATOR, DIRECTORY_SEPARATOR, $user_dir );
+		$legacy_url = str_replace( '/sites/' . get_current_blog_id() . '/', '/', $user_url );
+		if ( $legacy_dir !== $user_dir || $legacy_url !== $user_url ) {
+			$locations[] = array( 'dir' => $legacy_dir, 'url' => $legacy_url );
 		}
-		foreach ( $candidates as $filename ) {
-			$path = $dir . $user_id . DIRECTORY_SEPARATOR . $filename;
-			if ( file_exists( $path ) ) {
-				$mtime = @filemtime( $path ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
-				$found = $url . $user_id . '/' . $filename . '?' . ( $mtime ? $mtime : time() );
+	}
+
+	$input_ext = strtolower( pathinfo( wp_basename( (string) $image ), PATHINFO_EXTENSION ) );
+	$extensions = array( $input_ext, 'jpg', 'jpeg', 'png', 'webp', 'gif' );
+	$extensions = array_values( array_unique( array_filter( $extensions, static function ( $ext ) {
+		return in_array( $ext, array( 'jpg', 'jpeg', 'png', 'webp', 'gif' ), true );
+	} ) ) );
+	if ( empty( $extensions ) ) {
+		$extensions = array( 'jpg', 'jpeg', 'png', 'webp', 'gif' );
+	}
+
+	$target = is_numeric( $attrs ) ? absint( $attrs ) : 0;
+	$ratio  = str_replace( ':1', '', (string) UM()->options()->get( 'profile_cover_ratio' ) );
+	$height = ( $target && is_numeric( $ratio ) && (float) $ratio > 0 ) ? round( $target / (float) $ratio ) : 0;
+
+	foreach ( $locations as $location ) {
+		$preferred = array();
+
+		// First try the exact requested thumbnail in both the MP and legacy UM names.
+		if ( $target > 0 ) {
+			foreach ( $extensions as $ext ) {
+				$preferred[] = 'cover_photo-' . $target . '.' . $ext;
+				if ( $height > 0 ) {
+					$preferred[] = 'cover_photo-' . $target . 'x' . $height . '.' . $ext;
+				}
 			}
 		}
-		return $found;
-	};
 
-	if ( is_multisite() ) {
-		//multisite fix for old customers
-		$multisite_fix_dir = UM()->uploader()->get_upload_base_dir();
-		$multisite_fix_url = UM()->uploader()->get_upload_base_url();
-		$multisite_fix_dir = str_replace( DIRECTORY_SEPARATOR . 'sites' . DIRECTORY_SEPARATOR . get_current_blog_id() . DIRECTORY_SEPARATOR, DIRECTORY_SEPARATOR, $multisite_fix_dir );
-		$multisite_fix_url = str_replace( '/sites/' . get_current_blog_id() . '/', '/', $multisite_fix_url );
+		// The master cover is full-resolution and is a safe fallback when a requested
+		// thumbnail was never generated or the configured cover width changed.
+		foreach ( $extensions as $ext ) {
+			$preferred[] = 'cover_photo.' . $ext;
+		}
 
-		$uri_common = $find( $multisite_fix_dir, $multisite_fix_url );
+		// As a final fallback, use any still-existing generated variant instead of
+		// returning a broken image URL when a master file is missing.
+		$fallbacks = array();
+		foreach ( $extensions as $ext ) {
+			$matches = glob( $location['dir'] . 'cover_photo-*.' . $ext );
+			if ( ! is_array( $matches ) ) {
+				continue;
+			}
+			foreach ( $matches as $match ) {
+				$name = wp_basename( $match );
+				if ( is_file( $match ) && preg_match( '/^cover_photo-(\d+)(?:x(\d+))?\.(?:jpg|jpeg|png|webp|gif)$/i', $name, $parts ) ) {
+					$fallbacks[] = array(
+						'name'  => $name,
+						'width' => absint( $parts[1] ),
+					);
+				}
+			}
+		}
+		usort( $fallbacks, static function ( $left, $right ) {
+			return $right['width'] - $left['width'];
+		} );
+		foreach ( $fallbacks as $fallback ) {
+			$preferred[] = $fallback['name'];
+		}
+
+		$preferred = array_values( array_unique( $preferred ) );
+		foreach ( $preferred as $filename ) {
+			$path = $location['dir'] . $filename;
+			if ( ! is_file( $path ) ) {
+				continue;
+			}
+			$modified = (int) @filemtime( $path ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
+			$url      = $location['url'] . rawurlencode( $filename );
+			return add_query_arg( 'mp_cover_ver', $modified > 0 ? $modified : time(), $url );
+		}
 	}
 
-	$uri = $find( UM()->uploader()->get_upload_base_dir(), UM()->uploader()->get_upload_base_url() );
-
-	if ( ! empty( $uri_common ) && empty( $uri ) ) {
-		$uri = $uri_common;
-	}
-
-	return $uri;
+	return false;
 }
-
 
 /**
  * get avatar URL instead of image
@@ -2754,6 +2802,10 @@ function um_user( $data, $attrs = null ) {
 
 			if ( um_profile( 'cover_photo' ) ) {
 				$cover_uri = um_get_cover_uri( um_profile( 'cover_photo' ), $attrs );
+				if ( empty( $cover_uri ) ) {
+					$cover_uri  = um_get_default_cover_uri();
+					$is_default = true;
+				}
 			} elseif ( um_profile( 'synced_cover_photo' ) ) {
 				$cover_uri = um_profile( 'synced_cover_photo' );
 			} else {
