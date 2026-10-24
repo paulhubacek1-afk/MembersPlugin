@@ -479,6 +479,10 @@ final class MP_Account_Tabs {
 				$next_field = max( $next_field, (int) $field_index + 1 );
 			}
 		}
+		if ( empty( $fields ) && ! $template ) {
+			// The initial editable blank row occupies index 0.
+			$next_field = 1;
+		}
 		?>
 		<section class="mp-account-tab-card" data-mp-tab-card data-tab-index="<?php echo esc_attr( $index ); ?>">
 			<h2><?php esc_html_e( 'Konto-Tab', 'members-plugin' ); ?> <button type="button" class="button-link-delete" data-mp-remove-tab><?php esc_html_e( 'Diesen Tab entfernen', 'members-plugin' ); ?></button></h2>
@@ -497,7 +501,9 @@ final class MP_Account_Tabs {
 				<table style="width:100%;border-collapse:collapse"><tbody data-mp-fields-body data-next-field="<?php echo esc_attr( $next_field ); ?>">
 					<?php
 					if ( empty( $fields ) ) {
-						self::render_field_row( array(), $index, 0 );
+						if ( ! $template ) {
+							self::render_field_row( array(), $index, 0 );
+						}
 					} else {
 						foreach ( $fields as $field_index => $field ) {
 							self::render_field_row( $field, $index, $field_index );
