@@ -4,7 +4,7 @@ Tags: membership, user-profile, community, user-registration, member-directory, 
 Requires at least: 6.2
 Tested up to: 7.1
 Requires PHP: 7.0
-Stable tag: 1.1.8
+Stable tag: 1.1.9
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -57,6 +57,9 @@ No. The profile checks the built-in birth_date field automatically.
 No. It searches for releases automatically and makes available updates visible in WordPress.
 
 == Changelog ==
+
+= 1.1.9 =
+* Fixed: after uploading a new cover photo, browsers could keep showing an old cached `cover_photo.jpg` (e.g. a small, blurry, wrongly cropped image) because the profile markup contained the bare file URL without the per-upload version token. A final safeguard on `um_user_cover_photo_html__filter` now always re-adds the version token and the responsive `srcset`, even when other site code rewrote the cover URL.
 
 = 1.1.8 =
 * Fixed: the saved cover photo was blurry although the crop preview was sharp. Phones were forced to a 300px cover and the profile form's cover size (300/600px by default) was used on desktop. The profile header now serves every generated variant via `srcset`, so the browser picks a sharp file for the real width and pixel density. Filters `mp_profile_cover_size` / `um_mobile_cover_photo` can still force a fixed size.

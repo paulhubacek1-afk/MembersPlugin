@@ -1,3 +1,7 @@
+## 1.1.9 – 2026-10-24
+
+- Fixed: stale cached cover photo after upload. The profile cover URL could reach the page without the `mp_cover_ver` token, so browsers kept the old `cover_photo.jpg`. A last-priority safeguard re-adds the token and the `srcset`.
+
 ## 1.1.8 – 2026-10-24
 
 - Fixed: blurry cover photo after upload although the crop preview was sharp (mobile forced a 300px variant; desktop used the form's 300/600px cover size). The profile header now uses a responsive `srcset` over all generated variants and is no longer lazy-loaded.
