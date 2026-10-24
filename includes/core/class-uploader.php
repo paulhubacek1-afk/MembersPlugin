@@ -1206,6 +1206,7 @@ if ( ! class_exists( 'um\core\Uploader' ) ) {
 			delete_user_meta( $target_user_id, "{$key}_metadata_temp" );
 			delete_user_meta( $target_user_id, 'synced_cover_photo' );
 			update_user_meta( $target_user_id, 'mp_cover_photo_version', wp_generate_password( 20, false, false ) );
+			UM()->user()->remove_cache( $target_user_id );
 
 			return $response;
 		}
