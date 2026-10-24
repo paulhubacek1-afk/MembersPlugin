@@ -2120,17 +2120,23 @@ function um_get_cover_uri( $image, $attrs ) {
 		return false;
 	}
 
+	$stored_filename = sanitize_file_name( wp_basename( strtok( (string) $image, '?' ) ) );
+	if ( '' === $stored_filename || 0 !== strpos( $stored_filename, 'cover_photo' ) ) {
+		return false;
+	}
+	$stored_ext = strtolower( pathinfo( $stored_filename, PATHINFO_EXTENSION ) );
+	$allowed_exts = array( 'jpg', 'jpeg', 'png', 'webp', 'gif' );
+	if ( ! in_array( $stored_ext, $allowed_exts, true ) ) {
+		return false;
+	}
+	$stored_stem = pathinfo( $stored_filename, PATHINFO_FILENAME );
+
 	$base_dir = trailingslashit( UM()->uploader()->get_upload_base_dir() );
 	$base_url = trailingslashit( UM()->uploader()->get_upload_base_url() );
 	$user_dir = trailingslashit( $base_dir . $user_id );
 	$user_url = $base_url . $user_id . '/';
+	$locations = array( array( 'dir' => $user_dir, 'url' => $user_url ) );
 
-	$locations = array(
-		array( 'dir' => $user_dir, 'url' => $user_url ),
-	);
-
-	// Keep compatibility with covers saved before WordPress multisite upload paths
-	// included /sites/{blog_id}/.
 	if ( is_multisite() ) {
 		$legacy_dir = str_replace( DIRECTORY_SEPARATOR . 'sites' . DIRECTORY_SEPARATOR . get_current_blog_id() . DIRECTORY_SEPARATOR, DIRECTORY_SEPARATOR, $user_dir );
 		$legacy_url = str_replace( '/sites/' . get_current_blog_id() . '/', '/', $user_url );
@@ -2139,54 +2145,45 @@ function um_get_cover_uri( $image, $attrs ) {
 		}
 	}
 
-	$input_ext = strtolower( pathinfo( wp_basename( (string) $image ), PATHINFO_EXTENSION ) );
-	$extensions = array( $input_ext, 'jpg', 'jpeg', 'png', 'webp', 'gif' );
-	$extensions = array_values( array_unique( array_filter( $extensions, static function ( $ext ) {
-		return in_array( $ext, array( 'jpg', 'jpeg', 'png', 'webp', 'gif' ), true );
-	} ) ) );
-	if ( empty( $extensions ) ) {
-		$extensions = array( 'jpg', 'jpeg', 'png', 'webp', 'gif' );
+	$requested_size = is_numeric( $attrs ) ? absint( $attrs ) : 1200;
+	if ( $requested_size < 1 ) {
+		$requested_size = 1200;
 	}
-
-	$target = is_numeric( $attrs ) ? absint( $attrs ) : 0;
 	$ratio  = str_replace( ':1', '', (string) UM()->options()->get( 'profile_cover_ratio' ) );
-	$height = ( $target && is_numeric( $ratio ) && (float) $ratio > 0 ) ? round( $target / (float) $ratio ) : 0;
+	$sizes  = UM()->options()->get( 'cover_thumb_sizes' );
+	$sizes  = is_array( $sizes ) ? array_map( 'absint', $sizes ) : array();
+	$targets = array_values( array_unique( array_filter( array_merge( array( $requested_size, 1200, 1800, 600 ), $sizes ) ) ) );
+
+	$extensions = array_values( array_unique( array_filter( array_merge( array( $stored_ext ), $allowed_exts ) ) ) );
+	$version = (string) get_user_meta( $user_id, 'mp_cover_photo_version', true );
+	if ( '' === $version ) {
+		$version = 'legacy';
+	}
 
 	foreach ( $locations as $location ) {
 		$preferred = array();
-
-		// First try the exact requested thumbnail in both the MP and legacy UM names.
-		if ( $target > 0 ) {
+		foreach ( $targets as $size ) {
+			$height = ( is_numeric( $ratio ) && (float) $ratio > 0 ) ? round( $size / (float) $ratio ) : 0;
 			foreach ( $extensions as $ext ) {
-				$preferred[] = 'cover_photo-' . $target . '.' . $ext;
+				$preferred[] = $stored_stem . '-' . $size . '.' . $ext;
 				if ( $height > 0 ) {
-					$preferred[] = 'cover_photo-' . $target . 'x' . $height . '.' . $ext;
+					$preferred[] = $stored_stem . '-' . $size . 'x' . $height . '.' . $ext;
 				}
 			}
 		}
+		$preferred[] = $stored_filename;
 
-		// The master cover is full-resolution and is a safe fallback when a requested
-		// thumbnail was never generated or the configured cover width changed.
-		foreach ( $extensions as $ext ) {
-			$preferred[] = 'cover_photo.' . $ext;
-		}
-
-		// As a final fallback, use any still-existing generated variant instead of
-		// returning a broken image URL when a master file is missing.
+		// Keep compatibility with thumbnails made by earlier MP/UM versions, including
+		// names like cover_photo-1-1200.jpg created when WordPress avoided overwriting.
 		$fallbacks = array();
-		foreach ( $extensions as $ext ) {
-			$matches = glob( $location['dir'] . 'cover_photo-*.' . $ext );
-			if ( ! is_array( $matches ) ) {
-				continue;
-			}
+		$matches = glob( $location['dir'] . $stored_stem . '-*' );
+		if ( is_array( $matches ) ) {
 			foreach ( $matches as $match ) {
 				$name = wp_basename( $match );
-				if ( is_file( $match ) && preg_match( '/^cover_photo-(\d+)(?:x(\d+))?\.(?:jpg|jpeg|png|webp|gif)$/i', $name, $parts ) ) {
-					$fallbacks[] = array(
-						'name'  => $name,
-						'width' => absint( $parts[1] ),
-					);
+				if ( ! is_file( $match ) || ! preg_match( '/^' . preg_quote( $stored_stem, '/' ) . '-(\\d+)(?:x\\d+)?\\.(' . implode( '|', array_map( 'preg_quote', $allowed_exts ) ) . ')$/i', $name, $parts ) ) {
+					continue;
 				}
+				$fallbacks[] = array( 'name' => $name, 'width' => absint( $parts[1] ) );
 			}
 		}
 		usort( $fallbacks, static function ( $left, $right ) {
@@ -2196,20 +2193,24 @@ function um_get_cover_uri( $image, $attrs ) {
 			$preferred[] = $fallback['name'];
 		}
 
-		$preferred = array_values( array_unique( $preferred ) );
-		foreach ( $preferred as $filename ) {
+		foreach ( array_values( array_unique( $preferred ) ) as $filename ) {
 			$path = $location['dir'] . $filename;
 			if ( ! is_file( $path ) ) {
 				continue;
 			}
-			$modified = (int) @filemtime( $path ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
-			$url      = $location['url'] . rawurlencode( $filename );
-			return add_query_arg( 'mp_cover_ver', $modified > 0 ? $modified : time(), $url );
+			$url = $location['url'] . rawurlencode( $filename );
+			return add_query_arg( 'mp_cover_ver', $version, $url );
 		}
 	}
-
 	return false;
 }
+
+if ( ! function_exists( 'mp_clear_cover_photo_version_after_remove' ) ) {
+	function mp_clear_cover_photo_version_after_remove( $user_id ) {
+		delete_user_meta( absint( $user_id ), 'mp_cover_photo_version' );
+	}
+}
+add_action( 'um_after_remove_cover_photo', 'mp_clear_cover_photo_version_after_remove', 10, 1 );
 
 /**
  * get avatar URL instead of image
