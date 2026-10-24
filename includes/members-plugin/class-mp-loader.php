@@ -10,6 +10,7 @@ defined( 'ABSPATH' ) || exit;
 require_once MP_PATH . 'class-mp-color.php';
 require_once MP_PATH . 'class-mp-theme-colors.php';
 require_once MP_PATH . 'class-mp-member-cards.php';
+require_once MP_PATH . 'class-mp-icons.php';
 require_once MP_PATH . 'class-mp-design.php';
 require_once MP_PATH . 'class-mp-class-reference.php';
 require_once MP_PATH . 'class-mp-inspector.php';
@@ -41,6 +42,7 @@ add_filter( 'script_loader_src', 'mp_bust_core_asset_version', 20 );
 add_filter( 'style_loader_src', 'mp_bust_core_asset_version', 20 );
 
 MP_Member_Cards::init();
+MP_Icons::init();
 MP_Design::init();
 MP_Inspector::init();
 MP_Security::init();

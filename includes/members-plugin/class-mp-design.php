@@ -103,6 +103,7 @@ final class MP_Design {
 			'theme_typography' => 1,
 			'original_cards'   => 1,
 			'card_layout_stage' => 1,
+			'fontawesome5'      => 1,
 			'strip_foreign_card_css' => 0,
 		);
 	}
