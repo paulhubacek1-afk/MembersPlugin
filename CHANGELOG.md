@@ -1,3 +1,8 @@
+## 1.0.9.9 – 2026-10-24
+
+- Fixed: with "Typografie des Themes übernehmen" the plugin used the typography of the block around the shortcode (e.g. an Elementor text widget: Roboto, small sizes) instead of the site's typography. Font family, size and line height are now read from the page body right after it opens.
+- Fixed: empty paragraphs that page builders insert into the directory card templates (wpautop) no longer make cards tall or break the grid.
+
 ## 1.0.9.8 – 2026-10-24
 
 - Fixed: profile tabs added by other plugins (e.g. Portfolio from the Stückverwaltung) were hidden until the profile-menu settings had been saved once, although the settings screen showed them as enabled. Tabs without a stored setting now use the default shown there (enabled, visible to everyone).

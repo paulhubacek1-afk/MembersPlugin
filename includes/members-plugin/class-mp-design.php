@@ -278,6 +278,16 @@ final class MP_Design {
 	 */
 	public static function base_css() {
 		$css  = '.um,.um-modal,.um-account,.um-directory{font-family:var(--um-font-family,inherit)}';
+		// Page builders (e.g. Elementor text widgets) run wpautop over the directory card
+		// templates; the resulting empty paragraphs make cards tall and break the grid.
+		$css .= '.um-directory .um-members > p:empty,.um-directory .um-member > p:empty,.um-directory .um-member-card > p:empty{display:none!important}.um-directory .um-member > p,.um-directory .um-member-card > p{margin:0!important;padding:0!important}';
+		// Members Plugin: with theme typography, take font, size and line height from the
+		// page itself (<body>), not from whatever block wraps the shortcode (e.g. an
+		// Elementor text widget with its own small "Text" typography).
+		$opts_tmp = self::get_options();
+		if ( ! empty( $opts_tmp['theme_typography'] ) ) {
+			$css .= 'body.um-mp-typo .um,body.um-mp-typo .um-modal,body.um-mp-typo .um-account,body.um-mp-typo .um-directory{font-family:var(--um-font-family,inherit)!important;font-size:var(--um-font-size,inherit)!important;line-height:var(--um-line-height,inherit)!important}';
+		}
 		$opts = self::get_options();
 		if ( ! empty( $opts['theme_typography'] ) ) {
 			$css .= self::theme_typography_css();
@@ -357,7 +367,7 @@ final class MP_Design {
 			}
 		}
 
-		$css  = implode( ',', $roots ) . '{font-size:inherit;line-height:inherit;letter-spacing:inherit}';
+		$css  = implode( ',', $roots ) . '{letter-spacing:normal}';
 		$css .= $list( $controls ) . '{font-family:inherit;letter-spacing:inherit}';
 		$css .= $list( $body ) . '{font-size:1em!important;line-height:inherit!important}';
 		$css .= $list( $small ) . '{font-size:0.875em!important;line-height:1.5!important}';
@@ -423,6 +433,34 @@ final class MP_Design {
 		add_action( 'enqueue_block_assets', array( __CLASS__, 'enqueue_editor' ), 20 );
 		MP_Theme_Colors::register_cache_invalidation();
 		add_filter( 'body_class', array( __CLASS__, 'body_class' ) );
+		add_action( 'wp_body_open', array( __CLASS__, 'print_typography_script' ), 1 );
+		add_action( 'wp_footer', array( __CLASS__, 'print_typography_script' ), 1 );
+	}
+
+	/**
+	 * Theme typography: read the page's body and heading typography right after <body>
+	 * opens (before any content is shown) and expose it as CSS variables. Values found
+	 * on the server (theme.json) or set manually take precedence.
+	 */
+	public static function print_typography_script() {
+		static $done = false;
+		if ( $done || is_admin() ) {
+			return;
+		}
+		$done = true;
+
+		$opts = self::get_options();
+		if ( empty( $opts['theme_typography'] ) ) {
+			return;
+		}
+		$values = self::resolved_values();
+		$known  = array(
+			'font'    => ! empty( $values['font-family'] ) && 'inherit' !== $values['font-family'],
+			'heading' => ! empty( $values['heading-font-family'] ),
+			'weight'  => ! empty( $values['heading-font-weight'] ),
+		);
+
+		echo '<script id="mp-typography">(function(k){var d=document.documentElement,s=d.style,b=document.body;if(!b)return;var c=getComputedStyle(b);if(!k.font){s.setProperty("--um-font-family",c.fontFamily);}s.setProperty("--um-font-size",c.fontSize);s.setProperty("--um-line-height",c.lineHeight);function h(){if(k.heading&&k.weight)return;var l=document.querySelectorAll("h1,h2,h3,.entry-title,.wp-block-post-title");for(var i=0;i<l.length;i++){if(!l[i].closest(".um,.um-modal,#wpadminbar")){var x=getComputedStyle(l[i]);if(!k.heading){s.setProperty("--um-heading-font-family",x.fontFamily);}if(!k.weight){s.setProperty("--um-heading-font-weight",x.fontWeight);}return;}}}if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",h);}else{h();}})(' . wp_json_encode( $known ) . ');</script>' . "\n"; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 	}
 
 	/**
@@ -440,16 +478,6 @@ final class MP_Design {
 			$css .= "\n/* Members Plugin – eigenes CSS */\n" . self::sanitize_custom_css( $opts['custom_css'] );
 		}
 		wp_add_inline_style( 'mp-design', $css );
-
-		// Classic themes have no theme.json heading font: read it from the page in the browser.
-		if ( ! empty( $opts['theme_typography'] ) && empty( $values['heading-font-family'] ) ) {
-			wp_register_script( 'mp-typography', false, array(), MP_VERSION, true );
-			wp_enqueue_script( 'mp-typography' );
-			wp_add_inline_script(
-				'mp-typography',
-				"(function(){function r(){if(!document.querySelector('.um'))return;var h=null,l=document.querySelectorAll('h1,h2,h3,.entry-title,.wp-block-post-title');for(var i=0;i<l.length;i++){if(!l[i].closest('.um,.um-modal,#wpadminbar')){h=l[i];break;}}if(!h)return;var c=window.getComputedStyle(h),s=document.documentElement.style;s.setProperty('--um-heading-font-family',c.fontFamily);if(!getComputedStyle(document.documentElement).getPropertyValue('--um-heading-font-weight').trim()){s.setProperty('--um-heading-font-weight',c.fontWeight);}}if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',r);}else{r();}})();"
-			);
-		}
 
 		// Live-Erkennung im Browser für Werte, die serverseitig nicht ermittelt werden konnten.
 		if ( ! empty( $opts['auto_colors'] ) ) {
