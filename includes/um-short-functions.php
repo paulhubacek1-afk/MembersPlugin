@@ -2145,14 +2145,15 @@ function um_get_cover_uri( $image, $attrs ) {
 		}
 	}
 
-	$requested_size = is_numeric( $attrs ) ? absint( $attrs ) : 1200;
+	// The full profile cover should prefer the 1800px variant; numeric sizes are used by directory cards.
+	$requested_size = is_numeric( $attrs ) ? absint( $attrs ) : 1800;
 	if ( $requested_size < 1 ) {
 		$requested_size = 1200;
 	}
 	$ratio  = str_replace( ':1', '', (string) UM()->options()->get( 'profile_cover_ratio' ) );
 	$sizes  = UM()->options()->get( 'cover_thumb_sizes' );
 	$sizes  = is_array( $sizes ) ? array_map( 'absint', $sizes ) : array();
-	$targets = array_values( array_unique( array_filter( array_merge( array( $requested_size, 1200, 1800, 600 ), $sizes ) ) ) );
+	$targets = array_values( array_unique( array_filter( array_merge( array( $requested_size, 1800, 1200, 600 ), $sizes ) ) ) );
 
 	$extensions = array_values( array_unique( array_filter( array_merge( array( $stored_ext ), $allowed_exts ) ) ) );
 	$version = (string) get_user_meta( $user_id, 'mp_cover_photo_version', true );
@@ -2160,22 +2161,9 @@ function um_get_cover_uri( $image, $attrs ) {
 		$version = 'legacy';
 	}
 
-	$prefer_original = ! is_numeric( $attrs );
-	$canonical_filename = sanitize_file_name( wp_basename( (string) get_user_meta( $user_id, 'cover_photo', true ) ) );
-
 	foreach ( $locations as $location ) {
-		// Full profile covers should use the original, cropped master file. A 1200px
-		// thumbnail can look blurry when stretched across a wide/high-density display.
-		// Numeric sizes are passed by member-directory cards, which should stay optimized.
-		if (
-			$prefer_original &&
-			preg_match( '/^cover_photo\\.[a-z0-9]+$/i', $canonical_filename ) &&
-			is_file( $location['dir'] . $canonical_filename )
-		) {
-			$original_url = $location['url'] . rawurlencode( $canonical_filename );
-			return add_query_arg( 'mp_cover_ver', $version, $original_url );
-		}
-
+		// Full profile covers prefer the 1800px thumbnail, not cover_photo.jpg.
+		// Numeric sizes passed by member-directory cards remain optimized to their requested size.
 		$preferred = array();
 		foreach ( $targets as $size ) {
 			$height = ( is_numeric( $ratio ) && (float) $ratio > 0 ) ? round( $size / (float) $ratio ) : 0;
@@ -2206,8 +2194,7 @@ function um_get_cover_uri( $image, $attrs ) {
 			$preferred[] = $fallback['name'];
 		}
 
-		// The master is intentionally last: use an existing thumbnail when the exact
-		// requested size was not generated (for example, due to a changed ratio setting).
+		// The master is last-resort only. Full profile covers use 1800px whenever that variant exists.
 		$preferred[] = $stored_filename;
 
 		foreach ( array_values( array_unique( $preferred ) ) as $filename ) {
