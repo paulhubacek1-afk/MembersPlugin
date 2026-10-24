@@ -2911,10 +2911,10 @@ if ( ! class_exists( 'um\core\Member_Directory' ) ) {
 					}
 					if ( $cover_version > 0 ) {
 						$tag = preg_replace_callback(
-							'/\\b(src|srcset)\\s*=\\s*(["\\'])(.*?)\\2/i',
+							'/\\b(src|srcset)\\s*=\\s*"([^"]*)"/i',
 							static function ( $attribute ) use ( $cover_version ) {
 								$name  = strtolower( $attribute[1] );
-								$value = $attribute[3];
+								$value = $attribute[2];
 								if ( 'srcset' === $name ) {
 									$items = array();
 									foreach ( explode( ',', $value ) as $candidate ) {
@@ -2929,7 +2929,7 @@ if ( ! class_exists( 'um\core\Member_Directory' ) ) {
 								} else {
 									$value = add_query_arg( 'mp_cover_ver', $cover_version, $value );
 								}
-								return $attribute[1] . '=' . $attribute[2] . esc_attr( $value ) . $attribute[2];
+								return $attribute[1] . '="' . esc_attr( $value ) . '"';
 							},
 							$tag
 						);
