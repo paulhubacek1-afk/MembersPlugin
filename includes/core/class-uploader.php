@@ -391,7 +391,7 @@ if ( ! class_exists( 'um\core\Uploader' ) ) {
 				 * Resize and compress images uploaded on Activity wall and Group Discussion wall.
 				 * @since 2.1.16 2021-02-16
 				 */
-				if ( $field_key === 'wall_img_upload' || empty( $field_data['crop_data'] ) ) {
+				if ( $field_key === 'wall_img_upload' || ( empty( $field_data['crop_data'] ) && ! in_array( $field_key, array( 'profile_photo', 'cover_photo' ), true ) ) ) {
 					$this->stream_photo( $movefile, $movefile['file'], $movefile['url'], $field_key, $user_id );
 				}
 
@@ -1342,7 +1342,11 @@ if ( ! class_exists( 'um\core\Uploader' ) ) {
 				$image = imagecreatefromjpeg( $movefile['file'] );
 				if ( $image ) {
 					$image = UM()->files()->fix_image_orientation( $image, $movefile['file'] );
-					$quality = UM()->options()->get( 'image_compression' );
+					// Cover photos are processed by cover_photo() at full quality later.
+					// Do not irreversibly compress the JPEG before the crop/large thumbnails are made.
+					$quality = 'cover_photo' === $this->upload_image_type
+						? 100
+						: (int) UM()->options()->get( 'image_compression' );
 					imagejpeg( $image, $movefile['file'], $quality );
 				}
 			}
