@@ -259,22 +259,25 @@ final class MP_Role_Avatar_Rings {
 		wp_register_style( 'mp-role-avatar-rings', false, array(), defined( 'MP_VERSION' ) ? MP_VERSION : null );
 		wp_enqueue_style( 'mp-role-avatar-rings' );
 
-		$css = '.mp-role-avatar-ring{border:0!important;outline:none!important;box-shadow:0 0 0 3px currentColor!important;}';
+		// Avatars without their own frame (comments, widgets, …) get a ring as a shadow.
+		$css = '.mp-role-avatar-ring{outline:none!important;box-shadow:0 0 0 3px currentColor!important;}';
 		foreach ( $colors as $role => $color ) {
 			$role_class = sanitize_html_class( 'um-role-' . $role );
 			$ring_class = sanitize_html_class( 'mp-role-avatar-ring--' . $role );
-			// The profile theme clips shadows on the inner image. Put the role ring
-			// on the circular photo link itself and remove any inner image ring.
-			$css .= '.um-profile.' . $role_class . ' .um-profile-photo-img img{border:0!important;outline:none!important;box-shadow:none!important;}';
 
-			$selectors  = array(
-				'.' . $ring_class,
-				'.um-profile.' . $role_class . ' .um-profile-photo-img',
-				'.um-member.' . $role_class . ' .um-member-photo img',
-				'.um-member.' . $role_class . ' .um-member-photo .um-avatar',
+			$css .= '.' . $ring_class . '{box-shadow:0 0 0 3px ' . $color . '!important;}';
+
+			// Profile header and member cards already draw a frame directly around the
+			// photo. The role colour replaces that frame instead of adding a second ring.
+			$frames = array(
+				'.um-profile.' . $role_class . ' .um-profile-photo a.um-profile-photo-img',
+				'.um-directory .um-members-wrapper .um-members .um-member.' . $role_class . ' .um-member-photo a img',
+				'.um-directory .um-members-wrapper .um-members .um-member.' . $role_class . ' .um-member-photo a img.mp-role-avatar-ring',
+				'body.um-mp-cards-stage .um-directory .um-members-wrapper .um-members.um-members-grid .um-member.' . $role_class . ' .um-member-photo a img',
 			);
-			$selectors = array_unique( $selectors );
-			$css .= implode( ',', $selectors ) . '{border:0!important;outline:none!important;box-shadow:0 0 0 3px ' . $color . '!important;}';
+			$css .= implode( ',', $frames ) . '{border-color:' . $color . '!important;outline:none!important;}';
+			$css .= '.um-profile.' . $role_class . ' .um-profile-photo a.um-profile-photo-img,.um-directory .um-members-wrapper .um-members .um-member.' . $role_class . ' .um-member-photo a img.mp-role-avatar-ring{box-shadow:none!important;}';
+			$css .= '.um-profile.' . $role_class . ' .um-profile-photo-img img{border:0!important;outline:none!important;box-shadow:none!important;}';
 		}
 
 		wp_add_inline_style( 'mp-role-avatar-rings', $css );

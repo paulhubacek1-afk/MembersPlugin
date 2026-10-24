@@ -1,5 +1,11 @@
 # Members Plugin – Profiles & Community
 
+## Updated in 1.1
+
+- **Bühnen-Layout for member cards:** four columns, large round profile photo overlapping the card, bold names, statistics chips and hover effects. Fonts, sizes and colours are adjustable under **Design & CSS › Mitgliederkarten**.
+- **Font Awesome 5** for icons instead of Font Awesome 6, matching the theme and add-ons.
+- **Role ring** recolours the frame directly around the profile photo.
+
 ## Updated in 1.0.9.3
 
 - **Faster member directories:** profile and cover photos are now browser-cacheable (stable, file-based URL versions instead of a new timestamp on every request), lists load small avatar thumbnails, per-member cache lookups are bundled into one query, and already loaded directory pages reappear instantly.

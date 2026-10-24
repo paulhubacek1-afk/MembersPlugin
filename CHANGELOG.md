@@ -1,9 +1,7 @@
-## 1.0.10.1 – 2026-10-24
+## 1.1 – 2026-10-24
 
+- Changed: the role colour now replaces the frame directly around the profile photo (profile header and member cards) instead of adding a second ring outside it.
 - New: Font Awesome 5 for icons (Design & CSS, on by default). The core's Font Awesome 6 stylesheet overrode the site's Font Awesome 5 icons inside plugin areas (e.g. Stückverwaltung statistics). It is replaced by a bundled Font Awesome 5.15.4 Free incl. v4 shims; Font Awesome 6 icon names used by the core are mapped to Font Awesome 5 glyphs.
-
-## 1.0.10 – 2026-10-24
-
 - New: "Bühnen-Layout" for member-directory cards (Design & CSS, on by default): four columns, large round profile photo overlapping the top of the card, bold names, statistics chips, and the hover effects of the reference design (ring around the photo, highlighted name and chips).
 - New: adjustable card fonts and colours under Design & CSS › Mitgliederkarten: font family for cards and names, name size and weight, text size, card background, text colour, photo border, hover colour and statistics colours.
 - The layout is part of the Members Plugin, so it no longer depends on replacing the Stückverwaltung file.
