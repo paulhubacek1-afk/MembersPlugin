@@ -2171,8 +2171,6 @@ function um_get_cover_uri( $image, $attrs ) {
 				}
 			}
 		}
-		$preferred[] = $stored_filename;
-
 		// Keep compatibility with thumbnails made by earlier MP/UM versions, including
 		// names like cover_photo-1-1200.jpg created when WordPress avoided overwriting.
 		$fallbacks = array();
@@ -2192,6 +2190,10 @@ function um_get_cover_uri( $image, $attrs ) {
 		foreach ( $fallbacks as $fallback ) {
 			$preferred[] = $fallback['name'];
 		}
+
+		// The master is intentionally last: use an existing thumbnail when the exact
+		// requested size was not generated (for example, due to a changed ratio setting).
+		$preferred[] = $stored_filename;
 
 		foreach ( array_values( array_unique( $preferred ) ) as $filename ) {
 			$path = $location['dir'] . $filename;
