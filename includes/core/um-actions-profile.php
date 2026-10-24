@@ -845,7 +845,7 @@ function um_profile_dynamic_meta_desc() {
 
 		um_reset_user();
 		?>
-		<!-- START - Ultimate Member profile SEO meta tags -->
+		<!-- START - profile SEO meta tags -->
 
 		<link rel="image_src" href="<?php echo esc_url( $image ); ?>"/>
 
@@ -880,7 +880,7 @@ function um_profile_dynamic_meta_desc() {
 
 		<script type="application/ld+json"><?php echo wp_json_encode( $person ); ?></script>
 
-		<!-- END - Ultimate Member profile SEO meta tags -->
+		<!-- END - profile SEO meta tags -->
 		<?php
 	}
 }
@@ -962,16 +962,14 @@ function um_profile_header_cover_area( $args ) {
 			<?php
 			if ( $user_cover ) {
 
-				$get_cover_size = $args['coversize'];
-				if ( ! $get_cover_size || 'original' === $get_cover_size ) {
-					$size = null;
-				} else {
-					$size = $get_cover_size;
-				}
+				// The profile header always renders a responsive cover (srcset over every
+				// generated variant). Earlier the form's "coversize" (300/600px by default)
+				// and a forced 300px on mobile were used, so the saved cover looked blurry
+				// although the crop preview was sharp. A fixed size can still be forced
+				// with the mp_profile_cover_size / um_mobile_cover_photo filters.
+				$size = apply_filters( 'mp_profile_cover_size', null, $args );
 
 				if ( wp_is_mobile() ) {
-					// Set for mobile width = 300 by default but can be changed via filter
-					$size = 300;
 
 					/**
 					 * UM hook

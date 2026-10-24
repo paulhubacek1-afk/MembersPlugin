@@ -1945,7 +1945,6 @@ if ( ! class_exists( 'um\admin\Admin' ) ) {
 		 * @return array
 		 */
 		public function plugin_links( $links ) {
-			$more_links[] = '<a href="http://docs.ultimatemember.com/">' . esc_html__( 'Docs', 'ultimate-member' ) . '</a>';
 			$more_links[] = '<a href="' . admin_url() . 'admin.php?page=um_options">' . esc_html__( 'Settings', 'ultimate-member' ) . '</a>';
 
 			$links = $more_links + $links;

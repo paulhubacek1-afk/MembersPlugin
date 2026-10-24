@@ -257,6 +257,11 @@ final class MP_Migration_Backup {
 		if ( ! current_user_can( 'manage_options' ) ) {
 			wp_die( esc_html__( 'Keine Berechtigung.', 'members-plugin' ), 403 );
 		}
+		// On multisite the users/usermeta tables are shared by the whole network. A site
+		// administrator must not be able to overwrite other sites' accounts or passwords.
+		if ( is_multisite() && ! is_super_admin() ) {
+			wp_die( esc_html__( 'Nur Netzwerk-Administratoren dürfen Sicherungen importieren.', 'members-plugin' ), 403 );
+		}
 		check_admin_referer( 'mp_migration_import_backup' );
 		if ( ! class_exists( 'ZipArchive' ) || empty( $_FILES['mp_backup_file']['tmp_name'] ) || ! is_uploaded_file( $_FILES['mp_backup_file']['tmp_name'] ) ) {
 			self::redirect_import_error( 'invalid_upload' );
@@ -268,6 +273,11 @@ final class MP_Migration_Backup {
 		$zip = new ZipArchive();
 		if ( true !== $zip->open( $file['tmp_name'] ) ) {
 			self::redirect_import_error( 'invalid_zip' );
+		}
+		$stat = $zip->statName( 'database-snapshot.json' );
+		if ( false === $stat || (int) $stat['size'] > 200 * MB_IN_BYTES ) {
+			$zip->close();
+			self::redirect_import_error( 'snapshot_missing' );
 		}
 		$json = $zip->getFromName( 'database-snapshot.json' );
 		if ( false === $json || strlen( $json ) > 200 * MB_IN_BYTES ) {
@@ -292,7 +302,17 @@ final class MP_Migration_Backup {
 			array( $wpdb->postmeta, 'postmeta', 'meta_id' ),
 		);
 		$ok = true;
+		// Post meta may only be restored for membership posts (forms, directories, roles).
+		$membership_post_ids = array();
+		if ( isset( $data['posts'] ) && is_array( $data['posts'] ) ) {
+			foreach ( $data['posts'] as $post_row ) {
+				if ( is_array( $post_row ) && isset( $post_row['ID'] ) && self::is_importable_row( 'posts', $post_row ) ) {
+					$membership_post_ids[ absint( $post_row['ID'] ) ] = true;
+				}
+			}
+		}
 		foreach ( $map as $item ) {
+			$columns = self::table_columns( $item[0] );
 			if ( ! isset( $data[ $item[1] ] ) || ! is_array( $data[ $item[1] ] ) ) {
 				$ok = false;
 				break;
@@ -306,6 +326,16 @@ final class MP_Migration_Backup {
 				// must not be able to overwrite unrelated options (e.g. siteurl) or posts.
 				if ( ! self::is_importable_row( $item[1], $row ) ) {
 					continue;
+				}
+				if ( 'postmeta' === $item[1] && ( ! isset( $row['post_id'] ) || empty( $membership_post_ids[ absint( $row['post_id'] ) ] ) ) ) {
+					continue;
+				}
+				// Column names come from the archive and are not escaped by $wpdb->insert();
+				// only keep real columns of the target table (prevents SQL injection).
+				$row = array_intersect_key( $row, $columns );
+				if ( ! array_key_exists( $item[2], $row ) || ! self::scalar_row( $row ) ) {
+					$ok = false;
+					break 2;
 				}
 				$exists = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$item[0]} WHERE {$item[2]} = %s", $row[ $item[2] ] ) );
 				$result = $exists ? $wpdb->update( $item[0], $row, array( $item[2] => $row[ $item[2] ] ) ) : $wpdb->insert( $item[0], $row );
@@ -339,8 +369,14 @@ final class MP_Migration_Backup {
 					}
 				}
 				if ( '' !== $primary ) {
+					$columns = self::table_columns( $table_name );
 					foreach ( $rows as $row ) {
-						if ( ! is_array( $row ) || ! array_key_exists( $primary, $row ) ) {
+						if ( ! is_array( $row ) ) {
+							$ok = false;
+							break 2;
+						}
+						$row = array_intersect_key( $row, $columns );
+						if ( ! array_key_exists( $primary, $row ) || ! self::scalar_row( $row ) ) {
 							$ok = false;
 							break 2;
 						}
@@ -379,6 +415,9 @@ final class MP_Migration_Backup {
 					continue;
 				}
 				$target = $target_root . $relative;
+				if ( is_link( $target ) ) {
+					continue;
+				}
 				if ( ! wp_mkdir_p( dirname( $target ) ) ) {
 					$ok = false;
 					continue;
@@ -421,6 +460,34 @@ final class MP_Migration_Backup {
 		if ( 'posts' === $kind ) {
 			$type = isset( $row['post_type'] ) ? (string) $row['post_type'] : '';
 			return 0 === strpos( $type, 'um_' );
+		}
+		return true;
+	}
+
+	/**
+	 * Real column names of a table, as array keys.
+	 *
+	 * @param string $table Table name (validated or from $wpdb).
+	 * @return array
+	 */
+	private static function table_columns( $table ) {
+		global $wpdb;
+		$table = str_replace( chr( 96 ), '', (string) $table );
+		$cols  = $wpdb->get_col( 'SHOW COLUMNS FROM `' . $table . '`', 0 );
+		return is_array( $cols ) ? array_fill_keys( $cols, true ) : array();
+	}
+
+	/**
+	 * Every value of an imported row must be a scalar or null.
+	 *
+	 * @param array $row
+	 * @return bool
+	 */
+	private static function scalar_row( $row ) {
+		foreach ( $row as $value ) {
+			if ( null !== $value && ! is_scalar( $value ) ) {
+				return false;
+			}
 		}
 		return true;
 	}

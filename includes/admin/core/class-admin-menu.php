@@ -28,7 +28,6 @@ if ( ! class_exists( 'um\admin\core\Admin_Menu' ) ) {
 		public function __construct() {
 			add_action( 'admin_menu', array( &$this, 'primary_admin_menu' ), 0 );
 			add_action( 'admin_menu', array( &$this, 'secondary_menu_items' ), 1000 );
-			add_action( 'admin_menu', array( &$this, 'extension_menu' ), 9999 );
 
 			add_action( 'admin_head', array( $this, 'menu_order_count' ) );
 
@@ -372,11 +371,7 @@ if ( ! class_exists( 'um\admin\core\Admin_Menu' ) ) {
 					//]]>
 				</script>
 
-			<?php } elseif ( $page == 'ultimatemember-extensions' ) {
-
-				include_once UM()->admin()->templates_path . 'extensions.php';
-
-			}
+			<?php }
 
 		}
 

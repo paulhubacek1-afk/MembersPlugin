@@ -25,6 +25,8 @@ Meta-Key-Injection). Folgende Probleme wurden behoben:
 | 11 | Profil-Ausgaben | E-Mail-Werte unescaped im Link; externe Links ohne `noopener`. | Escaping, `rel="noopener noreferrer"`. | `includes/core/um-filters-fields.php` |
 | 12 | Verzeichnis-Templates | Meta-Keys, „keine Mitglieder“-Text und Sortier-Label unescaped. | `esc_attr` / `wp_kses_post` / `esc_html`. | `templates/members*.php` |
 | 13 | Sensible Seiten | Login, Registrierung, Konto, Passwort ohne Clickjacking-Schutz. | `X-Frame-Options: SAMEORIGIN`, `nosniff`, `Referrer-Policy` (Filter `mp_send_security_headers`). | `includes/members-plugin/class-mp-security.php` |
+| 14 | Sicherungs-Import | Spaltennamen aus der ZIP wurden ungeprüft an `$wpdb->insert/update` übergeben (SQL-Injection über präparierte Spaltennamen); Post-Meta beliebiger Beiträge überschreibbar; auf Multisite konnten Website-Admins netzwerkweite Benutzerkonten überschreiben. | Spalten-Whitelist per `SHOW COLUMNS`, nur skalare Werte, Post-Meta nur für Mitglieder-Beiträge, Symlink-Ziele übersprungen, Größenprüfung vor dem Entpacken, Multisite nur für Netzwerk-Admins. | `includes/class-mp-migration-backup.php` |
+| 15 | Online-Mitglieder-Shortcode | Zeigte private Profile und als Fallback den Login-Namen (hilft bei Brute-Force). | Profil-Sichtbarkeit wird geprüft, kein Login-Name mehr. | `includes/members-plugin/class-mp-online-status.php` |
 
 Neue Funktionen des Forks sind von Anfang an abgesichert: Capability-Checks
 (`manage_options`, eigenes CSS nur mit `edit_css`), Nonces für alle Formulare,

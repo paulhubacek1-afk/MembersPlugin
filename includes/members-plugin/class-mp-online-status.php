@@ -241,7 +241,14 @@ final class MP_Online_Status {
 				continue;
 			}
 
-			$name   = $user->display_name ? $user->display_name : $user->user_login;
+			// Respect profile privacy and never expose login names (used for brute-force attacks).
+			if ( function_exists( 'um_can_view_profile' ) && ! um_can_view_profile( $user->ID ) ) {
+				continue;
+			}
+			$name = trim( (string) $user->display_name );
+			if ( '' === $name ) {
+				$name = __( 'Mitglied', 'ultimate-member' );
+			}
 			$avatar = get_avatar( $user->ID, 44, '', $name, array( 'class' => 'mp-online-members__avatar' ) );
 
 			$output .= '<li class="mp-online-members__item">';

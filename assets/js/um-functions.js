@@ -1,9 +1,5 @@
 /*
- Plugin Name: Ultimate Member
- Description: Frontend scripts
- Version:     2.1.16
- Author:      Ultimate Member
- Author URI:  http://ultimatemember.com/
+ Members Plugin – frontend scripts
  */
 
 if ( typeof (window.UM) !== 'object' ) {

@@ -1,3 +1,10 @@
+## 1.1.8 – 2026-10-24
+
+- Fixed: blurry cover photo after upload although the crop preview was sharp (mobile forced a 300px variant; desktop used the form's 300/600px cover size). The profile header now uses a responsive `srcset` over all generated variants and is no longer lazy-loaded.
+- Removed: visible Ultimate Member branding (admin texts, Extensions page, All Access Pass notice, footer review prompt, upstream doc links). GPL credits kept.
+- Security: hardened backup import (column whitelist against SQL injection, post meta limited to membership posts, symlink check, snapshot size check, multisite super-admin only).
+- Security: online-members shortcode respects profile privacy and never shows login names.
+
 ## 1.1.4 – 2026-10-24
 
 - Fixed: cover uploads now replace the canonical `cover_photo.jpg` and regenerate predictable high-quality `cover_photo-600.jpg`, `cover_photo-1200.jpg`, and `cover_photo-1800.jpg` variants (only when the source is large enough).

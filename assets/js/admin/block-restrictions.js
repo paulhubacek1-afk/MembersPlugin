@@ -115,7 +115,7 @@ var um_block_restriction = wp.compose.createHigherOrderComponent(
 					wp.element.createElement(
 						wp.components.PanelBody,
 						{
-							title: wp.i18n.__( 'Ultimate Member: Content Restriction', 'ultimate-member' ),
+							title: wp.i18n.__( 'Members Plugin: Content Restriction', 'ultimate-member' ),
 							className: 'um_block_settings'
 						},
 						wp.element.createElement(

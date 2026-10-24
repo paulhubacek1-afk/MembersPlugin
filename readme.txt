@@ -4,7 +4,7 @@ Tags: membership, user-profile, community, user-registration, member-directory, 
 Requires at least: 6.2
 Tested up to: 7.1
 Requires PHP: 7.0
-Stable tag: 1.1.7
+Stable tag: 1.1.8
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -57,6 +57,13 @@ No. The profile checks the built-in birth_date field automatically.
 No. It searches for releases automatically and makes available updates visible in WordPress.
 
 == Changelog ==
+
+= 1.1.8 =
+* Fixed: the saved cover photo was blurry although the crop preview was sharp. Phones were forced to a 300px cover and the profile form's cover size (300/600px by default) was used on desktop. The profile header now serves every generated variant via `srcset`, so the browser picks a sharp file for the real width and pixel density. Filters `mp_profile_cover_size` / `um_mobile_cover_photo` can still force a fixed size.
+* Improved: the profile cover is no longer lazy-loaded (it is above the fold).
+* Removed: visible Ultimate Member branding – admin texts are rebranded to "Members Plugin", the Extensions advertising page, "All Access Pass" notice, review prompt in the admin footer and upstream doc links are gone. GPL licence credits are kept.
+* Security: backup import whitelists table columns (SQL injection via crafted column names), restores post meta only for membership posts, refuses symlinked targets and checks the snapshot size before reading it. On multisite only network administrators may import.
+* Security: the online-members shortcode respects profile privacy and never falls back to login names.
 
 = 1.1.7 =
 * Fixed: full profile cover URLs now prefer the 1800px thumbnail instead of the original `cover_photo.jpg`; smaller variants remain fallback options when the 1800px file is unavailable.
