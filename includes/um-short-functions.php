@@ -2295,6 +2295,60 @@ if ( ! function_exists( 'mp_clear_cover_photo_version_after_remove' ) ) {
 }
 add_action( 'um_after_remove_cover_photo', 'mp_clear_cover_photo_version_after_remove', 10, 1 );
 
+if ( ! function_exists( 'mp_cover_html_safeguard' ) ) {
+	/**
+	 * Last line of defence for the profile cover markup.
+	 *
+	 * The canonical file is always named cover_photo.jpg, so a URL without the
+	 * per-upload version token lets browsers and proxies keep showing an old,
+	 * cached cover after a new upload. Some site code (theme, snippet, synced
+	 * cover) can produce such a bare URL. Re-add the token and the srcset here,
+	 * after every other filter has run.
+	 *
+	 * @return string
+	 */
+	function mp_cover_html_safeguard( $html, $cover_uri, $alt, $is_default, $attrs ) {
+		if ( $is_default || ! is_string( $html ) || '' === $html || false !== strpos( $html, 'mp_cover_ver' ) ) {
+			return $html;
+		}
+		$user_id = absint( um_user( 'ID' ) );
+		if ( ! $user_id ) {
+			return $html;
+		}
+		$user_url = trailingslashit( UM()->uploader()->get_upload_base_url() ) . $user_id . '/';
+		$user_url = preg_replace( '#^https?:#i', '', $user_url );
+		$pattern  = '#(src=["\'])((?:https?:)?' . preg_quote( $user_url, '#' ) . 'cover_photo[^"\'?\s]*\.(?:jpe?g|png|webp|gif))(["\'])#i';
+		if ( ! preg_match( $pattern, $html ) ) {
+			return $html;
+		}
+
+		$version = (string) get_user_meta( $user_id, 'mp_cover_photo_version', true );
+		if ( '' === $version ) {
+			$version = 'legacy';
+		}
+		$html = preg_replace_callback(
+			$pattern,
+			static function ( $m ) use ( $version ) {
+				return $m[1] . esc_url( add_query_arg( 'mp_cover_ver', rawurlencode( $version ), $m[2] ) ) . $m[3];
+			},
+			$html,
+			1
+		);
+
+		// Full profile cover: add the responsive srcset and load it eagerly.
+		if ( ! is_numeric( $attrs ) && false === stripos( $html, 'srcset=' ) ) {
+			$stored     = (string) get_user_meta( $user_id, 'cover_photo', true );
+			$responsive = mp_get_cover_srcset( '' !== $stored ? $stored : 'cover_photo.jpg' );
+			if ( ! empty( $responsive['srcset'] ) ) {
+				$html = preg_replace( '#<img\s#i', '<img srcset="' . esc_attr( $responsive['srcset'] ) . '" sizes="100vw" ', $html, 1 );
+				$html = preg_replace( '#\sloading=(["\'])lazy\1#i', ' fetchpriority="high"', $html, 1 );
+			}
+		}
+		return $html;
+	}
+}
+add_filter( 'um_user_cover_photo_html__filter', 'mp_cover_html_safeguard', PHP_INT_MAX, 5 );
+
 /**
  * get avatar URL instead of image
  *
