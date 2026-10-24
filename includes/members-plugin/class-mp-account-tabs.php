@@ -208,7 +208,8 @@ final class MP_Account_Tabs {
 			$key   = $field['key'];
 			$value = isset( $values[ $key ] ) ? self::sanitize_field_value( $values[ $key ], $field['type'] ) : ( 'checkbox' === $field['type'] ? '0' : '' );
 
-			if ( $field['required'] && '' === trim( (string) $value ) && '0' !== $value ) {
+			$is_missing = 'checkbox' === $field['type'] ? '1' !== $value : '' === trim( (string) $value );
+			if ( $field['required'] && $is_missing ) {
 				UM()->form()->add_error( 'mp_account_' . $key, sprintf( __( 'Bitte fülle das Feld „%s“ aus.', 'members-plugin' ), $field['label'] ) );
 				continue;
 			}
