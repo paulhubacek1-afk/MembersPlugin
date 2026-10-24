@@ -4,7 +4,7 @@ Tags: membership, user-profile, community, user-registration, member-directory, 
 Requires at least: 6.2
 Tested up to: 7.1
 Requires PHP: 7.0
-Stable tag: 1.1.6
+Stable tag: 1.1.7
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -57,6 +57,9 @@ No. The profile checks the built-in birth_date field automatically.
 No. It searches for releases automatically and makes available updates visible in WordPress.
 
 == Changelog ==
+
+= 1.1.7 =
+* Fixed: full profile cover URLs now prefer the 1800px thumbnail instead of the original `cover_photo.jpg`; smaller variants remain fallback options when the 1800px file is unavailable.
 
 = 1.1.6 =
 * Fixed: the full profile cover now uses the original cropped master image instead of defaulting to a 1200px thumbnail on wide/high-density displays.
