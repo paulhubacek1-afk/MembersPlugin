@@ -1,18 +1,17 @@
 {
-  "name": "ultimate-member",
+  "name": "members-plugin",
   "version": "2.14.1",
   "author": {
-    "name": "Ultimate Member",
-    "email": "team@ultimatemember.com",
-    "url": "https://ultimatemember.com"
+    "name": "Paul Hubacek",
+    "url": "https://github.com/paulhubacek1-afk"
   },
-  "homepage": "http://roots.io",
+  "homepage": "https://github.com/paulhubacek1-afk/MembersPlugin",
   "repository": {
     "type": "git",
-    "url": "git://github.com/roots/roots.git"
+    "url": "https://github.com/paulhubacek1-afk/MembersPlugin.git"
   },
   "bugs": {
-    "url": "https://github.com/roots/roots/issues"
+    "url": "https://github.com/paulhubacek1-afk/MembersPlugin/issues"
   },
   "licenses": [
     {

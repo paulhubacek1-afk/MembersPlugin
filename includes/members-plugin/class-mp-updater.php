@@ -321,7 +321,7 @@ final class MP_Updater {
 			'last_updated'  => $release ? $release['published'] : '',
 			'download_link' => $release ? $release['package'] : '',
 			'sections'      => array(
-				'description' => '<p>' . esc_html__( 'Mitgliederbereich, Profile, Registrierung und Mitgliederverzeichnis mit automatischer Theme-Farbanpassung. Fork von Ultimate Member.', 'ultimate-member' ) . '</p>',
+				'description' => '<p>' . esc_html__( 'Mitgliederbereich, Profile, Registrierung und Mitgliederverzeichnis mit automatischer Theme-Farbanpassung.', 'ultimate-member' ) . '</p>',
 				'changelog'   => wpautop( esc_html( $notes ) ),
 			),
 		);
@@ -492,7 +492,7 @@ final class MP_Updater {
 			<?php endif; ?>
 
 			<table class="form-table" role="presentation">
-				<tr><th><?php esc_html_e( 'Installierte Version', 'ultimate-member' ); ?></th><td><code><?php echo esc_html( MP_VERSION ); ?></code> <span class="description">(<?php echo esc_html( sprintf( 'Ultimate Member %s', UM_VERSION ) ); ?>)</span></td></tr>
+				<tr><th><?php esc_html_e( 'Installierte Version', 'ultimate-member' ); ?></th><td><code><?php echo esc_html( MP_VERSION ); ?></code> <span class="description">(<?php echo esc_html( sprintf( 'Core %s', UM_VERSION ) ); ?>)</span></td></tr>
 				<tr><th><?php esc_html_e( 'Neueste Version auf GitHub', 'ultimate-member' ); ?></th><td>
 					<?php if ( $release ) : ?>
 						<code><?php echo esc_html( $release['version'] ); ?></code>

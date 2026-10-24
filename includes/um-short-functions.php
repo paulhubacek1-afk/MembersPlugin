@@ -2209,6 +2209,85 @@ function um_get_cover_uri( $image, $attrs ) {
 	return false;
 }
 
+if ( ! function_exists( 'mp_get_cover_srcset' ) ) {
+	/**
+	 * Build a srcset for the current profile's cover photo from every generated variant.
+	 *
+	 * Browsers then pick the variant matching the real display width and pixel density,
+	 * so phones and high-DPI screens no longer get a 300px/600px cover stretched to full width.
+	 *
+	 * @param string $image Stored cover filename (user meta value).
+	 *
+	 * @return array{src:string,srcset:string} Empty array when no variants exist.
+	 */
+	function mp_get_cover_srcset( $image ) {
+		$user_id = absint( um_user( 'ID' ) );
+		if ( ! $user_id || empty( $image ) ) {
+			return array();
+		}
+
+		$stored_filename = sanitize_file_name( wp_basename( strtok( (string) $image, '?' ) ) );
+		if ( '' === $stored_filename || 0 !== strpos( $stored_filename, 'cover_photo' ) ) {
+			return array();
+		}
+		$allowed_exts = array( 'jpg', 'jpeg', 'png', 'webp', 'gif' );
+		$stored_ext   = strtolower( pathinfo( $stored_filename, PATHINFO_EXTENSION ) );
+		if ( ! in_array( $stored_ext, $allowed_exts, true ) ) {
+			return array();
+		}
+		$stored_stem = pathinfo( $stored_filename, PATHINFO_FILENAME );
+
+		$user_dir = trailingslashit( UM()->uploader()->get_upload_base_dir() ) . $user_id . DIRECTORY_SEPARATOR;
+		$user_url = trailingslashit( UM()->uploader()->get_upload_base_url() ) . $user_id . '/';
+		$version  = (string) get_user_meta( $user_id, 'mp_cover_photo_version', true );
+		$version  = '' === $version ? 'legacy' : $version;
+
+		$candidates = array();
+		$files      = glob( $user_dir . $stored_stem . '*' );
+		if ( is_array( $files ) ) {
+			$pattern = '/^' . preg_quote( $stored_stem, '/' ) . '(?:-\d+(?:x\d+)?)?\.(?:' . implode( '|', $allowed_exts ) . ')$/i';
+			foreach ( $files as $file ) {
+				$name = wp_basename( $file );
+				if ( ! is_file( $file ) || ! preg_match( $pattern, $name ) ) {
+					continue;
+				}
+				$size = @getimagesize( $file ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
+				if ( ! is_array( $size ) || empty( $size[0] ) ) {
+					continue;
+				}
+				$width = absint( $size[0] );
+				// Keep one file per width; prefer the canonical master/variant name.
+				if ( ! isset( $candidates[ $width ] ) || $name === $stored_filename ) {
+					$candidates[ $width ] = add_query_arg( 'mp_cover_ver', rawurlencode( $version ), $user_url . rawurlencode( $name ) );
+				}
+			}
+		}
+
+		if ( empty( $candidates ) ) {
+			return array();
+		}
+		ksort( $candidates, SORT_NUMERIC );
+
+		$srcset = array();
+		foreach ( $candidates as $width => $url ) {
+			$srcset[] = esc_url( $url ) . ' ' . $width . 'w';
+		}
+
+		// Fallback src for browsers without srcset: the largest variant up to 1800px.
+		$src = '';
+		foreach ( $candidates as $width => $url ) {
+			if ( $width <= 1800 || '' === $src ) {
+				$src = $url;
+			}
+		}
+
+		return array(
+			'src'    => $src,
+			'srcset' => implode( ', ', $srcset ),
+		);
+	}
+}
+
 if ( ! function_exists( 'mp_clear_cover_photo_version_after_remove' ) ) {
 	function mp_clear_cover_photo_version_after_remove( $user_id ) {
 		delete_user_meta( absint( $user_id ), 'mp_cover_photo_version' );
@@ -2840,11 +2919,28 @@ function um_user( $data, $attrs = null ) {
 			 * }
 			 * ?>
 			 */
-			$cover_uri = apply_filters( 'um_user_cover_photo_uri__filter', $cover_uri, $is_default, $attrs );
+			$unfiltered_uri = $cover_uri;
+			$cover_uri      = apply_filters( 'um_user_cover_photo_uri__filter', $cover_uri, $is_default, $attrs );
 
 			$alt = um_profile( 'nickname' );
 
-			$cover_html = $cover_uri ? '<img src="' . esc_attr( $cover_uri ) . '" alt="' . esc_attr( $alt ) . '" loading="lazy" />' : '';
+			$cover_html = '';
+			if ( $cover_uri ) {
+				$srcset_attr = '';
+				$loading     = ' loading="lazy"';
+				// Full profile cover (no numeric size): serve every generated variant via
+				// srcset so the browser picks a sharp one for the real width and pixel density.
+				if ( ! is_numeric( $attrs ) && ! $is_default && $cover_uri === $unfiltered_uri && um_profile( 'cover_photo' ) ) {
+					$responsive = mp_get_cover_srcset( um_profile( 'cover_photo' ) );
+					if ( ! empty( $responsive['srcset'] ) ) {
+						$cover_uri   = $responsive['src'];
+						$srcset_attr = ' srcset="' . esc_attr( $responsive['srcset'] ) . '" sizes="100vw"';
+					}
+					// The profile cover is above the fold; lazy loading only delays it.
+					$loading = ' decoding="async" fetchpriority="high"';
+				}
+				$cover_html = '<img src="' . esc_url( $cover_uri ) . '"' . $srcset_attr . ' alt="' . esc_attr( $alt ) . '"' . $loading . ' />';
+			}
 
 			return apply_filters( 'um_user_cover_photo_html__filter', $cover_html, $cover_uri, $alt, $is_default, $attrs );
 

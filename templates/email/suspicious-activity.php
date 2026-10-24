@@ -29,7 +29,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 	<div style="color: #999;padding: 20px 30px">
 
-		<div style="">- Sent via Ultimate Member plugin.</div>
+		<div style="">- Sent via Members Plugin.</div>
 
 	</div>
 
