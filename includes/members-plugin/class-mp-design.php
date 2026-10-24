@@ -294,7 +294,7 @@ final class MP_Design {
 		// Elementor text widget with its own small "Text" typography).
 		$opts_tmp = self::get_options();
 		if ( ! empty( $opts_tmp['theme_typography'] ) ) {
-			$css .= 'body.um-mp-typo .um,body.um-mp-typo .um-modal,body.um-mp-typo .um-account,body.um-mp-typo .um-directory{font-family:var(--um-font-family,inherit)!important;font-size:var(--um-font-size,inherit)!important;line-height:var(--um-line-height,inherit)!important}';
+			$css .= 'body.um-mp-typo .um,body.um-mp-typo .um-modal,body.um-mp-typo .um-account,body.um-mp-typo .um-directory{font-family:var(--um-font-family,inherit)!important;font-size:clamp(14px,min(var(--um-font-size,16px),16px),16px)!important;line-height:1.45!important}';
 		}
 		$opts = self::get_options();
 		if ( ! empty( $opts['theme_typography'] ) ) {
@@ -358,9 +358,11 @@ final class MP_Design {
 
 		// Namen und Überschriften: Überschriften-Schrift des Themes.
 		$headings = array(
-			'.um-name' => '1.6em', '.um-name a' => '1em', '.um-member-name' => '1.15em', '.um-member-name a' => '1em',
-			'.um-account-name a' => '1.2em', '.um-account-heading' => '1.2em', '.um-members-total' => '1.25em',
-			'.um-row-heading' => '1.1em', '.um-field-group-head' => '1.05em',
+			// Use rem-based sizes so a large Elementor/theme body font cannot scale
+			// every UM heading up unexpectedly.
+			'.um-name' => '1.5rem', '.um-name a' => '1em', '.um-member-name' => '1rem', '.um-member-name a' => '1em',
+			'.um-account-name a' => '1.125rem', '.um-account-heading' => '1.125rem', '.um-members-total' => '1.125rem',
+			'.um-row-heading' => '1rem', '.um-field-group-head' => '1rem',
 		);
 
 		// With "original member cards" the cards keep the original sizes; they still use the theme font.
@@ -378,7 +380,7 @@ final class MP_Design {
 			}
 		}
 
-		$css  = implode( ',', $roots ) . '{letter-spacing:normal}';
+		$css  = implode( ',', $roots ) . '{letter-spacing:normal;font-size:clamp(14px,min(var(--um-font-size,16px),16px),16px)!important;line-height:1.45!important}';
 		$css .= $list( $controls ) . '{font-family:inherit;letter-spacing:inherit}';
 		$css .= $list( $body ) . '{font-size:1em!important;line-height:inherit!important}';
 		$css .= $list( $small ) . '{font-size:0.875em!important;line-height:1.5!important}';
