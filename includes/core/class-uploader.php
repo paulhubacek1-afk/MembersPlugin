@@ -1059,124 +1059,178 @@ if ( ! class_exists( 'um\core\Uploader' ) ) {
 		 */
 		public function cover_photo( $response, $image_path, $src, $key, $user_id, $coord, $crop ) {
 			$target_user_id = absint( $user_id ) ? absint( $user_id ) : absint( $this->user_id );
-			$sizes = UM()->options()->get( 'cover_thumb_sizes' );
+			$sizes           = UM()->options()->get( 'cover_thumb_sizes' );
+			$sizes           = array_values( array_unique( array_filter( array_merge( array_map( 'absint', (array) $sizes ), array( 600, 1200, 1800 ) ) ) ) );
+			sort( $sizes, SORT_NUMERIC );
 
-			// Members Plugin: always generate high-resolution cover variants while
-			// preserving any additional sizes configured by the site administrator.
-			$sizes = array_values(
-				array_unique(
-					array_filter(
-						array_merge( array_map( 'absint', (array) $sizes ), array( 600, 1200, 1800 ) )
-					)
-				)
-			);
-
-			$image = wp_get_image_editor( $image_path ); // Return an implementation that extends WP_Image_Editor
-
+			$image          = wp_get_image_editor( $image_path );
 			$temp_image_path = $image_path;
+			$photo_ext       = strtolower( pathinfo( $image_path, PATHINFO_EXTENSION ) );
+			$cover_dir       = pathinfo( $image_path, PATHINFO_DIRNAME );
+			$image_path      = $cover_dir . DIRECTORY_SEPARATOR . $key . '.' . $photo_ext;
 
-			// Refresh image_path to make temporary image permanently after upload.
-			$photo_ext  = pathinfo( $image_path, PATHINFO_EXTENSION );
-			$image_path = pathinfo( $image_path, PATHINFO_DIRNAME ) . DIRECTORY_SEPARATOR . $key . '.' . $photo_ext;
-
-			if ( ! is_wp_error( $image ) ) {
-				$src_x = $crop[0];
-				$src_y = $crop[1];
-				$src_w = $crop[2];
-				$src_h = $crop[3];
-
-				$image->crop( $src_x, $src_y, $src_w, $src_h );
-
-				// Cover images use maximum encoder quality. Set this BEFORE save(), otherwise
-				// the main uploaded image would be saved with the editor's default quality.
-				$image->set_quality( 100 );
-
-				// Keep the full resolution of the user's selected crop. The generic
-				// image_max_width limit must not downscale the master cover image.
-				$save_result = $image->save( $image_path );
-
-				if ( is_wp_error( $save_result ) ) {
-					// translators: %s is the file src.
-					wp_send_json_error( sprintf( __( 'Unable to crop image file: %s', 'ultimate-member' ), $src ) );
-				}
-
-				$sizes_array = array();
-				foreach ( (array) $sizes as $size ) {
-					$size = absint( $size );
-					if ( $size > 0 ) {
-						$sizes_array[] = array( 'width' => $size );
-					}
-				}
-
-				// Keep the configured thumbnail sizes, but render them at quality 100 too.
-				$resize = $image->multi_resize( $sizes_array );
-
-				// Track the files belonging to this newly saved cover. Once every new
-				// file exists, obsolete cover variants from earlier uploads/sizes can
-				// be removed without touching unrelated user files.
-				$keep_cover_files = array( wp_basename( $save_result['file'] ) );
-
-				// Change filenames of resized images.
-				if ( is_array( $resize ) ) {
-					foreach ( $resize as $row ) {
-						if ( empty( $row['file'] ) || empty( $row['height'] ) ) {
-							continue;
-						}
-					$new_filename = str_replace( "x{$row['height']}", '', $row['file'] );
-					$old_filename = $row['file'];
-					$old_path     = dirname( $image_path ) . DIRECTORY_SEPARATOR . $old_filename;
-					$new_path     = dirname( $image_path ) . DIRECTORY_SEPARATOR . $new_filename;
-						if ( $old_path !== $new_path && file_exists( $old_path ) ) {
-							if ( rename( $old_path, $new_path ) ) {
-								$keep_cover_files[] = $new_filename;
-							} else {
-								// Keep the legacy variant if the filesystem refuses the rename.
-								$keep_cover_files[] = $old_filename;
-							}
-						} elseif ( is_file( $new_path ) ) {
-							$keep_cover_files[] = $new_filename;
-						}
-					}
-				}
-
-				// Remove only obsolete generated cover files in this user's own upload
-				// directory. Keep the master and every thumbnail generated above.
-				$cover_dir   = dirname( $image_path );
-				$cover_files = glob( $cover_dir . DIRECTORY_SEPARATOR . 'cover_photo*' );
-				if ( is_array( $cover_files ) ) {
-					foreach ( $cover_files as $cover_file ) {
-						$cover_basename = wp_basename( $cover_file );
-						if (
-							is_file( $cover_file ) &&
-							preg_match( '/^cover_photo(?:-\\d+(?:x\\d+)?)?\\.[a-z0-9]+$/i', $cover_basename ) &&
-							! in_array( $cover_basename, $keep_cover_files, true )
-						) {
-							wp_delete_file( $cover_file );
-						}
-					}
-				}
-
-				if ( $temp_image_path !== $image_path && file_exists( $temp_image_path ) ) {
-					unlink( $temp_image_path );
-				}
-
-				$basename = $key . '_temp.' . $photo_ext;
-				$src      = str_replace( '/' . $basename, '/' . $save_result['file'], $src );
-
-				$response['image']['source_url']  = $src;
-				$response['image']['source_path'] = $save_result['path'];
-				$response['image']['filename']    = $save_result['file'];
-
-				update_user_meta( $target_user_id, $key, wp_basename( $save_result['file'] ) );
-				delete_user_meta( $this->user_id, "{$key}_metadata_temp" );
-			} else {
-				// translators: %s is the file src.
+			if ( is_wp_error( $image ) ) {
 				wp_send_json_error( sprintf( __( 'Unable to crop image file: %s', 'ultimate-member' ), $src ) );
 			}
 
+			$src_x = isset( $crop[0] ) ? absint( $crop[0] ) : 0;
+			$src_y = isset( $crop[1] ) ? absint( $crop[1] ) : 0;
+			$src_w = isset( $crop[2] ) ? absint( $crop[2] ) : 0;
+			$src_h = isset( $crop[3] ) ? absint( $crop[3] ) : 0;
+			if ( $src_w < 1 || $src_h < 1 ) {
+				wp_send_json_error( __( 'The cover crop is invalid. Please select the cover area again.', 'ultimate-member' ) );
+			}
+
+			$image->crop( $src_x, $src_y, $src_w, $src_h );
+			$image->set_quality( 100 );
+
+			// Back up existing master files and every old generated variant first. This
+			// is crucial because WP_Image_Editor otherwise chooses cover_photo-1.jpg
+			// when cover_photo.jpg already exists, which makes an old cover easy to show.
+			$backup_token      = wp_generate_password( 14, false, false );
+			$old_cover_backups = array();
+			$cover_pattern     = '/^' . preg_quote( $key, '/' ) . '(?:-\\d+(?:x\\d+)?)*\\.[a-z0-9]+$/i';
+			$old_files         = glob( $cover_dir . DIRECTORY_SEPARATOR . $key . '*' );
+			if ( is_array( $old_files ) ) {
+				foreach ( $old_files as $old_file ) {
+					$old_name = wp_basename( $old_file );
+					if ( ! is_file( $old_file ) || ! preg_match( $cover_pattern, $old_name ) ) {
+						continue;
+					}
+					$backup_path = $cover_dir . DIRECTORY_SEPARATOR . $key . '-mp-backup-' . $backup_token . '-' . $old_name;
+					if ( ! @rename( $old_file, $backup_path ) ) { // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
+						foreach ( $old_cover_backups as $original => $backup ) {
+							if ( is_file( $backup ) && ! is_file( $original ) ) {
+								@rename( $backup, $original ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
+							}
+						}
+						wp_send_json_error( __( 'The old cover files could not be replaced. Please check folder permissions.', 'ultimate-member' ) );
+					}
+					$old_cover_backups[ $old_file ] = $backup_path;
+				}
+			}
+
+			$restore_old_covers = static function () use ( &$old_cover_backups, $cover_dir, $key, $cover_pattern ) {
+				// Remove files created by the failed attempt before restoring the backup.
+				$current_files = glob( $cover_dir . DIRECTORY_SEPARATOR . $key . '*' );
+				if ( is_array( $current_files ) ) {
+					foreach ( $current_files as $current_file ) {
+						if ( is_file( $current_file ) && preg_match( $cover_pattern, wp_basename( $current_file ) ) ) {
+							wp_delete_file( $current_file );
+						}
+					}
+				}
+				foreach ( $old_cover_backups as $original => $backup ) {
+					if ( is_file( $backup ) ) {
+						@rename( $backup, $original ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
+					}
+				}
+			};
+
+			$save_result = $image->save( $image_path );
+			if ( is_wp_error( $save_result ) || empty( $save_result['path'] ) || ! is_file( $save_result['path'] ) ) {
+				$restore_old_covers();
+				wp_send_json_error( sprintf( __( 'Unable to crop image file: %s', 'ultimate-member' ), $src ) );
+			}
+
+			// Enforce the stable canonical master filename (cover_photo.jpg).
+			$master_filename = $key . '.' . $photo_ext;
+			$master_path     = $cover_dir . DIRECTORY_SEPARATOR . $master_filename;
+			if ( wp_basename( $save_result['path'] ) !== $master_filename ) {
+				if ( is_file( $master_path ) || ! @rename( $save_result['path'], $master_path ) ) { // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
+					wp_delete_file( $save_result['path'] );
+					$restore_old_covers();
+					wp_send_json_error( __( 'The new cover could not be saved with the expected filename.', 'ultimate-member' ) );
+				}
+			}
+			$master_path = is_file( $master_path ) ? $master_path : $save_result['path'];
+			$master_size = @getimagesize( $master_path ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
+			$master_width = is_array( $master_size ) && isset( $master_size[0] ) ? absint( $master_size[0] ) : 0;
+			$keep_cover_files = array( wp_basename( $master_path ) );
+
+			// Generate each thumbnail from the saved master independently. This makes
+			// the exact paths cover_photo-600.jpg, cover_photo-1200.jpg and
+			// cover_photo-1800.jpg predictable and keeps encoder quality at 100.
+			foreach ( $sizes as $size ) {
+				$size = absint( $size );
+				if ( $size < 1 || ( $master_width > 0 && $size > $master_width ) ) {
+					continue; // Never upscale a small source just to create a larger filename.
+				}
+				$thumbnail_path = $cover_dir . DIRECTORY_SEPARATOR . $key . '-' . $size . '.' . $photo_ext;
+				$thumbnail = wp_get_image_editor( $master_path );
+				if ( is_wp_error( $thumbnail ) ) {
+					if ( 1200 === $size && $master_width >= $size ) {
+						$restore_old_covers();
+						wp_send_json_error( __( 'The 1200px cover thumbnail could not be created. The previous cover has been restored.', 'ultimate-member' ) );
+					}
+					continue;
+				}
+				$thumbnail->set_quality( 100 );
+				$resize_result = $thumbnail->resize( $size, null, false );
+				if ( is_wp_error( $resize_result ) ) {
+					if ( 1200 === $size && $master_width >= $size ) {
+						$restore_old_covers();
+						wp_send_json_error( __( 'The 1200px cover thumbnail could not be resized. The previous cover has been restored.', 'ultimate-member' ) );
+					}
+					continue;
+				}
+				$thumbnail_result = $thumbnail->save( $thumbnail_path );
+				if ( is_wp_error( $thumbnail_result ) || empty( $thumbnail_result['path'] ) || ! is_file( $thumbnail_result['path'] ) ) {
+					if ( 1200 === $size && $master_width >= $size ) {
+						$restore_old_covers();
+						wp_send_json_error( __( 'The 1200px cover thumbnail could not be saved. The previous cover has been restored.', 'ultimate-member' ) );
+					}
+					continue;
+				}
+				// The destination is empty because old thumbnails were backed up. If an
+				// editor still chose another name, normalize it to the required filename.
+				if ( wp_basename( $thumbnail_result['path'] ) !== wp_basename( $thumbnail_path ) ) {
+					if ( ! is_file( $thumbnail_path ) && @rename( $thumbnail_result['path'], $thumbnail_path ) ) { // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
+						$keep_cover_files[] = wp_basename( $thumbnail_path );
+					} elseif ( 1200 === $size && $master_width >= $size ) {
+						$restore_old_covers();
+						wp_send_json_error( __( 'The 1200px cover thumbnail could not be named correctly. The previous cover has been restored.', 'ultimate-member' ) );
+					} else {
+						$keep_cover_files[] = wp_basename( $thumbnail_result['path'] );
+					}
+				} else {
+					$keep_cover_files[] = wp_basename( $thumbnail_path );
+				}
+			}
+
+			// Commit succeeded: remove the temporary backups and any leftover old variants.
+			foreach ( $old_cover_backups as $backup ) {
+				if ( is_file( $backup ) ) {
+					wp_delete_file( $backup );
+				}
+			}
+			$keep_cover_files = array_values( array_unique( $keep_cover_files ) );
+			$leftover_files = glob( $cover_dir . DIRECTORY_SEPARATOR . $key . '*' );
+			if ( is_array( $leftover_files ) ) {
+				foreach ( $leftover_files as $leftover ) {
+					$name = wp_basename( $leftover );
+					if ( is_file( $leftover ) && preg_match( $cover_pattern, $name ) && ! in_array( $name, $keep_cover_files, true ) ) {
+						wp_delete_file( $leftover );
+					}
+				}
+			}
+
+			if ( $temp_image_path !== $master_path && is_file( $temp_image_path ) ) {
+				wp_delete_file( $temp_image_path );
+			}
+
+			$response['image']['source_url']  = str_replace( '/' . $key . '_temp.' . $photo_ext, '/' . $master_filename, $src );
+			$response['image']['source_path'] = $master_path;
+			$response['image']['filename']    = $master_filename;
+
+			update_user_meta( $target_user_id, $key, $master_filename );
+			delete_user_meta( $target_user_id, "{$key}_metadata_temp" );
+			delete_user_meta( $target_user_id, 'synced_cover_photo' );
+			update_user_meta( $target_user_id, 'mp_cover_photo_version', wp_generate_password( 20, false, false ) );
+			UM()->user()->remove_cache( $target_user_id );
+
 			return $response;
 		}
-
 		/**
 		 * Stream photo image process
 		 *
