@@ -63,6 +63,12 @@ final class MP_Design {
 			'heading-font-weight' => array( __( 'Schriftstärke Überschriften/Namen', 'ultimate-member' ), __( 'z.B. 600 oder bold. Leer = vom Theme.', 'ultimate-member' ), '', 'shape' ),
 		);
 
+		if ( class_exists( 'MP_Member_Cards' ) ) {
+			$vars = array_merge( $vars, MP_Member_Cards::variables() );
+		}
+
+		$font_keys = array( 'font-family', 'heading-font-family', 'heading-font-weight', 'card-font-family', 'card-name-font-family', 'card-name-font-weight' );
+
 		$out = array();
 		foreach ( $vars as $key => $v ) {
 			$out[ $key ] = array(
@@ -70,7 +76,7 @@ final class MP_Design {
 				'desc'    => $v[1],
 				'default' => $v[2],
 				'group'   => $v[3],
-				'type'    => 'shape' === $v[3] ? ( in_array( $key, array( 'font-family', 'heading-font-family', 'heading-font-weight' ), true ) ? 'font' : 'size' ) : 'color',
+				'type'    => in_array( $key, $font_keys, true ) ? 'font' : ( ( 'shape' === $v[3] || false !== strpos( $key, '-size' ) ) ? 'size' : 'color' ),
 			);
 		}
 
@@ -96,6 +102,7 @@ final class MP_Design {
 			'editor_styles' => 1,
 			'theme_typography' => 1,
 			'original_cards'   => 1,
+			'card_layout_stage' => 1,
 			'strip_foreign_card_css' => 0,
 		);
 	}
@@ -291,6 +298,9 @@ final class MP_Design {
 		$opts = self::get_options();
 		if ( ! empty( $opts['theme_typography'] ) ) {
 			$css .= self::theme_typography_css();
+		}
+		if ( class_exists( 'MP_Member_Cards' ) ) {
+			$css .= MP_Member_Cards::css();
 		}
 		return $css;
 	}

@@ -1,3 +1,9 @@
+## 1.0.10 – 2026-10-24
+
+- New: "Bühnen-Layout" for member-directory cards (Design & CSS, on by default): four columns, large round profile photo overlapping the top of the card, bold names, statistics chips, and the hover effects of the reference design (ring around the photo, highlighted name and chips).
+- New: adjustable card fonts and colours under Design & CSS › Mitgliederkarten: font family for cards and names, name size and weight, text size, card background, text colour, photo border, hover colour and statistics colours.
+- The layout is part of the Members Plugin, so it no longer depends on replacing the Stückverwaltung file.
+
 ## 1.0.9.9 – 2026-10-24
 
 - Fixed: with "Typografie des Themes übernehmen" the plugin used the typography of the block around the shortcode (e.g. an Elementor text widget: Roboto, small sizes) instead of the site's typography. Font family, size and line height are now read from the page body right after it opens.
