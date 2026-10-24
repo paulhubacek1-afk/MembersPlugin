@@ -4,7 +4,7 @@ Tags: membership, user-profile, community, user-registration, member-directory, 
 Requires at least: 6.2
 Tested up to: 7.1
 Requires PHP: 7.0
-Stable tag: 1.1.4
+Stable tag: 1.1.5
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -57,6 +57,10 @@ No. The profile checks the built-in birth_date field automatically.
 No. It searches for releases automatically and makes available updates visible in WordPress.
 
 == Changelog ==
+
+= 1.1.5 =
+* Fixed: cover-photo uploads no longer pass through the generic stream-image resize/compression stage before cropping.
+* Fixed: JPEG EXIF orientation correction keeps cover photos at quality 100, so the master image and generated thumbnails are not based on an already-compressed upload.
 
 = 1.1 =
 * Changed: the role colour now replaces the frame directly around the profile photo (profile header and member cards) instead of adding a second ring outside it.
