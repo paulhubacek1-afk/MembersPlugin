@@ -1034,7 +1034,7 @@ if ( ! class_exists( 'um\core\Uploader' ) ) {
 				$response['image']['source_path'] = $save_result['path'];
 				$response['image']['filename']    = $save_result['file'];
 
-				update_user_meta( $target_user_id, $key, wp_basename( $save_result['file'] ) );
+				update_user_meta( $this->user_id, $key, $save_result['file'] );
 				delete_user_meta( $this->user_id, "{$key}_metadata_temp" );
 			} else {
 				// translators: %s is the file src.
@@ -1167,7 +1167,7 @@ if ( ! class_exists( 'um\core\Uploader' ) ) {
 				$response['image']['source_path'] = $save_result['path'];
 				$response['image']['filename']    = $save_result['file'];
 
-				update_user_meta( $this->user_id, $key, $save_result['file'] );
+				update_user_meta( $target_user_id, $key, wp_basename( $save_result['file'] ) );
 				delete_user_meta( $this->user_id, "{$key}_metadata_temp" );
 			} else {
 				// translators: %s is the file src.
