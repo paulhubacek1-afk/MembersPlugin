@@ -1143,7 +1143,7 @@ if ( ! class_exists( 'um\core\Uploader' ) ) {
 						$cover_basename = wp_basename( $cover_file );
 						if (
 							is_file( $cover_file ) &&
-							preg_match( '/^cover_photo(?:-\\d+)?\\.[a-z0-9]+$/i', $cover_basename ) &&
+							preg_match( '/^cover_photo(?:-\\d+(?:x\\d+)?)?\\.[a-z0-9]+$/i', $cover_basename ) &&
 							! in_array( $cover_basename, $keep_cover_files, true )
 						) {
 							wp_delete_file( $cover_file );
