@@ -362,7 +362,11 @@ final class MP_Design {
 		if ( empty( $opts['original_cards'] ) ) {
 			$weight_selectors = array_merge( $weight_selectors, array( '.um-member-name', '.um-member-name a' ) );
 		}
-		$css .= $list( $weight_selectors ) . '{font-weight:var(--um-heading-font-weight,inherit)}';
+		// Do not replace UM's native bold weights with the theme's heading weight.
+		// Only apply a weight when the site owner explicitly configured an override.
+		if ( ! empty( $opts['overrides']['heading-font-weight'] ) ) {
+			$css .= $list( $weight_selectors ) . '{font-weight:var(--um-heading-font-weight,inherit)!important}';
+		}
 
 		return $css;
 	}
