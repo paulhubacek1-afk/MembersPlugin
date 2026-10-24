@@ -6,6 +6,7 @@
 - Fixed: each new cover upload gets a persisted cache token so rapid replacements don't reuse the old cover URL; directory HTML keeps this token instead of replacing it with a coarse file timestamp.
 - Maintained: JPEG encoder quality 100 for master and thumbnails; thumbnails are never upscaled from small sources.
 
+- Fixed: when the crop is at least 1200px wide, failure to generate the required 1200px thumbnail now aborts the replacement and restores the previous cover instead of silently succeeding.
 ## 1.1.3 – 2026-10-24
 
 - Fixed: retain Ultimate Member's native bold and font-weight styling unless a heading-weight override is explicitly set.
