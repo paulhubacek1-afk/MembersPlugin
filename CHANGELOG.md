@@ -1,3 +1,9 @@
+## 1.1.1 – 2026-10-24
+
+- Fixed: profile cover uploads generate 600, 1200 and 1800 px thumbnail variants where the source resolution allows it, while retaining any additional configured sizes.
+- Improved: cover images and generated thumbnails continue to be saved at encoder quality 100.
+- Fixed: when a cover image is replaced, obsolete generated cover files and thumbnail sizes are removed from that user's upload directory; unrelated files and the current cover variants are preserved.
+
 ## 1.1 – 2026-10-24
 
 - Changed: the role colour now replaces the frame directly around the profile photo (profile header and member cards) instead of adding a second ring outside it.
