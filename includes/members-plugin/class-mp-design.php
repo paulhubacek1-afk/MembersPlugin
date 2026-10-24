@@ -294,7 +294,7 @@ final class MP_Design {
 		// Elementor text widget with its own small "Text" typography).
 		$opts_tmp = self::get_options();
 		if ( ! empty( $opts_tmp['theme_typography'] ) ) {
-			$css .= 'body.um-mp-typo .um,body.um-mp-typo .um-modal,body.um-mp-typo .um-account,body.um-mp-typo .um-directory{font-family:var(--um-font-family,inherit)!important;font-size:clamp(14px,min(var(--um-font-size,16px),16px),16px)!important;line-height:1.45!important}';
+			$css .= 'body.um-mp-typo .um,body.um-mp-typo .um-modal,body.um-mp-typo .um-account,body.um-mp-typo .um-directory{font-family:var(--um-font-family,inherit)!important}';
 		}
 		$opts = self::get_options();
 		if ( ! empty( $opts['theme_typography'] ) ) {
@@ -307,10 +307,10 @@ final class MP_Design {
 	}
 
 	/**
-	 * "Typografie des Themes übernehmen": Schriftart, Schriftgröße und Zeilenhöhe kommen
-	 * vom Theme statt aus den festen Pixelwerten des Plugins. Größenverhältnisse bleiben
-	 * relativ zur Theme-Schrift (em), Namen/Überschriften nutzen die Überschriften-Schrift.
-	 * Icon-Schriften werden nicht verändert.
+	 * "Typografie des Themes übernehmen": Übernimmt die Schriftfamilie des Themes sowie
+	 * die Überschriften-Schrift und -Stärke. Schriftgrößen und Zeilenhöhen bleiben bei
+	 * den originalen UM-Stylesheets, damit Profile, Formulare und Verzeichnisse dieselbe
+	 * Größenlogik wie Ultimate Member verwenden. Icon-Schriften werden nicht verändert.
 	 *
 	 * @return string
 	 */
@@ -333,60 +333,31 @@ final class MP_Design {
 			$roots[] = $scope . ' ' . $w;
 		}
 
-		// Formularelemente erben die Schrift im Browser standardmäßig nicht.
+		// Form controls do not reliably inherit font families in every browser.
 		$controls = array( 'input', 'select', 'textarea', 'button', '.um-button', '.select2-selection', '.select2-results__option', '.select2-search__field' );
 
-		// Fließtext: Größe des Themes.
-		$body = array(
-			'.um-field-label label', '.um-field-label', '.um-field-block', '.um-field-value', '.um-field-area',
-			'.um-form input[type="text"]', '.um-form input[type="date"]', '.um-form input[type="time"]', '.um-form input[type="search"]',
-			'.um-form input[type="url"]', '.um-form input[type="email"]', '.um-form input[type="tel"]', '.um-form input[type="number"]',
-			'.um-form input[type="password"]', '.um-form textarea', '.um-form select',
-			'.select2-container .select2-selection', '.select2-container .select2-results li',
-			'input[type="submit"].um-button', '.um-button', 'a.um-button', 'p.um-notice', '.um-meta', '.um-profile-note span',
-			'.um-profile-nav-item a', '.um-profile-subnav a', '.um-item-link a', '.um-field-divider-text', '.um-field-group-head',
-			'.um-account-main label', '.um-account-nav a', '.um-account-side li a', '.um-dropdown li a', '.um-new-dropdown',
-			'.um-members-pagi', '.um-members-pagidrop', '.um-member-directory-header', '.um-members-none',
-		);
-
-		// Kleinere Zusatztexte: relativ zur Theme-Schrift.
-		$small = array(
-			'.um-field-error', '.um-error-block', '.um-field-notice', '.um-notice-block', '.um-tip-text', '.um-meta span', '.um-meta-text',
-			'.um-item-meta span', '.um-member-tagline', '.um-member-metaline', '.um-members-filter-tag', '.um-account-profile-link a',
-			'.um-member-status', '.um-members-edit-btn a.um-edit-profile-btn', 'small.um-max-filesize span', '.um-profile-nav-item span.count',
-		);
-
-		// Namen und Überschriften: Überschriften-Schrift des Themes.
+		// Keep UM's own font sizes and line heights. Only use the theme's heading font
+		// for profile names and headings when that option is enabled.
 		$headings = array(
-			// Use rem-based sizes so a large Elementor/theme body font cannot scale
-			// every UM heading up unexpectedly.
-			'.um-name' => '1.5rem', '.um-name a' => '1em', '.um-member-name' => '1rem', '.um-member-name a' => '1em',
-			'.um-account-name a' => '1.125rem', '.um-account-heading' => '1.125rem', '.um-members-total' => '1.125rem',
-			'.um-row-heading' => '1rem', '.um-field-group-head' => '1rem',
+			'.um-name', '.um-name a', '.um-member-name', '.um-member-name a',
+			'.um-account-name a', '.um-account-heading', '.um-members-total',
+			'.um-row-heading', '.um-field-group-head',
 		);
 
-		// With "original member cards" the cards keep the original sizes; they still use the theme font.
 		$opts = self::get_options();
 		if ( ! empty( $opts['original_cards'] ) ) {
 			$is_card = static function ( $selector ) {
-				return (bool) preg_match( '/\.um-member(?![\w-]*directory)|\.um-members\b/', $selector );
+				return (bool) preg_match( '/\\.um-member(?![\\w-]*directory)|\\.um-members\\b/', $selector );
 			};
-			$body     = array_values( array_filter( $body, static function ( $sel ) use ( $is_card ) { return ! $is_card( $sel ); } ) );
-			$small    = array_values( array_filter( $small, static function ( $sel ) use ( $is_card ) { return ! $is_card( $sel ); } ) );
-			foreach ( array_keys( $headings ) as $sel ) {
-				if ( $is_card( $sel ) ) {
-					unset( $headings[ $sel ] );
-				}
-			}
+			$headings = array_values( array_filter( $headings, static function ( $selector ) use ( $is_card ) {
+				return ! $is_card( $selector );
+			} ) );
 		}
 
-		$css  = implode( ',', $roots ) . '{letter-spacing:normal;font-size:clamp(14px,min(var(--um-font-size,16px),16px),16px)!important;line-height:1.45!important}';
-		$css .= $list( $controls ) . '{font-family:inherit;letter-spacing:inherit}';
-		$css .= $list( $body ) . '{font-size:1em!important;line-height:inherit!important}';
-		$css .= $list( $small ) . '{font-size:0.875em!important;line-height:1.5!important}';
-		foreach ( $headings as $selector => $size ) {
-			$css .= $list( array( $selector ) ) . '{font-family:var(--um-heading-font-family,inherit)!important;font-size:' . $size . '!important;line-height:1.3!important}';
-		}
+		$css  = implode( ',', $roots ) . '{letter-spacing:normal}';
+		$css .= $list( $controls ) . '{font-family:inherit!important;letter-spacing:inherit}';
+		$css .= $list( $headings ) . '{font-family:var(--um-heading-font-family,inherit)!important}';
+
 		$weight_selectors = array( '.um-name', '.um-name a', '.um-account-name a', '.um-account-heading', '.um-row-heading' );
 		if ( empty( $opts['original_cards'] ) ) {
 			$weight_selectors = array_merge( $weight_selectors, array( '.um-member-name', '.um-member-name a' ) );
