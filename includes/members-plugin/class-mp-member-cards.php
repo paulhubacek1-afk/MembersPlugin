@@ -95,8 +95,8 @@ final class MP_Member_Cards {
 			$m . ' .um-member-photo' => 'display:block!important;position:relative!important;z-index:1;top:-34px!important;margin:0 0 -34px!important;padding:0 0 20px!important;width:auto!important;height:auto!important;border:0!important;border-radius:0!important;box-shadow:none!important;background:transparent!important;overflow:visible!important;text-align:center!important',
 			$m . ' .um-member-photo::after' => 'display:none!important',
 			$m . ' .um-member-photo a' => 'display:inline-block!important;width:60%!important;height:auto!important;border:0!important;border-radius:50%!important;box-shadow:none!important;background:transparent!important;overflow:visible!important',
-			$m . ' .um-member-photo a img' => 'display:block!important;width:100%!important;height:auto!important;aspect-ratio:1/1;object-fit:cover!important;border:5px solid var(--um-card-photo-border,#fff)!important;border-radius:50%!important;background:var(--um-card-photo-border,#fff)!important;position:static!important;top:auto!important;margin:0!important;transition:box-shadow .5s ease!important',
-			$m . ' .um-member-photo a img:hover,' . $m . ' .um-member-photo a:focus-visible img' => 'box-shadow:0 0 0 .5rem var(--um-card-hover,#3c6999)!important',
+			$m . ' .um-member-photo a img' => 'display:block!important;width:100%!important;height:auto!important;aspect-ratio:1/1;object-fit:cover!important;border:5px solid var(--um-card-photo-border,#fff)!important;border-radius:50%!important;background:var(--um-card-photo-border,#fff)!important;position:static!important;top:auto!important;margin:0!important;box-shadow:none!important;transition:box-shadow .5s ease!important',
+			$m . ' .um-member-photo a img:hover,' . $m . ' .um-member-photo a img.mp-role-avatar-ring:hover,' . $m . ' .um-member-photo a:focus-visible img' => 'box-shadow:0 0 0 .5rem var(--um-card-hover,#3c6999)!important',
 			$m . ' .um-member-photo a:hover,' . $m . ' .um-member-photo a:focus-visible' => 'opacity:1!important',
 
 			// Card text.

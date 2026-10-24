@@ -1,5 +1,6 @@
 ## 1.0.10.1 – 2026-10-24
 
+- Changed: the role colour now replaces the frame directly around the profile photo (profile header and member cards) instead of adding a second ring outside it.
 - New: Font Awesome 5 for icons (Design & CSS, on by default). The core's Font Awesome 6 stylesheet overrode the site's Font Awesome 5 icons inside plugin areas (e.g. Stückverwaltung statistics). It is replaced by a bundled Font Awesome 5.15.4 Free incl. v4 shims; Font Awesome 6 icon names used by the core are mapped to Font Awesome 5 glyphs.
 
 ## 1.0.10 – 2026-10-24
