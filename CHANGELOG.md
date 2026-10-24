@@ -1,3 +1,7 @@
+## 1.0.9.8 – 2026-10-24
+
+- Fixed: profile tabs added by other plugins (e.g. Portfolio from the Stückverwaltung) were hidden until the profile-menu settings had been saved once, although the settings screen showed them as enabled. Tabs without a stored setting now use the default shown there (enabled, visible to everyone).
+
 ## 1.0.9.7 – 2026-10-23
 
 - Fixed: member-card styling of add-ons (e.g. Stückverwaltung: red card background, statistics) was removed by 1.0.9.6. Removing other plugins' card CSS is now an opt-in option (Design & CSS), off by default.

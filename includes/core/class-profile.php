@@ -283,7 +283,15 @@ if ( ! class_exists( 'um\core\Profile' ) ) {
 					continue;
 				}
 
-				if ( ! UM()->options()->get( 'profile_tab_' . $id ) ) {
+				$enabled = UM()->options()->get( 'profile_tab_' . $id );
+				// Members Plugin: a tab added by another plugin after installation has no stored
+				// on/off value yet. The settings screen shows such tabs as enabled (default 1),
+				// so treat "never saved" the same way instead of hiding the tab.
+				if ( '' === $enabled || null === $enabled ) {
+					$enabled = apply_filters( 'mp_profile_tab_default_enabled', true, $id, $info );
+				}
+
+				if ( ! $enabled ) {
 					unset( $tabs[ $id ] );
 				}
 			}
