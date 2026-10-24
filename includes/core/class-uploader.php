@@ -1110,12 +1110,18 @@ if ( ! class_exists( 'um\core\Uploader' ) ) {
 				}
 			}
 
-			$restore_old_covers = static function () use ( &$old_cover_backups ) {
+			$restore_old_covers = static function () use ( &$old_cover_backups, $cover_dir, $key, $cover_pattern ) {
+				// Remove files created by the failed attempt before restoring the backup.
+				$current_files = glob( $cover_dir . DIRECTORY_SEPARATOR . $key . '*' );
+				if ( is_array( $current_files ) ) {
+					foreach ( $current_files as $current_file ) {
+						if ( is_file( $current_file ) && preg_match( $cover_pattern, wp_basename( $current_file ) ) ) {
+							wp_delete_file( $current_file );
+						}
+					}
+				}
 				foreach ( $old_cover_backups as $original => $backup ) {
 					if ( is_file( $backup ) ) {
-						if ( is_file( $original ) ) {
-							wp_delete_file( $original );
-						}
 						@rename( $backup, $original ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
 					}
 				}
@@ -1151,17 +1157,29 @@ if ( ! class_exists( 'um\core\Uploader' ) ) {
 					continue; // Never upscale a small source just to create a larger filename.
 				}
 				$thumbnail_path = $cover_dir . DIRECTORY_SEPARATOR . $key . '-' . $size . '.' . $photo_ext;
-				$thumbnail      = wp_get_image_editor( $master_path );
+				$thumbnail = wp_get_image_editor( $master_path );
 				if ( is_wp_error( $thumbnail ) ) {
+					if ( 1200 === $size && $master_width >= $size ) {
+						$restore_old_covers();
+						wp_send_json_error( __( 'The 1200px cover thumbnail could not be created. The previous cover has been restored.', 'ultimate-member' ) );
+					}
 					continue;
 				}
 				$thumbnail->set_quality( 100 );
 				$resize_result = $thumbnail->resize( $size, null, false );
 				if ( is_wp_error( $resize_result ) ) {
+					if ( 1200 === $size && $master_width >= $size ) {
+						$restore_old_covers();
+						wp_send_json_error( __( 'The 1200px cover thumbnail could not be resized. The previous cover has been restored.', 'ultimate-member' ) );
+					}
 					continue;
 				}
 				$thumbnail_result = $thumbnail->save( $thumbnail_path );
 				if ( is_wp_error( $thumbnail_result ) || empty( $thumbnail_result['path'] ) || ! is_file( $thumbnail_result['path'] ) ) {
+					if ( 1200 === $size && $master_width >= $size ) {
+						$restore_old_covers();
+						wp_send_json_error( __( 'The 1200px cover thumbnail could not be saved. The previous cover has been restored.', 'ultimate-member' ) );
+					}
 					continue;
 				}
 				// The destination is empty because old thumbnails were backed up. If an
@@ -1169,6 +1187,9 @@ if ( ! class_exists( 'um\core\Uploader' ) ) {
 				if ( wp_basename( $thumbnail_result['path'] ) !== wp_basename( $thumbnail_path ) ) {
 					if ( ! is_file( $thumbnail_path ) && @rename( $thumbnail_result['path'], $thumbnail_path ) ) { // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
 						$keep_cover_files[] = wp_basename( $thumbnail_path );
+					} elseif ( 1200 === $size && $master_width >= $size ) {
+						$restore_old_covers();
+						wp_send_json_error( __( 'The 1200px cover thumbnail could not be named correctly. The previous cover has been restored.', 'ultimate-member' ) );
 					} else {
 						$keep_cover_files[] = wp_basename( $thumbnail_result['path'] );
 					}
