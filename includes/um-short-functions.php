@@ -2160,7 +2160,22 @@ function um_get_cover_uri( $image, $attrs ) {
 		$version = 'legacy';
 	}
 
+	$prefer_original = ! is_numeric( $attrs );
+	$canonical_filename = sanitize_file_name( wp_basename( (string) get_user_meta( $user_id, 'cover_photo', true ) ) );
+
 	foreach ( $locations as $location ) {
+		// Full profile covers should use the original, cropped master file. A 1200px
+		// thumbnail can look blurry when stretched across a wide/high-density display.
+		// Numeric sizes are passed by member-directory cards, which should stay optimized.
+		if (
+			$prefer_original &&
+			preg_match( '/^cover_photo\\.[a-z0-9]+$/i', $canonical_filename ) &&
+			is_file( $location['dir'] . $canonical_filename )
+		) {
+			$original_url = $location['url'] . rawurlencode( $canonical_filename );
+			return add_query_arg( 'mp_cover_ver', $version, $original_url );
+		}
+
 		$preferred = array();
 		foreach ( $targets as $size ) {
 			$height = ( is_numeric( $ratio ) && (float) $ratio > 0 ) ? round( $size / (float) $ratio ) : 0;
