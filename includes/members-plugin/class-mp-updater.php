@@ -235,7 +235,7 @@ final class MP_Updater {
 				continue;
 			}
 			$version = ltrim( (string) $item['tag_name'], 'vV' );
-			if ( ! preg_match( '/^1\.\d+\.\d+(?:\.\d+)?$/', $version ) ) {
+			if ( ! preg_match( '/^1\.\d+(?:\.\d+){0,2}$/', $version ) ) {
 				continue;
 			}
 			$has_asset = false;

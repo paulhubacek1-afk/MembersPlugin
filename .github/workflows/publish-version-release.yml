@@ -25,7 +25,7 @@ jobs:
         run: |
           set -euo pipefail
           VERSION="$(awk -F': ' '/Version:/ { gsub(/[[:space:]]/, "", $2); print $2; exit }' members-plugin.php)"
-          if [[ ! "$VERSION" =~ ^[0-9]+[.][0-9]+([.][0-9]+){1,2}$ ]]; then
+          if [[ ! "$VERSION" =~ ^[0-9]+[.][0-9]+([.][0-9]+){0,2}$ ]]; then
             echo "::error::Invalid plugin version: $VERSION"
             exit 1
           fi
